@@ -1018,7 +1018,7 @@
     list-style: none !important;          /* hide default <details> marker */
     -webkit-appearance: none !important;
     font-family: var(--bp-font-display) !important;
-    font-size: 13px !important;
+    font-size: 16px !important;
     font-weight: 600 !important;
     color: var(--bp-text-primary) !important;
     letter-spacing: 0.2px !important;
@@ -1143,6 +1143,8 @@ form.cart .quantity {
     overflow: hidden;
     background: var(--bp-white);
     box-shadow: var(--bp-shadow-xs);
+    max-width: 150px !important;
+    height: 58px !important;
 }
 
 form.cart .single_add_to_cart_button {
@@ -1243,7 +1245,7 @@ form.cart .single_add_to_cart_button:active {
 ================================================================ */
 .bannercalc-quantity-row {
     display: flex !important;
-    align-items: center !important;
+    align-items: flex-end;
     gap: 12px !important;
     padding: 0 15px 20px !important;
     border-top: none !important;
@@ -1314,7 +1316,7 @@ form.cart .single_add_to_cart_button:active {
     border-radius: 10px !important;
     font-family: var(--bp-font-display) !important;
     font-size: 20px !important;
-    font-weight: 700 !important;
+    font-weight: 500 !important;
     letter-spacing: 1px !important;
     text-transform: uppercase !important;
     cursor: pointer !important;
