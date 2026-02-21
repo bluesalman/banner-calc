@@ -193,6 +193,7 @@
     cursor: pointer;
     transition: all 0.25s ease;
     text-align: center;
+    position: relative;
 }
 
 .bannercalc-preset-card:hover {
@@ -205,6 +206,23 @@
     border-color: var(--bp-cyan);
     background: rgba(0, 174, 239, 0.06);
     box-shadow: 0 4px 16px rgba(0, 174, 239, 0.18);
+}
+
+.bannercalc-preset-badge {
+    position: absolute;
+    top: -8px;
+    right: -4px;
+    padding: 2px 8px;
+    font-family: var(--bp-font-mono);
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--bp-text-inverse);
+    background: var(--bp-gradient-print);
+    border-radius: 100px;
+    white-space: nowrap;
+    line-height: 1.6;
 }
 
 .bannercalc-preset-label {
@@ -220,6 +238,31 @@
     font-weight: 500;
     font-size: 13px;
     color: var(--bp-cyan);
+}
+
+/* ─── Preset Description Callout ─── */
+.bannercalc-preset-description {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+    padding: 10px 14px;
+    background: var(--bp-off-white);
+    border-left: 3px solid var(--bp-cyan);
+    border-radius: 0 var(--bp-radius-sm) var(--bp-radius-sm) 0;
+    font-family: var(--bp-font-body);
+    font-size: 13px;
+    color: var(--bp-text-secondary);
+}
+
+.bannercalc-desc-icon {
+    font-size: 16px;
+    color: var(--bp-cyan);
+    flex-shrink: 0;
+}
+
+.bannercalc-desc-text {
+    line-height: 1.4;
 }
 
 /* ================================================================
@@ -370,15 +413,28 @@
    ATTRIBUTE SELECTORS
 ================================================================ */
 .bannercalc-attribute {
-    margin-bottom: 20px;
+    margin-bottom: 16px;
 }
 
-.bannercalc-attribute-label {
+.bannercalc-attr-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.bannercalc-attr-label {
     font-family: var(--bp-font-display);
-    font-size: 15px;
+    font-size: 13px;
     font-weight: 600;
     color: var(--bp-text-primary);
-    margin: 0 0 10px;
+}
+
+.bannercalc-attr-selected {
+    font-family: var(--bp-font-mono);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--bp-cyan);
 }
 
 .bannercalc-required {
@@ -386,38 +442,46 @@
     font-weight: 700;
 }
 
-.bannercalc-attribute-options {
+/* ─── Compact Pills ─── */
+.bannercalc-attr-pills {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 6px;
 }
 
-.bannercalc-attr-btn {
+.bannercalc-pill {
     display: inline-flex;
-    flex-direction: column;
     align-items: center;
-    padding: 10px 16px;
-    border: 2px solid var(--bp-light-gray);
-    border-radius: var(--bp-radius-sm);
+    gap: 4px;
+    padding: 6px 12px;
+    border: 1.5px solid var(--bp-light-gray);
+    border-radius: 100px;
     background: var(--bp-white);
     cursor: pointer;
     transition: all 0.2s ease;
     font-family: var(--bp-font-body);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--bp-text-secondary);
+    line-height: 1.4;
+    white-space: nowrap;
 }
 
-.bannercalc-attr-btn:hover {
+.bannercalc-pill:hover {
     border-color: var(--bp-cyan);
-    transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(0, 174, 239, 0.1);
+    color: var(--bp-cyan);
+    background: rgba(0, 174, 239, 0.04);
 }
 
-.bannercalc-attr-btn.active {
+.bannercalc-pill.active {
     border-color: var(--bp-cyan);
-    background: rgba(0, 174, 239, 0.06);
-    box-shadow: 0 2px 8px rgba(0, 174, 239, 0.15);
+    background: rgba(0, 174, 239, 0.08);
+    color: var(--bp-cyan);
+    font-weight: 600;
+    box-shadow: 0 1px 4px rgba(0, 174, 239, 0.15);
 }
 
-.bannercalc-attr-btn.error {
+.bannercalc-pill.error {
     border-color: var(--bp-error);
     animation: shake 0.4s ease;
 }
@@ -428,19 +492,74 @@
     75% { transform: translateX(4px); }
 }
 
-.bannercalc-attr-name {
-    font-family: var(--bp-font-body);
+.bannercalc-pill-price {
+    font-family: var(--bp-font-mono);
+    font-size: 10px;
     font-weight: 500;
-    font-size: 13px;
-    color: var(--bp-text-primary);
+    color: var(--bp-cyan-dark);
+    opacity: 0.8;
 }
 
-.bannercalc-attr-price {
-    font-family: var(--bp-font-mono);
-    font-size: 11px;
+/* ─── Styled Dropdown ─── */
+.bannercalc-attr-dropdown-wrap {
+    position: relative;
+}
+
+.bannercalc-attr-dropdown-wrap::after {
+    content: '';
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid var(--bp-muted);
+    pointer-events: none;
+}
+
+.bannercalc-attr-dropdown {
+    width: 100%;
+    padding: 10px 36px 10px 14px;
+    border: 1.5px solid var(--bp-light-gray);
+    border-radius: var(--bp-radius-sm);
+    background: var(--bp-white);
+    font-family: var(--bp-font-body);
+    font-size: 13px;
     font-weight: 500;
+    color: var(--bp-text-primary);
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.bannercalc-attr-dropdown:hover {
+    border-color: var(--bp-cyan-light);
+}
+
+.bannercalc-attr-dropdown:focus {
+    border-color: var(--bp-cyan);
+    box-shadow: 0 0 0 3px rgba(0, 174, 239, 0.12);
+}
+
+/* ─── Visual Icons for eyelets & pole pockets ─── */
+.bannercalc-attr--pa_eyelets .bannercalc-attr-label::before {
+    content: '⊚';
+    display: inline-block;
+    margin-right: 5px;
+    font-size: 15px;
     color: var(--bp-cyan);
-    margin-top: 3px;
+}
+
+.bannercalc-attr--pa_pole-pockets .bannercalc-attr-label::before {
+    content: '▭';
+    display: inline-block;
+    margin-right: 5px;
+    font-size: 14px;
+    color: var(--bp-magenta);
 }
 
 /* ================================================================
@@ -566,12 +685,13 @@
         font-size: 22px;
     }
 
-    .bannercalc-attribute-options {
-        gap: 6px;
+    .bannercalc-attr-pills {
+        gap: 4px;
     }
 
-    .bannercalc-attr-btn {
-        padding: 8px 12px;
+    .bannercalc-pill {
+        padding: 5px 10px;
+        font-size: 11px;
     }
 }
 

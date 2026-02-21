@@ -33,9 +33,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 <div class="bannercalc-section bannercalc-attributes-section">
     <div class="bannercalc-section-overline"><?php esc_html_e( 'OPTIONS', 'bannercalc' ); ?></div>
     <?php
+    // Attributes that are handled by the size section — skip from OPTIONS.
+    $size_taxonomies = [ 'pa_size', 'pa_banner-size-width-height' ];
+
     foreach ( $enabled_attrs as $taxonomy ) {
-        if ( $taxonomy === 'pa_size' ) {
-            continue; // Size is handled in the size section.
+        if ( in_array( $taxonomy, $size_taxonomies, true ) ) {
+            continue;
         }
 
         $attr_config = $attribute_pricing[ $taxonomy ] ?? [];

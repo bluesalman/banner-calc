@@ -93,6 +93,15 @@
                     this.state.selectedAttributes[attr] = pricing[attr].default_value;
                 }
             }
+
+            // Sync dropdown selects to their default values.
+            this.el.find('.bannercalc-attr-dropdown').each(function() {
+                var taxonomy = $(this).data('taxonomy');
+                var defaultVal = (pricing[taxonomy] && pricing[taxonomy].default_value) ? pricing[taxonomy].default_value : '';
+                if (defaultVal) {
+                    $(this).val(defaultVal);
+                }
+            });
         },
 
         /**
@@ -111,13 +120,37 @@
                     $('#bannercalc-presets').show();
                     $('#bannercalc-custom').hide();
                     self.state.sizingMode = 'preset';
+                    // Clear custom dimensions.
+                    self.state.widthRaw = null;
+                    self.state.heightRaw = null;
+                    $('#bannercalc-width').val('');
+                    $('#bannercalc-height').val('');
+                    // If no preset selected yet, reset area & price.
+                    if (!self.state.selectedPreset) {
+                        self.state.widthMetres = null;
+                        self.state.heightMetres = null;
+                        self.state.areaSqft = null;
+                        self.state.areaSqm = null;
+                    }
                 } else {
                     $('#bannercalc-presets').hide();
                     $('#bannercalc-custom').show();
                     self.state.sizingMode = 'custom';
+                    // Clear preset.
                     self.state.selectedPreset = null;
+                    self.state._presetPriceOverride = null;
+                    self.el.find('.bannercalc-preset-card').removeClass('active');
+                    // Hide description callout.
+                    $('#bannercalc-preset-desc').hide();
+                    // Reset dimensions to empty.
+                    self.state.widthMetres = null;
+                    self.state.heightMetres = null;
+                    self.state.areaSqft = null;
+                    self.state.areaSqm = null;
                 }
 
+                self.calculateArea();
+                self.calculatePrice();
                 self.updateHiddenFields();
                 self.updatePriceDisplay();
             });
@@ -135,6 +168,16 @@
                 var priceOverride = $(this).data('price');
                 // Store for calculation.
                 self.state._presetPriceOverride = (priceOverride !== '' && priceOverride !== undefined) ? parseFloat(priceOverride) : null;
+
+                // Show description callout if available.
+                var desc = $(this).data('description') || '';
+                var $descWrap = $('#bannercalc-preset-desc');
+                if (desc) {
+                    $('#bannercalc-desc-text').text(desc);
+                    $descWrap.slideDown(150);
+                } else {
+                    $descWrap.slideUp(150);
+                }
 
                 self.calculateArea();
                 self.calculatePrice();
@@ -165,13 +208,30 @@
                 }, 300);
             });
 
-            // Attribute buttons.
-            this.el.on('click', '.bannercalc-attr-btn', function() {
+            // Attribute pill buttons (new class: .bannercalc-pill).
+            this.el.on('click', '.bannercalc-pill', function() {
                 var taxonomy = $(this).data('taxonomy');
                 var slug = $(this).data('slug');
 
-                self.el.find('.bannercalc-attr-btn[data-taxonomy="' + taxonomy + '"]').removeClass('active');
+                self.el.find('.bannercalc-pill[data-taxonomy="' + taxonomy + '"]').removeClass('active');
                 $(this).addClass('active');
+
+                self.state.selectedAttributes[taxonomy] = slug;
+
+                // Update hidden input.
+                self.el.find('.bannercalc-attr-input[data-taxonomy="' + taxonomy + '"]').val(slug);
+
+                // Update header selection text.
+                $('#bannercalc-selected-' + taxonomy).text($(this).text().split('+')[0].trim());
+
+                self.calculatePrice();
+                self.updatePriceDisplay();
+            });
+
+            // Attribute dropdown selects.
+            this.el.on('change', '.bannercalc-attr-dropdown', function() {
+                var taxonomy = $(this).data('taxonomy');
+                var slug = $(this).val();
 
                 self.state.selectedAttributes[taxonomy] = slug;
 

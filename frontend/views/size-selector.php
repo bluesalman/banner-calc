@@ -1,6 +1,9 @@
 <?php
 /**
- * Size selector template — preset sizes + custom size input.
+ * Size selector template — preset popular sizes + custom size input.
+ *
+ * Presets are sorted by popularity (highest first) and display the
+ * label in the category's natural unit. Description is shown on selection.
  *
  * @package BannerCalc
  * @var string $sizing_mode
@@ -16,6 +19,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 $show_presets = in_array( $sizing_mode, [ 'preset_only', 'preset_and_custom' ], true );
 $show_custom  = in_array( $sizing_mode, [ 'custom_only', 'preset_and_custom' ], true );
+
+// Sort presets: highest popularity first, then by original order.
+if ( ! empty( $preset_sizes ) ) {
+    usort( $preset_sizes, function ( $a, $b ) {
+        $pa = (int) ( $a['popularity'] ?? 3 );
+        $pb = (int) ( $b['popularity'] ?? 3 );
+        return $pb - $pa;
+    } );
+}
 ?>
 
 <div class="bannercalc-section-overline"><?php esc_html_e( 'SIZE', 'bannercalc' ); ?></div>
@@ -35,19 +47,34 @@ $show_custom  = in_array( $sizing_mode, [ 'custom_only', 'preset_and_custom' ], 
 
 <?php if ( $show_presets ) : ?>
     <!-- Preset sizes grid -->
-    <div class="bannercalc-preset-sizes" id="bannercalc-presets" <?php echo ( $show_presets && $show_custom ) ? '' : ''; ?>>
+    <div class="bannercalc-preset-sizes" id="bannercalc-presets">
         <div class="bannercalc-preset-grid">
-            <?php foreach ( $preset_sizes as $preset ) : ?>
+            <?php foreach ( $preset_sizes as $preset ) :
+                $popularity  = (int) ( $preset['popularity'] ?? 3 );
+                $description = $preset['description'] ?? '';
+                $is_popular  = $popularity >= 5;
+            ?>
                 <button type="button"
                         class="bannercalc-preset-card"
                         data-slug="<?php echo esc_attr( $preset['slug'] ); ?>"
                         data-width-m="<?php echo esc_attr( $preset['width_m'] ); ?>"
                         data-height-m="<?php echo esc_attr( $preset['height_m'] ); ?>"
-                        data-price="<?php echo esc_attr( $preset['price'] ?? '' ); ?>">
+                        data-price="<?php echo esc_attr( $preset['price'] ?? '' ); ?>"
+                        data-description="<?php echo esc_attr( $description ); ?>"
+                        data-popularity="<?php echo esc_attr( $popularity ); ?>">
+                    <?php if ( $is_popular ) : ?>
+                        <span class="bannercalc-preset-badge"><?php esc_html_e( 'Popular', 'bannercalc' ); ?></span>
+                    <?php endif; ?>
                     <span class="bannercalc-preset-label"><?php echo esc_html( $preset['label'] ); ?></span>
                     <span class="bannercalc-preset-price"></span>
                 </button>
             <?php endforeach; ?>
+        </div>
+
+        <!-- Description callout (shown when a size is selected) -->
+        <div class="bannercalc-preset-description" id="bannercalc-preset-desc" style="display:none;">
+            <span class="bannercalc-desc-icon">&#9432;</span>
+            <span class="bannercalc-desc-text" id="bannercalc-desc-text"></span>
         </div>
     </div>
 <?php endif; ?>
@@ -98,4 +125,5 @@ $show_custom  = in_array( $sizing_mode, [ 'custom_only', 'preset_and_custom' ], 
             <!-- Populated by JS with calculated area -->
         </div>
     </div>
+<?php endif; ?>
 <?php endif; ?>

@@ -52,13 +52,80 @@ class CartHandler {
      * @return array
      */
     public function add_cart_item_data( array $cart_item_data, int $product_id, int $variation_id ): array {
-        // Only process if BannerCalc data was submitted.
         if ( empty( $_POST['bannercalc'] ) ) { // phpcs:ignore
             return $cart_item_data;
         }
 
-        // TODO: Phase G — validate and construct bannercalc cart data from POST.
-        // Stub: pass through for now.
+        $raw    = $_POST['bannercalc']; // phpcs:ignore
+        $plugin = Plugin::instance();
+
+        if ( ! $plugin->is_enabled_for_product( $product_id ) ) {
+            return $cart_item_data;
+        }
+
+        $config = $plugin->get_product_config( $product_id );
+
+        // Sanitize submitted data.
+        $sizing_mode = sanitize_text_field( $raw['sizing_mode'] ?? 'custom' );
+        $preset_slug = sanitize_text_field( $raw['preset_slug'] ?? '' );
+        $unit        = sanitize_text_field( $raw['unit'] ?? 'ft' );
+        $width_raw   = (float) ( $raw['width_raw'] ?? 0 );
+        $height_raw  = (float) ( $raw['height_raw'] ?? 0 );
+
+        // Sanitize selected attributes.
+        $attrs = [];
+        if ( ! empty( $raw['attributes'] ) && is_array( $raw['attributes'] ) ) {
+            foreach ( $raw['attributes'] as $tax => $slug ) {
+                $attrs[ sanitize_text_field( $tax ) ] = sanitize_text_field( $slug );
+            }
+        }
+
+        // Convert raw dimensions to metres for server-side pricing.
+        $factor    = UnitConverter::TO_METRES[ $unit ] ?? 1.0;
+        $width_m   = $width_raw * $factor;
+        $height_m  = $height_raw * $factor;
+
+        // Match preset if applicable.
+        $preset = null;
+        if ( $sizing_mode === 'preset' && $preset_slug ) {
+            $presets = $config['preset_sizes'] ?? [];
+            foreach ( $presets as $p ) {
+                if ( ( $p['slug'] ?? '' ) === $preset_slug ) {
+                    $preset   = $p;
+                    $width_m  = (float) ( $p['width_m'] ?? $width_m );
+                    $height_m = (float) ( $p['height_m'] ?? $height_m );
+                    break;
+                }
+            }
+        }
+
+        // Server-side price calculation (prevents client manipulation).
+        $result = $this->pricing->calculate( $config, $width_m, $height_m, $attrs, $preset );
+
+        // Build human-readable size label.
+        $unit_abbr  = [ 'mm' => 'mm', 'cm' => 'cm', 'inch' => 'in', 'ft' => 'ft', 'm' => 'm' ];
+        $abbr       = $unit_abbr[ $unit ] ?? $unit;
+        $size_label = $width_raw . $abbr . ' × ' . $height_raw . $abbr;
+
+        if ( $sizing_mode === 'preset' && $preset ) {
+            $size_label = $preset['label'] ?? $size_label;
+        }
+
+        $cart_item_data['bannercalc'] = [
+            'sizing_mode'      => $sizing_mode,
+            'preset_slug'      => $preset_slug,
+            'unit'             => $unit,
+            'width_raw'        => $width_raw,
+            'height_raw'       => $height_raw,
+            'width_m'          => $width_m,
+            'height_m'         => $height_m,
+            'size_label'       => $size_label,
+            'area_sqft'        => $result['area_sqft'],
+            'selected_attrs'   => $attrs,
+            'base_price'       => $result['base_price'],
+            'addons_total'     => $result['addons_total'],
+            'calculated_price' => $result['calculated_price'],
+        ];
 
         return $cart_item_data;
     }
@@ -92,7 +159,29 @@ class CartHandler {
             return $item_data;
         }
 
-        // TODO: Phase G — format cart display data.
+        $bc = $cart_item['bannercalc'];
+
+        $item_data[] = [
+            'key'   => __( 'Size', 'bannercalc' ),
+            'value' => $bc['size_label'] ?? '',
+        ];
+
+        $item_data[] = [
+            'key'   => __( 'Area', 'bannercalc' ),
+            'value' => ( $bc['area_sqft'] ?? 0 ) . ' sqft',
+        ];
+
+        if ( ! empty( $bc['selected_attrs'] ) ) {
+            foreach ( $bc['selected_attrs'] as $tax => $slug ) {
+                $label = wc_attribute_label( $tax );
+                $term  = get_term_by( 'slug', $slug, $tax );
+                $value = $term ? $term->name : $slug;
+                $item_data[] = [
+                    'key'   => $label,
+                    'value' => $value,
+                ];
+            }
+        }
 
         return $item_data;
     }
@@ -126,6 +215,28 @@ class CartHandler {
             return;
         }
 
-        // TODO: Phase G — render order item meta display.
+        $bc = $data;
+
+        if ( $plain_text ) {
+            echo "\n" . esc_html__( 'BannerCalc:', 'bannercalc' ) . "\n";
+            echo esc_html__( 'Size: ', 'bannercalc' ) . esc_html( $bc['size_label'] ?? '' ) . "\n";
+            echo esc_html__( 'Area: ', 'bannercalc' ) . esc_html( $bc['area_sqft'] ?? 0 ) . " sqft\n";
+        } else {
+            echo '<div class="bannercalc-order-meta" style="margin-top:8px;font-size:12px;color:#555;">';
+            echo '<strong>' . esc_html__( 'BannerCalc:', 'bannercalc' ) . '</strong><br/>';
+            echo esc_html__( 'Size: ', 'bannercalc' ) . esc_html( $bc['size_label'] ?? '' ) . '<br/>';
+            echo esc_html__( 'Area: ', 'bannercalc' ) . esc_html( $bc['area_sqft'] ?? 0 ) . ' sqft<br/>';
+
+            if ( ! empty( $bc['selected_attrs'] ) ) {
+                foreach ( $bc['selected_attrs'] as $tax => $slug ) {
+                    $label = wc_attribute_label( $tax );
+                    $term  = get_term_by( 'slug', $slug, $tax );
+                    $value = $term ? $term->name : $slug;
+                    echo esc_html( $label ) . ': ' . esc_html( $value ) . '<br/>';
+                }
+            }
+
+            echo '</div>';
+        }
     }
 }

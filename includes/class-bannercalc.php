@@ -90,6 +90,9 @@ class Plugin {
         }
 
         $this->register_hooks();
+
+        // Preset seeder AJAX (admin only).
+        PresetSeeder::register();
     }
 
     /**

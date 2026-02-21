@@ -148,19 +148,34 @@ class ProductDisplay {
      * @return string
      */
     public function replace_price_html( $price_html, $product ): string {
-        if ( ! is_product() ) {
-            return $price_html;
-        }
-
         $plugin = \BannerCalc\Plugin::instance();
 
         if ( ! $plugin->is_enabled_for_product( $product->get_id() ) ) {
             return $price_html;
         }
 
-        // Return a styled hint instead of £0.00.
-        return '<span class="bannercalc-price-hint" style="font-family:var(--bp-font-mono,monospace);font-size:13px;color:#8892A0;">'
-             . esc_html__( 'Price calculated below ↓', 'bannercalc' )
+        $config = $plugin->get_product_config( $product->get_id() );
+        $settings = \BannerCalc\Plugin::get_settings();
+        $currency = $settings['currency_symbol'] ?? '£';
+        $min_charge = (float) ( $config['minimum_charge'] ?? 0 );
+
+        if ( is_product() ) {
+            // Single product page: hint to scroll down.
+            return '<span class="bannercalc-price-hint" style="font-family:var(--bp-font-mono,monospace);font-size:13px;color:#8892A0;">'
+                 . esc_html__( 'Price calculated below ↓', 'bannercalc' )
+                 . '</span>';
+        }
+
+        // Archive / shop pages: show "From £X.XX".
+        if ( $min_charge > 0 ) {
+            return '<span class="bannercalc-archive-price" style="font-weight:600;">'
+                 . esc_html__( 'From ', 'bannercalc' )
+                 . esc_html( $currency . number_format( $min_charge, 2 ) )
+                 . '</span>';
+        }
+
+        return '<span class="bannercalc-archive-price" style="font-style:italic;color:#8892A0;">'
+             . esc_html__( 'Price on configuration', 'bannercalc' )
              . '</span>';
     }
 

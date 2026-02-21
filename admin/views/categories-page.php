@@ -42,7 +42,6 @@ if ( isset( $_POST['bannercalc_category_save'] ) && wp_verify_nonce( $_POST['_wp
 
     if ( $cat_id && current_user_can( 'manage_woocommerce' ) ) {
         $category_defaults = new \BannerCalc\Admin\CategoryDefaults();
-        // Use the public save method — trigger the same sanitize path.
         $config = [];
 
         $config['enabled']      = ! empty( $raw['enabled'] );
@@ -51,11 +50,23 @@ if ( isset( $_POST['bannercalc_category_save'] ) && wp_verify_nonce( $_POST['_wp
 
         $config['area_rate_sqft'] = (float) ( $raw['area_rate_sqft'] ?? 0 );
         $config['area_rate_sqm']  = (float) ( $raw['area_rate_sqm'] ?? 0 );
-        $config['min_width_m']    = (float) ( $raw['min_width_m'] ?? 0 );
-        $config['min_height_m']   = (float) ( $raw['min_height_m'] ?? 0 );
-        $config['max_width_m']    = (float) ( $raw['max_width_m'] ?? 0 );
-        $config['max_height_m']   = (float) ( $raw['max_height_m'] ?? 0 );
         $config['minimum_charge'] = (float) ( $raw['minimum_charge'] ?? 0 );
+
+        // Dimension constraints — stored in metres.
+        // Admin enters in their chosen constraint_unit, we convert to metres.
+        $constraint_unit = sanitize_text_field( $raw['constraint_unit'] ?? 'm' );
+        $factor = \BannerCalc\UnitConverter::TO_METRES[ $constraint_unit ] ?? 1.0;
+
+        $min_w = (float) ( $raw['min_width'] ?? 0 );
+        $min_h = (float) ( $raw['min_height'] ?? 0 );
+        $max_w = (float) ( $raw['max_width'] ?? 0 );
+        $max_h = (float) ( $raw['max_height'] ?? 0 );
+
+        $config['min_width_m']    = $min_w > 0 ? $min_w * $factor : 0;
+        $config['min_height_m']   = $min_h > 0 ? $min_h * $factor : 0;
+        $config['max_width_m']    = $max_w > 0 ? $max_w * $factor : 0;
+        $config['max_height_m']   = $max_h > 0 ? $max_h * $factor : 0;
+        $config['constraint_unit'] = $constraint_unit;
 
         $allowed_units = [ 'mm', 'cm', 'inch', 'ft', 'm' ];
         $config['available_units'] = array_values(
@@ -64,7 +75,45 @@ if ( isset( $_POST['bannercalc_category_save'] ) && wp_verify_nonce( $_POST['_wp
 
         $config['enabled_attributes'] = array_map( 'sanitize_text_field', (array) ( $raw['enabled_attributes'] ?? [] ) );
         $config['attribute_pricing']  = $raw['attribute_pricing'] ?? [];
-        $config['preset_sizes']       = $raw['preset_sizes'] ?? [];
+
+        // Preset sizes — parse repeater rows.
+        $preset_sizes = [];
+        if ( ! empty( $raw['preset_label'] ) && is_array( $raw['preset_label'] ) ) {
+            foreach ( $raw['preset_label'] as $i => $label ) {
+                $label = sanitize_text_field( $label );
+                if ( empty( $label ) ) {
+                    continue;
+                }
+                $p_width  = (float) ( $raw['preset_width'][ $i ] ?? 0 );
+                $p_height = (float) ( $raw['preset_height'][ $i ] ?? 0 );
+                $p_unit   = sanitize_text_field( $raw['preset_unit'][ $i ] ?? 'ft' );
+                $p_price  = $raw['preset_price'][ $i ] ?? '';
+                $p_factor = \BannerCalc\UnitConverter::TO_METRES[ $p_unit ] ?? 1.0;
+
+                if ( $p_width <= 0 || $p_height <= 0 ) {
+                    continue;
+                }
+
+                $p_desc       = sanitize_text_field( $raw['preset_desc'][ $i ] ?? '' );
+                $p_popularity = absint( $raw['preset_popularity'][ $i ] ?? 3 );
+                $p_popularity = max( 1, min( 5, $p_popularity ) );
+
+                $preset_sizes[] = [
+                    'label'        => $label,
+                    'slug'         => sanitize_title( $label ),
+                    'width_m'      => $p_width * $p_factor,
+                    'height_m'     => $p_height * $p_factor,
+                    'display_w'    => $p_width,
+                    'display_h'    => $p_height,
+                    'display_unit' => $p_unit,
+                    'price'        => $p_price !== '' ? (float) $p_price : null,
+                    'description'  => $p_desc,
+                    'popularity'   => $p_popularity,
+                ];
+            }
+        }
+
+        $config['preset_sizes'] = $preset_sizes;
 
         update_term_meta( $cat_id, '_bannercalc_config', $config );
         $saved_message = __( 'Category configuration saved.', 'bannercalc' );
@@ -246,34 +295,59 @@ if ( $editing_cat_id ) {
 
                         <!-- Dimension constraints -->
                         <tr>
-                            <th scope="row"><?php esc_html_e( 'Dimension Constraints (m)', 'bannercalc' ); ?></th>
+                            <th scope="row"><?php esc_html_e( 'Dimension Constraints', 'bannercalc' ); ?></th>
                             <td>
+                                <?php
+                                $constraint_unit = $editing_config['constraint_unit'] ?? 'ft';
+                                $c_factor = \BannerCalc\UnitConverter::TO_METRES[ $constraint_unit ] ?? 1.0;
+                                // Convert stored metres back to display unit.
+                                $disp_min_w = ! empty( $editing_config['min_width_m'] ) ? round( (float) $editing_config['min_width_m'] / $c_factor, 4 ) : '';
+                                $disp_min_h = ! empty( $editing_config['min_height_m'] ) ? round( (float) $editing_config['min_height_m'] / $c_factor, 4 ) : '';
+                                $disp_max_w = ! empty( $editing_config['max_width_m'] ) ? round( (float) $editing_config['max_width_m'] / $c_factor, 4 ) : '';
+                                $disp_max_h = ! empty( $editing_config['max_height_m'] ) ? round( (float) $editing_config['max_height_m'] / $c_factor, 4 ) : '';
+                                ?>
+                                <div style="margin-bottom:10px;">
+                                    <label style="font-size:12px;color:#555;"><?php esc_html_e( 'Unit for entry:', 'bannercalc' ); ?></label>
+                                    <select name="bannercalc_category[constraint_unit]" class="bannercalc-select" style="width:auto;margin-left:6px;">
+                                        <?php foreach ( $all_units as $u_key => $u_label ) : ?>
+                                            <option value="<?php echo esc_attr( $u_key ); ?>"
+                                                    <?php selected( $constraint_unit, $u_key ); ?>>
+                                                <?php echo esc_html( $u_label ); ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
                                 <div class="bannercalc-dimension-grid">
                                     <label>
                                         <span class="bannercalc-dim-label"><?php esc_html_e( 'Min Width', 'bannercalc' ); ?></span>
-                                        <input type="number" name="bannercalc_category[min_width_m]"
-                                               value="<?php echo esc_attr( $editing_config['min_width_m'] ?? '' ); ?>"
-                                               step="0.0001" min="0" class="small-text" />
+                                        <input type="number" name="bannercalc_category[min_width]"
+                                               value="<?php echo esc_attr( $disp_min_w ); ?>"
+                                               step="any" min="0" class="small-text"
+                                               placeholder="<?php esc_attr_e( 'No limit', 'bannercalc' ); ?>" />
                                     </label>
                                     <label>
                                         <span class="bannercalc-dim-label"><?php esc_html_e( 'Min Height', 'bannercalc' ); ?></span>
-                                        <input type="number" name="bannercalc_category[min_height_m]"
-                                               value="<?php echo esc_attr( $editing_config['min_height_m'] ?? '' ); ?>"
-                                               step="0.0001" min="0" class="small-text" />
+                                        <input type="number" name="bannercalc_category[min_height]"
+                                               value="<?php echo esc_attr( $disp_min_h ); ?>"
+                                               step="any" min="0" class="small-text"
+                                               placeholder="<?php esc_attr_e( 'No limit', 'bannercalc' ); ?>" />
                                     </label>
                                     <label>
                                         <span class="bannercalc-dim-label"><?php esc_html_e( 'Max Width', 'bannercalc' ); ?></span>
-                                        <input type="number" name="bannercalc_category[max_width_m]"
-                                               value="<?php echo esc_attr( $editing_config['max_width_m'] ?? '' ); ?>"
-                                               step="0.0001" min="0" class="small-text" />
+                                        <input type="number" name="bannercalc_category[max_width]"
+                                               value="<?php echo esc_attr( $disp_max_w ); ?>"
+                                               step="any" min="0" class="small-text"
+                                               placeholder="<?php esc_attr_e( 'Unlimited', 'bannercalc' ); ?>" />
                                     </label>
                                     <label>
                                         <span class="bannercalc-dim-label"><?php esc_html_e( 'Max Height', 'bannercalc' ); ?></span>
-                                        <input type="number" name="bannercalc_category[max_height_m]"
-                                               value="<?php echo esc_attr( $editing_config['max_height_m'] ?? '' ); ?>"
-                                               step="0.0001" min="0" class="small-text" />
+                                        <input type="number" name="bannercalc_category[max_height]"
+                                               value="<?php echo esc_attr( $disp_max_h ); ?>"
+                                               step="any" min="0" class="small-text"
+                                               placeholder="<?php esc_attr_e( 'Unlimited', 'bannercalc' ); ?>" />
                                     </label>
                                 </div>
+                                <p class="bannercalc-field-hint" style="margin-top:6px;"><?php esc_html_e( 'Leave blank for no limit. Values stored internally in metres.', 'bannercalc' ); ?></p>
                             </td>
                         </tr>
 
@@ -297,6 +371,105 @@ if ( $editing_cat_id ) {
                                 else : ?>
                                     <p class="bannercalc-field-hint"><?php esc_html_e( 'No WooCommerce attributes found.', 'bannercalc' ); ?></p>
                                 <?php endif; ?>
+                            </td>
+                        </tr>
+
+                        <!-- Preset Sizes -->
+                        <tr>
+                            <th scope="row"><?php esc_html_e( 'Preset Sizes', 'bannercalc' ); ?></th>
+                            <td>
+                                <p class="bannercalc-field-hint" style="margin-bottom:10px;">
+                                    <?php esc_html_e( 'Define popular sizes for the "Popular Sizes" tab on the product page. Leave price blank to auto-calculate from area rate.', 'bannercalc' ); ?>
+                                </p>
+                                <div id="bannercalc-presets-repeater">
+                                    <table class="bannercalc-presets-table" style="width:100%;border-collapse:collapse;">
+                                        <thead>
+                                            <tr>
+                                                <th style="text-align:left;padding:6px 8px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#8892A0;"><?php esc_html_e( 'Label', 'bannercalc' ); ?></th>
+                                                <th style="text-align:left;padding:6px 8px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#8892A0;"><?php esc_html_e( 'W', 'bannercalc' ); ?></th>
+                                                <th style="text-align:left;padding:6px 8px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#8892A0;"><?php esc_html_e( 'H', 'bannercalc' ); ?></th>
+                                                <th style="text-align:left;padding:6px 8px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#8892A0;"><?php esc_html_e( 'Unit', 'bannercalc' ); ?></th>
+                                                <th style="text-align:left;padding:6px 8px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#8892A0;"><?php esc_html_e( 'Common Use / Description', 'bannercalc' ); ?></th>
+                                                <th style="text-align:center;padding:6px 8px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#8892A0;width:50px;"><?php esc_html_e( '★', 'bannercalc' ); ?></th>
+                                                <th style="text-align:left;padding:6px 8px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#8892A0;"><?php esc_html_e( 'Price (£)', 'bannercalc' ); ?></th>
+                                                <th style="width:40px;"></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="bannercalc-presets-body">
+                                            <?php
+                                            $existing_presets = $editing_config['preset_sizes'] ?? [];
+                                            if ( ! empty( $existing_presets ) ) :
+                                                foreach ( $existing_presets as $pi => $ps ) :
+                                            ?>
+                                                <tr class="bannercalc-preset-row">
+                                                    <td style="padding:4px 4px;">
+                                                        <input type="text" name="bannercalc_category[preset_label][]"
+                                                               value="<?php echo esc_attr( $ps['label'] ?? '' ); ?>"
+                                                               placeholder="<?php esc_attr_e( 'e.g. 6ft × 3ft', 'bannercalc' ); ?>"
+                                                               style="width:100%;" />
+                                                    </td>
+                                                    <td style="padding:4px 4px;">
+                                                        <input type="number" name="bannercalc_category[preset_width][]"
+                                                               value="<?php echo esc_attr( $ps['display_w'] ?? '' ); ?>"
+                                                               step="any" min="0" style="width:70px;" />
+                                                    </td>
+                                                    <td style="padding:4px 4px;">
+                                                        <input type="number" name="bannercalc_category[preset_height][]"
+                                                               value="<?php echo esc_attr( $ps['display_h'] ?? '' ); ?>"
+                                                               step="any" min="0" style="width:70px;" />
+                                                    </td>
+                                                    <td style="padding:4px 4px;">
+                                                        <select name="bannercalc_category[preset_unit][]" style="width:80px;">
+                                                            <?php foreach ( $all_units as $pu_key => $pu_label ) : ?>
+                                                                <option value="<?php echo esc_attr( $pu_key ); ?>"
+                                                                        <?php selected( $ps['display_unit'] ?? 'ft', $pu_key ); ?>>
+                                                                    <?php echo esc_html( $pu_label ); ?>
+                                                                </option>
+                                                            <?php endforeach; ?>
+                                                        </select>
+                                                    </td>
+                                                    <td style="padding:4px 4px;">
+                                                        <input type="text" name="bannercalc_category[preset_desc][]"
+                                                               value="<?php echo esc_attr( $ps['description'] ?? '' ); ?>"
+                                                               placeholder="<?php esc_attr_e( 'e.g. Trade shows, retail', 'bannercalc' ); ?>"
+                                                               style="width:100%;" />
+                                                    </td>
+                                                    <td style="padding:4px 4px;text-align:center;">
+                                                        <select name="bannercalc_category[preset_popularity][]" style="width:50px;">
+                                                            <?php for ( $star = 5; $star >= 1; $star-- ) : ?>
+                                                                <option value="<?php echo $star; ?>" <?php selected( (int) ( $ps['popularity'] ?? 3 ), $star ); ?>><?php echo $star; ?>★</option>
+                                                            <?php endfor; ?>
+                                                        </select>
+                                                    </td>
+                                                    <td style="padding:4px 4px;">
+                                                        <input type="number" name="bannercalc_category[preset_price][]"
+                                                               value="<?php echo esc_attr( $ps['price'] ?? '' ); ?>"
+                                                               step="0.01" min="0" style="width:80px;"
+                                                               placeholder="<?php esc_attr_e( 'Auto', 'bannercalc' ); ?>" />
+                                                    </td>
+                                                    <td style="padding:4px 4px;text-align:center;">
+                                                        <button type="button" class="bannercalc-remove-preset" title="<?php esc_attr_e( 'Remove', 'bannercalc' ); ?>"
+                                                                style="background:none;border:none;color:#ED1C24;cursor:pointer;font-size:18px;">&times;</button>
+                                                    </td>
+                                                </tr>
+                                            <?php
+                                                endforeach;
+                                            endif;
+                                            ?>
+                                        </tbody>
+                                    </table>
+                                    <div style="display:flex;gap:10px;align-items:center;margin-top:10px;">
+                                        <button type="button" id="bannercalc-add-preset" class="button bannercalc-btn-secondary">
+                                            + <?php esc_html_e( 'Add Preset Size', 'bannercalc' ); ?>
+                                        </button>
+                                        <button type="button" id="bannercalc-import-presets" class="button bannercalc-btn-secondary"
+                                                data-cat-id="<?php echo esc_attr( $editing_cat_id ); ?>"
+                                                title="<?php esc_attr_e( 'Import popular UK sizes for this category from reference data', 'bannercalc' ); ?>">
+                                            ↓ <?php esc_html_e( 'Import Popular Sizes', 'bannercalc' ); ?>
+                                        </button>
+                                        <span id="bannercalc-import-status" style="font-size:12px;color:#8892A0;"></span>
+                                    </div>
+                                </div>
                             </td>
                         </tr>
 
