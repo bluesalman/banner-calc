@@ -1157,7 +1157,7 @@ form.cart .single_add_to_cart_button {
     border-radius: 10px !important;
     font-family: var(--bp-font-display) !important;
     font-size: 20px !important;
-    font-weight: 700 !important;
+    font-weight: 500 !important;
     letter-spacing: 1px !important;
     text-transform: uppercase !important;
     cursor: pointer !important;
