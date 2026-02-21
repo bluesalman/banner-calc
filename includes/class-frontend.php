@@ -47,6 +47,9 @@ class Frontend {
             null
         );
 
+        // Dashicons for attribute icons.
+        wp_enqueue_style( 'dashicons' );
+
         wp_enqueue_style(
             'bannercalc-frontend',
             BANNERCALC_PLUGIN_URL . 'frontend/css/frontend.css',

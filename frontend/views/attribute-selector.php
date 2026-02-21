@@ -23,6 +23,17 @@ $default_value  = $attr_config['default_value'] ?? '';
 $required       = ! empty( $attr_config['required'] );
 $attr_label     = wc_attribute_label( $taxonomy );
 
+// Icon mapping — dashicons class + brand colour per attribute.
+$attr_icon_map = [
+    'pa_hemming'      => [ 'dashicons-image-crop',        'var(--bp-cyan)' ],
+    'pa_packaging'    => [ 'dashicons-portfolio',          'var(--bp-orange)' ],
+    'pa_finish'       => [ 'dashicons-admin-appearance',   'var(--bp-magenta)' ],
+    'pa_cable-ties'   => [ 'dashicons-admin-links',        'var(--bp-cyan-dark)' ],
+    'pa_eyelets'      => [ 'dashicons-visibility',         'var(--bp-green)' ],
+    'pa_pole-pockets' => [ 'dashicons-align-center',       'var(--bp-magenta)' ],
+];
+$icon_entry = $attr_icon_map[ $taxonomy ] ?? null;
+
 // Determine display mode.
 $toggle_attrs   = [ 'pa_cable-ties' ];
 $dropdown_attrs = [ 'pa_eyelets', 'pa_pole-pockets' ];
@@ -74,6 +85,9 @@ if ( $display_mode === 'toggle' ) {
         <div class="bannercalc-toggle-switch">
             <div class="bannercalc-attr-header" style="margin-bottom:0;">
                 <span class="bannercalc-attr-label">
+                    <?php if ( $icon_entry ) : ?>
+                        <span class="bannercalc-attr-icon dashicons <?php echo esc_attr( $icon_entry[0] ); ?>" style="color:<?php echo esc_attr( $icon_entry[1] ); ?>;"></span>
+                    <?php endif; ?>
                     <?php echo esc_html( $attr_label ); ?>
                     <?php if ( $required ) : ?>
                         <span class="bannercalc-required">*</span>
@@ -101,6 +115,9 @@ if ( $display_mode === 'toggle' ) {
     <?php else : ?>
         <div class="bannercalc-attr-header">
             <span class="bannercalc-attr-label">
+                <?php if ( $icon_entry ) : ?>
+                    <span class="bannercalc-attr-icon dashicons <?php echo esc_attr( $icon_entry[0] ); ?>" style="color:<?php echo esc_attr( $icon_entry[1] ); ?>;"></span>
+                <?php endif; ?>
                 <?php echo esc_html( $attr_label ); ?>
                 <?php if ( $required ) : ?>
                     <span class="bannercalc-required">*</span>

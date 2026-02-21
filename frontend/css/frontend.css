@@ -132,19 +132,28 @@
 }
 
 /* ================================================================
-   CONFIGURATOR SHELL — elevated card with depth
+   CONFIGURATOR SHELL — outer wrapper (no visual chrome)
 ================================================================ */
 #bannercalc-configurator.bannercalc-configurator {
+    font-family: var(--bp-font-body);
+    color: var(--bp-text-primary);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* ================================================================
+   CARDS — two elevated containers
+================================================================ */
+.bannercalc-card {
     background: var(--bp-white);
     border: 1px solid rgba(0,0,0,0.06);
     border-radius: 18px;
     overflow: hidden;
     box-shadow: var(--bp-shadow-lg);
     position: relative;
-    font-family: var(--bp-font-body);
-    color: var(--bp-text-primary);
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
 }
 
 /* ================================================================
@@ -164,7 +173,7 @@
    SECTION FRAMEWORK
 ================================================================ */
 .bannercalc-section {
-    padding: 24px 28px;
+    padding: 24px 15px;
 }
 .bannercalc-section + .bannercalc-section {
     border-top: 1px solid var(--bp-light-gray);
@@ -540,6 +549,12 @@
     gap: 16px;
 }
 
+.bannercalc-attr-row--inline {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
 .bannercalc-attr-row .bannercalc-attribute {
     margin-bottom: 0;
 }
@@ -562,6 +577,21 @@
     font-weight: 600;
     color: var(--bp-text-primary);
     letter-spacing: 0.1px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* ================================================================
+   ATTRIBUTE ICONS — dashicons next to labels
+================================================================ */
+.bannercalc-attr-icon {
+    font-size: 15px !important;
+    width: 15px !important;
+    height: 15px !important;
+    line-height: 1 !important;
+    flex-shrink: 0;
+    opacity: 0.85;
 }
 
 .bannercalc-attr-selected {
@@ -616,18 +646,7 @@
     box-shadow: var(--bp-shadow-sm) !important;
 }
 
-/* Eyelets — green accent indicator */
-.bannercalc-attr--pa_eyelets .bannercalc-attr-label::before {
-    content: '';
-    display: inline-block;
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: var(--bp-green);
-    margin-right: 6px;
-    vertical-align: middle;
-    box-shadow: 0 0 0 2px var(--bp-green-ghost);
-}
+/* Eyelets — green accent (icon replaces old dot) */
 #bannercalc-configurator .bannercalc-attr--pa_eyelets .bannercalc-attr-dropdown {
     border-left: 3px solid var(--bp-green) !important;
     padding-left: 11px !important;
@@ -639,18 +658,7 @@
     box-shadow: var(--bp-shadow-sm), 0 0 0 3px rgba(57, 181, 74, 0.08) !important;
 }
 
-/* Pole Pockets — magenta accent indicator */
-.bannercalc-attr--pa_pole-pockets .bannercalc-attr-label::before {
-    content: '';
-    display: inline-block;
-    width: 7px;
-    height: 7px;
-    border-radius: 3px;
-    background: var(--bp-magenta);
-    margin-right: 6px;
-    vertical-align: middle;
-    box-shadow: 0 0 0 2px var(--bp-magenta-ghost);
-}
+/* Pole Pockets — magenta accent (icon replaces old square) */
 #bannercalc-configurator .bannercalc-attr--pa_pole-pockets .bannercalc-attr-dropdown {
     border-left: 3px solid var(--bp-magenta) !important;
     padding-left: 11px !important;
@@ -876,7 +884,7 @@
 }
 
 .bannercalc-price-section .bannercalc-section-overline {
-    padding: 20px 28px 0;
+    padding: 20px 15px 0;
 }
 
 .bannercalc-price-block {
@@ -992,7 +1000,7 @@ form.cart a.product_type_customizable {
     display: block !important;
     text-align: center !important;
     padding: 11px 24px !important;
-    margin: 0 28px 4px !important;
+    margin: 0 15px 4px !important;
     background: transparent !important;
     color: var(--bp-cyan-dark) !important;
     border: 1.5px solid var(--bp-cyan) !important;
@@ -1060,7 +1068,7 @@ form.cart .single_add_to_cart_button:active {
    FILE UPLOAD (WooCommerce Drag & Drop / codedropz compatibility)
 ================================================================ */
 .wc-dnd-file-upload {
-    padding: 0 28px 8px;
+    padding: 0 15px 8px;
 }
 .wc-dnd-file-upload label {
     display: block;
@@ -1127,7 +1135,7 @@ form.cart .single_add_to_cart_button:active {
     display: flex !important;
     align-items: center !important;
     gap: 16px !important;
-    padding: 20px 28px 24px !important;
+    padding: 20px 15px 24px !important;
     border-top: 1px solid var(--bp-light-gray) !important;
 }
 
@@ -1247,7 +1255,8 @@ form.cart .single_add_to_cart_button:active {
         gap: 6px !important;
     }
     .bannercalc-attr-row--2col,
-    .bannercalc-attr-row--compact {
+    .bannercalc-attr-row--compact,
+    .bannercalc-attr-row--inline {
         grid-template-columns: 1fr !important;
         gap: 14px !important;
     }
