@@ -17,6 +17,9 @@ class ProductDisplay {
         // Hook into single product page to render configurator.
         add_action( 'woocommerce_before_add_to_cart_button', [ $this, 'render_configurator' ], 10 );
 
+        // Card 3: pricing + personalize + upload wrapper.
+        add_action( 'woocommerce_before_add_to_cart_button', [ $this, 'open_pricing_card' ], 11 );
+
         // Wrap quantity + add-to-cart button in a flex row.
         add_action( 'woocommerce_before_add_to_cart_quantity', [ $this, 'open_quantity_row' ], 1 );
         add_action( 'woocommerce_after_add_to_cart_button', [ $this, 'close_quantity_row' ], 99 );
@@ -92,6 +95,33 @@ class ProductDisplay {
     }
 
     /**
+     * Open Card 3: pricing section + space for Personalize & Upload (rendered by other plugins).
+     */
+    public function open_pricing_card(): void {
+        global $product;
+
+        if ( ! $product ) {
+            return;
+        }
+
+        $plugin  = \BannerCalc\Plugin::instance();
+
+        if ( ! $plugin->is_enabled_for_product( $product->get_id() ) ) {
+            return;
+        }
+
+        $settings = \BannerCalc\Plugin::get_settings();
+        $currency = $settings['currency_symbol'];
+
+        echo '<div class="bannercalc-card bannercalc-card--pricing">';
+        echo '<div class="bannercalc-section bannercalc-price-section">';
+        echo '<div class="bannercalc-section-overline">' . esc_html__( 'PRICING', 'bannercalc' ) . '</div>';
+        include BANNERCALC_PLUGIN_DIR . 'frontend/views/price-display.php';
+        echo '</div>'; // .bannercalc-price-section
+        // Card stays open — Personalize link & file upload (from other plugins) will land here.
+    }
+
+    /**
      * Open the quantity + button flex wrapper for BannerCalc products.
      */
     public function open_quantity_row(): void {
@@ -106,6 +136,9 @@ class ProductDisplay {
         if ( ! $plugin->is_enabled_for_product( $product->get_id() ) ) {
             return;
         }
+
+        // Close Card 3 (pricing + extras).
+        echo '</div><!-- .bannercalc-card--pricing -->';
 
         echo '<div class="bannercalc-quantity-row">';
     }
@@ -209,10 +242,8 @@ class ProductDisplay {
         $min_charge = (float) ( $config['minimum_charge'] ?? 0 );
 
         if ( is_product() ) {
-            // Single product page: hint to scroll down.
-            return '<span class="bannercalc-price-hint" style="font-family:var(--bp-font-mono,monospace);font-size:13px;color:#8892A0;">'
-                 . esc_html__( 'Price calculated below ↓', 'bannercalc' )
-                 . '</span>';
+            // Single product page: CMYK stripe instead of price.
+            return '<span class="bannercalc-cmyk-bar bannercalc-cmyk-bar--price"><span></span><span></span><span></span><span></span></span>';
         }
 
         // Archive / shop pages: show "From £X.XX".

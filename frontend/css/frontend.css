@@ -169,6 +169,14 @@
 .bannercalc-cmyk-bar span:nth-child(3) { flex: 1; background: var(--bp-yellow); }
 .bannercalc-cmyk-bar span:nth-child(4) { flex: 1; background: var(--bp-key); }
 
+/* Price-area variant: taller bar above product title */
+.bannercalc-cmyk-bar--price {
+    height: 8px;
+    margin-bottom: 15px;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
 /* ================================================================
    SECTION FRAMEWORK
 ================================================================ */
@@ -553,6 +561,7 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 16px;
+    align-items: end;
 }
 
 .bannercalc-attr-row .bannercalc-attribute {
@@ -994,13 +1003,23 @@
 }
 
 /* ================================================================
+   CARD 3 — PRICING + EXTRAS
+================================================================ */
+.bannercalc-card--pricing {
+    overflow: visible;
+}
+.bannercalc-card--pricing .bannercalc-price-section {
+    border-top: none !important;
+}
+
+/* ================================================================
    PERSONALIZE BUTTON (WooCommerce product customizer link)
 ================================================================ */
 form.cart a.product_type_customizable {
     display: block !important;
     text-align: center !important;
     padding: 11px 24px !important;
-    margin: 0 15px 4px !important;
+    margin: 0 15px 12px !important;
     background: transparent !important;
     color: var(--bp-cyan-dark) !important;
     border: 1.5px solid var(--bp-cyan) !important;
@@ -1068,7 +1087,7 @@ form.cart .single_add_to_cart_button:active {
    FILE UPLOAD (WooCommerce Drag & Drop / codedropz compatibility)
 ================================================================ */
 .wc-dnd-file-upload {
-    padding: 0 15px 8px;
+    padding: 0 15px 15px;
 }
 .wc-dnd-file-upload label {
     display: block;

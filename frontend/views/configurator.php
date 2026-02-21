@@ -127,12 +127,6 @@ if ( ! defined( 'ABSPATH' ) ) {
         ?>
     </div>
     <?php endif; ?>
-
-    <!-- PRICE DISPLAY -->
-    <div class="bannercalc-section bannercalc-price-section">
-        <div class="bannercalc-section-overline"><?php esc_html_e( 'PRICING', 'bannercalc' ); ?></div>
-        <?php include BANNERCALC_PLUGIN_DIR . 'frontend/views/price-display.php'; ?>
-    </div>
 </div>
 
 <!-- Hidden fields for form submission -->

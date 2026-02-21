@@ -31,7 +31,6 @@ if ( ! empty( $preset_sizes ) ) {
 ?>
 
 <div class="bannercalc-section-overline"><?php esc_html_e( 'SIZE', 'bannercalc' ); ?></div>
-<h3 class="bannercalc-section-title"><?php esc_html_e( 'Select Size', 'bannercalc' ); ?></h3>
 
 <?php if ( $show_presets && $show_custom ) : ?>
     <!-- Mode toggle -->
