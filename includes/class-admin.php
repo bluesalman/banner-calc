@@ -49,6 +49,7 @@ class Admin {
             str_contains( $hook_suffix, 'bannercalc' )
             || ( $screen && $screen->id === 'product' )
             || ( $screen && $screen->id === 'shop_order' )
+            || ( $screen && str_contains( $screen->id, 'edit-product_cat' ) )
         );
 
         if ( ! $is_bannercalc_page ) {

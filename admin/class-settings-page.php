@@ -1,6 +1,6 @@
 <?php
 /**
- * Admin Settings Page — registers WooCommerce submenu page.
+ * Admin Settings Page — registers top-level menu, submenu pages, and global settings.
  *
  * @package BannerCalc
  */
@@ -19,16 +19,63 @@ class SettingsPage {
     }
 
     /**
-     * Register the admin menu page under WooCommerce.
+     * Get the SVG icon for the admin menu (banner/flag shape).
+     *
+     * @return string Base64-encoded SVG data URI.
+     */
+    private function get_menu_icon(): string {
+        $svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none">'
+             . '<rect x="2" y="2" width="3" height="16" rx="1" fill="currentColor" opacity="0.9"/>'
+             . '<path d="M5 3h11.5c.83 0 1.1 1.08.4 1.6L13 7.5l3.9 2.9c.7.52.43 1.6-.4 1.6H5V3z" fill="currentColor"/>'
+             . '</svg>';
+
+        // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
+        return 'data:image/svg+xml;base64,' . base64_encode( $svg );
+    }
+
+    /**
+     * Register the top-level admin menu and submenu pages.
      */
     public function register_menu(): void {
-        add_submenu_page(
-            'woocommerce',
-            __( 'BannerCalc Settings', 'bannercalc' ),
+        // Top-level menu.
+        add_menu_page(
+            __( 'BannerCalc', 'bannercalc' ),
             __( 'BannerCalc', 'bannercalc' ),
             'manage_woocommerce',
+            'bannercalc',
+            [ $this, 'render_dashboard' ],
+            $this->get_menu_icon(),
+            56 // After WooCommerce.
+        );
+
+        // Submenu: Dashboard (replaces auto-generated first submenu).
+        add_submenu_page(
+            'bannercalc',
+            __( 'Dashboard — BannerCalc', 'bannercalc' ),
+            __( 'Dashboard', 'bannercalc' ),
+            'manage_woocommerce',
+            'bannercalc',
+            [ $this, 'render_dashboard' ]
+        );
+
+        // Submenu: Settings.
+        add_submenu_page(
+            'bannercalc',
+            __( 'Settings — BannerCalc', 'bannercalc' ),
+            __( 'Settings', 'bannercalc' ),
+            'manage_woocommerce',
             'bannercalc-settings',
-            [ $this, 'render_page' ]
+            [ $this, 'render_settings' ]
+        );
+
+        // Submenu: Category Defaults.
+        add_submenu_page(
+            'bannercalc',
+            __( 'Category Defaults — BannerCalc', 'bannercalc' ),
+            __( 'Category Defaults', 'bannercalc' ),
+            'manage_woocommerce',
+            'bannercalc-categories',
+            [ $this, 'render_categories' ]
         );
     }
 
@@ -70,13 +117,35 @@ class SettingsPage {
     }
 
     /**
-     * Render the settings page.
+     * Render the Dashboard page.
      */
-    public function render_page(): void {
+    public function render_dashboard(): void {
+        if ( ! current_user_can( 'manage_woocommerce' ) ) {
+            return;
+        }
+
+        include BANNERCALC_PLUGIN_DIR . 'admin/views/dashboard.php';
+    }
+
+    /**
+     * Render the Settings page.
+     */
+    public function render_settings(): void {
         if ( ! current_user_can( 'manage_woocommerce' ) ) {
             return;
         }
 
         include BANNERCALC_PLUGIN_DIR . 'admin/views/settings-page.php';
+    }
+
+    /**
+     * Render the Category Defaults page.
+     */
+    public function render_categories(): void {
+        if ( ! current_user_can( 'manage_woocommerce' ) ) {
+            return;
+        }
+
+        include BANNERCALC_PLUGIN_DIR . 'admin/views/categories-page.php';
     }
 }
