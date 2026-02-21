@@ -1,0 +1,309 @@
+/**
+ * BannerCalc Admin Styles
+ *
+ * Branded per Banner Printing Ltd Brand Guide v1.0
+ *
+ * @package BannerCalc
+ */
+
+/* ================================================================
+   BRAND TOKENS (Admin scope)
+================================================================ */
+:root {
+    --bp-cyan: #00AEEF;
+    --bp-magenta: #EC008C;
+    --bp-yellow: #FFF200;
+    --bp-key: #1A1A1A;
+    --bp-cyan-dark: #0090C9;
+    --bp-off-white: #F8F8F9;
+    --bp-light-gray: #EDEFF2;
+    --bp-mid-gray: #BFC4CE;
+    --bp-muted: #8892A0;
+    --bp-dark-gray: #555E6E;
+    --bp-error: #ED1C24;
+    --bp-success: #39B54A;
+    --bp-gradient-print: linear-gradient(135deg, #00AEEF 0%, #EC008C 100%);
+    --bp-font-display: 'Outfit', -apple-system, sans-serif;
+    --bp-font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --bp-font-mono: 'IBM Plex Mono', 'SF Mono', monospace;
+    --bp-radius-sm: 8px;
+    --bp-radius-md: 14px;
+}
+
+/* ================================================================
+   CMYK BAR (reusable)
+================================================================ */
+.bannercalc-cmyk-bar {
+    display: flex;
+    height: 4px;
+    width: 100%;
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.bannercalc-cmyk-bar span { flex: 1; }
+.bannercalc-cmyk-bar span:nth-child(1) { background: var(--bp-cyan); }
+.bannercalc-cmyk-bar span:nth-child(2) { background: var(--bp-magenta); }
+.bannercalc-cmyk-bar span:nth-child(3) { background: var(--bp-yellow); }
+.bannercalc-cmyk-bar span:nth-child(4) { background: var(--bp-key); }
+
+/* ================================================================
+   SETTINGS PAGE
+================================================================ */
+.bannercalc-settings {
+    font-family: var(--bp-font-body);
+}
+
+.bannercalc-settings .bannercalc-admin-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 8px;
+}
+
+.bannercalc-settings .bannercalc-admin-header h1 {
+    font-family: var(--bp-font-display);
+    font-weight: 700;
+    color: var(--bp-key);
+    font-size: 24px;
+    margin: 0;
+}
+
+.bannercalc-settings .bannercalc-admin-overline {
+    font-family: var(--bp-font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--bp-cyan);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 4px;
+}
+
+.bannercalc-settings .bannercalc-admin-overline::before {
+    content: '';
+    width: 16px;
+    height: 3px;
+    background: var(--bp-gradient-print);
+    display: inline-block;
+    border-radius: 2px;
+}
+
+.bannercalc-settings h2 {
+    font-family: var(--bp-font-display);
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--bp-key);
+    margin-top: 28px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--bp-light-gray);
+    position: relative;
+}
+
+.bannercalc-settings h2::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 60px;
+    height: 2px;
+    background: var(--bp-cyan);
+}
+
+.bannercalc-settings .form-table th {
+    width: 200px;
+    font-family: var(--bp-font-body);
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--bp-key);
+}
+
+.bannercalc-settings .form-table td label {
+    font-family: var(--bp-font-body);
+    font-size: 13px;
+    color: var(--bp-dark-gray);
+}
+
+.bannercalc-settings .form-table input[type="text"],
+.bannercalc-settings .form-table input[type="number"],
+.bannercalc-settings .form-table select {
+    font-family: var(--bp-font-body);
+    border: 1px solid var(--bp-light-gray);
+    border-radius: var(--bp-radius-sm);
+    padding: 8px 12px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.bannercalc-settings .form-table input:focus,
+.bannercalc-settings .form-table select:focus {
+    border-color: var(--bp-cyan);
+    box-shadow: 0 0 0 3px rgba(0, 174, 239, 0.12);
+    outline: none;
+}
+
+/* Submit button override */
+.bannercalc-settings .submit .button-primary {
+    background: var(--bp-cyan) !important;
+    border-color: var(--bp-cyan) !important;
+    font-family: var(--bp-font-display) !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    letter-spacing: 1px !important;
+    text-transform: uppercase !important;
+    border-radius: var(--bp-radius-sm) !important;
+    padding: 6px 24px !important;
+    height: auto !important;
+    transition: all 0.25s ease !important;
+}
+
+.bannercalc-settings .submit .button-primary:hover {
+    background: var(--bp-cyan-dark) !important;
+    border-color: var(--bp-cyan-dark) !important;
+}
+
+/* Category list links */
+.bannercalc-settings .bannercalc-category-list {
+    padding: 0;
+    margin: 8px 0;
+}
+
+.bannercalc-settings .bannercalc-category-list a {
+    color: var(--bp-cyan);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.bannercalc-settings .bannercalc-category-list a:hover {
+    color: var(--bp-cyan-dark);
+    text-decoration: underline;
+}
+
+/* ================================================================
+   CATEGORY CONFIG (term edit screen)
+================================================================ */
+.bannercalc-category-config h3 {
+    font-family: var(--bp-font-display);
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--bp-key);
+    margin: 24px 0 12px;
+    padding: 12px 0;
+    border-top: none;
+    position: relative;
+}
+
+.bannercalc-category-config h3::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, #00AEEF 25%, #EC008C 25%, #EC008C 50%, #FFF200 50%, #FFF200 75%, #1A1A1A 75%);
+    border-radius: 2px;
+}
+
+.bannercalc-category-config select,
+.bannercalc-category-config input[type="number"],
+.bannercalc-category-config input[type="text"] {
+    font-family: var(--bp-font-body);
+    border: 1px solid var(--bp-light-gray);
+    border-radius: var(--bp-radius-sm);
+    padding: 8px 12px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.bannercalc-category-config select:focus,
+.bannercalc-category-config input:focus {
+    border-color: var(--bp-cyan);
+    box-shadow: 0 0 0 3px rgba(0, 174, 239, 0.12);
+    outline: none;
+}
+
+.bannercalc-category-config .description {
+    font-family: var(--bp-font-mono);
+    font-size: 12px;
+    color: var(--bp-muted);
+    font-style: normal;
+}
+
+/* ================================================================
+   PRODUCT METABOX
+================================================================ */
+.bannercalc-metabox {
+    padding: 16px;
+    font-family: var(--bp-font-body);
+}
+
+.bannercalc-metabox .bannercalc-metabox-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.bannercalc-metabox .form-table {
+    margin-top: 0;
+}
+
+.bannercalc-metabox .form-table th {
+    width: 160px;
+    padding: 8px 10px 8px 0;
+    font-family: var(--bp-font-body);
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--bp-key);
+}
+
+.bannercalc-metabox .form-table td {
+    padding: 8px 10px;
+}
+
+.bannercalc-metabox .form-table select,
+.bannercalc-metabox .form-table input[type="number"],
+.bannercalc-metabox .form-table input[type="text"] {
+    font-family: var(--bp-font-body);
+    border: 1px solid var(--bp-light-gray);
+    border-radius: var(--bp-radius-sm);
+    padding: 8px 12px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.bannercalc-metabox .form-table select:focus,
+.bannercalc-metabox .form-table input:focus {
+    border-color: var(--bp-cyan);
+    box-shadow: 0 0 0 3px rgba(0, 174, 239, 0.12);
+    outline: none;
+}
+
+.bannercalc-metabox .description {
+    font-family: var(--bp-font-mono);
+    font-size: 12px;
+    color: var(--bp-muted);
+    font-style: normal;
+}
+
+.bannercalc-metabox .bannercalc-inherited-config {
+    background: var(--bp-off-white);
+    border: 1px solid var(--bp-light-gray);
+    border-radius: var(--bp-radius-sm);
+    padding: 10px 14px;
+    margin-bottom: 14px;
+    font-family: var(--bp-font-mono);
+    font-size: 12px;
+    color: var(--bp-dark-gray);
+}
+
+.bannercalc-metabox .bannercalc-override-label {
+    font-family: var(--bp-font-body);
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--bp-key);
+}
+
+.bannercalc-metabox .bannercalc-override-label input[type="checkbox"] {
+    accent-color: var(--bp-cyan);
+}

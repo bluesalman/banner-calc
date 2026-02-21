@@ -1,0 +1,590 @@
+/**
+ * BannerCalc Frontend Styles
+ *
+ * Branded per Banner Printing Ltd Brand Guide v1.0
+ *
+ * @package BannerCalc
+ */
+
+/* ================================================================
+   BRAND TOKENS
+================================================================ */
+:root {
+    /* — CMYK Primary — */
+    --bp-black: #1A1A1A;
+    --bp-ink: #2D2D2D;
+    --bp-cyan: #00AEEF;
+    --bp-magenta: #EC008C;
+    --bp-yellow: #FFF200;
+    --bp-key: #1A1A1A;
+
+    /* — Extended — */
+    --bp-cyan-dark: #0090C9;
+    --bp-cyan-light: #5CC8F5;
+    --bp-magenta-dark: #C70076;
+    --bp-magenta-light: #F266B7;
+    --bp-orange: #F26522;
+    --bp-green: #39B54A;
+
+    /* — Neutrals — */
+    --bp-white: #FFFFFF;
+    --bp-off-white: #F8F8F9;
+    --bp-light-gray: #EDEFF2;
+    --bp-mid-gray: #BFC4CE;
+    --bp-muted: #8892A0;
+    --bp-dark-gray: #555E6E;
+
+    /* — Functional — */
+    --bp-success: #39B54A;
+    --bp-warning: #F7941D;
+    --bp-error: #ED1C24;
+    --bp-info: #00AEEF;
+
+    /* — Gradients — */
+    --bp-gradient-cmyk: linear-gradient(135deg, #00AEEF 0%, #EC008C 50%, #FFF200 100%);
+    --bp-gradient-print: linear-gradient(135deg, #00AEEF 0%, #EC008C 100%);
+    --bp-gradient-dark: linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 100%);
+
+    /* — Text — */
+    --bp-text-primary: #1A1A1A;
+    --bp-text-secondary: #555E6E;
+    --bp-text-muted: #8892A0;
+    --bp-text-inverse: #FFFFFF;
+
+    /* — Typography — */
+    --bp-font-display: 'Outfit', -apple-system, sans-serif;
+    --bp-font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --bp-font-mono: 'IBM Plex Mono', 'SF Mono', monospace;
+
+    /* — Spacing — */
+    --bp-space-xs: 4px;
+    --bp-space-sm: 8px;
+    --bp-space-md: 16px;
+    --bp-space-lg: 32px;
+    --bp-space-xl: 64px;
+
+    /* — Radius — */
+    --bp-radius-sm: 8px;
+    --bp-radius-md: 14px;
+    --bp-radius-lg: 24px;
+}
+
+/* ================================================================
+   CONFIGURATOR WRAPPER
+================================================================ */
+.bannercalc-configurator {
+    margin: 24px 0;
+    font-family: var(--bp-font-body);
+    color: var(--bp-text-primary);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── CMYK Brand Bar ─── */
+.bannercalc-cmyk-bar {
+    display: flex;
+    height: 4px;
+    width: 100%;
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 24px;
+}
+
+.bannercalc-cmyk-bar span {
+    flex: 1;
+}
+
+.bannercalc-cmyk-bar span:nth-child(1) { background: var(--bp-cyan); }
+.bannercalc-cmyk-bar span:nth-child(2) { background: var(--bp-magenta); }
+.bannercalc-cmyk-bar span:nth-child(3) { background: var(--bp-yellow); }
+.bannercalc-cmyk-bar span:nth-child(4) { background: var(--bp-key); }
+
+/* ─── Sections ─── */
+.bannercalc-section {
+    margin-bottom: var(--bp-space-lg);
+}
+
+.bannercalc-section-title {
+    font-family: var(--bp-font-display);
+    font-size: 22px;
+    font-weight: 600;
+    line-height: 1.3;
+    margin: 0 0 var(--bp-space-md);
+    color: var(--bp-text-primary);
+}
+
+.bannercalc-section-overline {
+    font-family: var(--bp-font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--bp-cyan);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.bannercalc-section-overline::before {
+    content: '';
+    width: 16px;
+    height: 3px;
+    background: var(--bp-gradient-print);
+    display: inline-block;
+    border-radius: 2px;
+}
+
+/* ================================================================
+   SIZE TOGGLE (Popular Sizes / Custom Size)
+================================================================ */
+.bannercalc-size-toggle {
+    display: flex;
+    gap: 0;
+    margin-bottom: var(--bp-space-md);
+    border: 1px solid var(--bp-light-gray);
+    border-radius: var(--bp-radius-sm);
+    overflow: hidden;
+    background: var(--bp-off-white);
+}
+
+.bannercalc-toggle-btn {
+    flex: 1;
+    padding: 12px 20px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-family: var(--bp-font-display);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: var(--bp-text-secondary);
+    transition: all 0.25s ease;
+}
+
+.bannercalc-toggle-btn:hover {
+    color: var(--bp-text-primary);
+    background: var(--bp-white);
+}
+
+.bannercalc-toggle-btn.active {
+    background: var(--bp-cyan);
+    color: var(--bp-text-inverse);
+}
+
+/* ================================================================
+   PRESET SIZES GRID
+================================================================ */
+.bannercalc-preset-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 10px;
+}
+
+.bannercalc-preset-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 16px 12px;
+    border: 2px solid var(--bp-light-gray);
+    border-radius: var(--bp-radius-md);
+    background: var(--bp-white);
+    cursor: pointer;
+    transition: all 0.25s ease;
+    text-align: center;
+}
+
+.bannercalc-preset-card:hover {
+    border-color: var(--bp-cyan);
+    box-shadow: 0 4px 16px rgba(0, 174, 239, 0.12);
+    transform: translateY(-2px);
+}
+
+.bannercalc-preset-card.active {
+    border-color: var(--bp-cyan);
+    background: rgba(0, 174, 239, 0.06);
+    box-shadow: 0 4px 16px rgba(0, 174, 239, 0.18);
+}
+
+.bannercalc-preset-label {
+    font-family: var(--bp-font-display);
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--bp-text-primary);
+    margin-bottom: 4px;
+}
+
+.bannercalc-preset-price {
+    font-family: var(--bp-font-mono);
+    font-weight: 500;
+    font-size: 13px;
+    color: var(--bp-cyan);
+}
+
+/* ================================================================
+   UNIT SELECTOR
+================================================================ */
+.bannercalc-unit-selector {
+    display: flex;
+    gap: var(--bp-space-xs);
+    margin-bottom: var(--bp-space-md);
+}
+
+.bannercalc-unit-btn {
+    padding: 8px 18px;
+    border: 1px solid var(--bp-light-gray);
+    border-radius: var(--bp-radius-sm);
+    background: var(--bp-off-white);
+    cursor: pointer;
+    font-family: var(--bp-font-mono);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--bp-text-secondary);
+    transition: all 0.2s ease;
+}
+
+.bannercalc-unit-btn:hover {
+    border-color: var(--bp-cyan);
+    color: var(--bp-cyan);
+    background: var(--bp-white);
+}
+
+.bannercalc-unit-btn.active {
+    background: var(--bp-cyan);
+    color: var(--bp-text-inverse);
+    border-color: var(--bp-cyan);
+}
+
+/* ================================================================
+   DIMENSION INPUTS
+================================================================ */
+.bannercalc-dimension-inputs {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 12px;
+}
+
+.bannercalc-dimension-field {
+    flex: 1;
+}
+
+.bannercalc-dimension-field label {
+    display: block;
+    font-family: var(--bp-font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--bp-text-muted);
+    margin-bottom: 6px;
+}
+
+.bannercalc-input-group {
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--bp-light-gray);
+    border-radius: var(--bp-radius-sm);
+    overflow: hidden;
+    background: var(--bp-white);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.bannercalc-input-group:focus-within {
+    border-color: var(--bp-cyan);
+    box-shadow: 0 0 0 3px rgba(0, 174, 239, 0.12);
+}
+
+.bannercalc-input-group.error {
+    border-color: var(--bp-error);
+    box-shadow: 0 0 0 3px rgba(237, 28, 36, 0.1);
+}
+
+.bannercalc-dim-input {
+    flex: 1;
+    border: none;
+    padding: 12px 14px;
+    font-family: var(--bp-font-body);
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--bp-text-primary);
+    outline: none;
+    background: transparent;
+    appearance: textfield;
+    -moz-appearance: textfield;
+}
+
+.bannercalc-dim-input::-webkit-inner-spin-button,
+.bannercalc-dim-input::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.bannercalc-dim-input::placeholder {
+    color: var(--bp-mid-gray);
+}
+
+.bannercalc-unit-label {
+    padding: 12px 14px;
+    background: var(--bp-off-white);
+    color: var(--bp-text-muted);
+    font-family: var(--bp-font-mono);
+    font-size: 13px;
+    font-weight: 500;
+    border-left: 1px solid var(--bp-light-gray);
+    white-space: nowrap;
+}
+
+.bannercalc-dimension-separator {
+    font-family: var(--bp-font-display);
+    font-size: 20px;
+    font-weight: 300;
+    color: var(--bp-mid-gray);
+    padding-top: 22px;
+}
+
+/* ─── Constraints & Area ─── */
+.bannercalc-constraints {
+    font-family: var(--bp-font-mono);
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--bp-text-muted);
+    margin-bottom: 6px;
+}
+
+.bannercalc-constraints.error {
+    color: var(--bp-error);
+    font-weight: 500;
+}
+
+.bannercalc-area-display {
+    font-family: var(--bp-font-mono);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--bp-text-secondary);
+    padding: 8px 0;
+}
+
+/* ================================================================
+   ATTRIBUTE SELECTORS
+================================================================ */
+.bannercalc-attribute {
+    margin-bottom: 20px;
+}
+
+.bannercalc-attribute-label {
+    font-family: var(--bp-font-display);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--bp-text-primary);
+    margin: 0 0 10px;
+}
+
+.bannercalc-required {
+    color: var(--bp-error);
+    font-weight: 700;
+}
+
+.bannercalc-attribute-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.bannercalc-attr-btn {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 16px;
+    border: 2px solid var(--bp-light-gray);
+    border-radius: var(--bp-radius-sm);
+    background: var(--bp-white);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: var(--bp-font-body);
+}
+
+.bannercalc-attr-btn:hover {
+    border-color: var(--bp-cyan);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 174, 239, 0.1);
+}
+
+.bannercalc-attr-btn.active {
+    border-color: var(--bp-cyan);
+    background: rgba(0, 174, 239, 0.06);
+    box-shadow: 0 2px 8px rgba(0, 174, 239, 0.15);
+}
+
+.bannercalc-attr-btn.error {
+    border-color: var(--bp-error);
+    animation: shake 0.4s ease;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-4px); }
+    75% { transform: translateX(4px); }
+}
+
+.bannercalc-attr-name {
+    font-family: var(--bp-font-body);
+    font-weight: 500;
+    font-size: 13px;
+    color: var(--bp-text-primary);
+}
+
+.bannercalc-attr-price {
+    font-family: var(--bp-font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--bp-cyan);
+    margin-top: 3px;
+}
+
+/* ================================================================
+   PRICE BLOCK
+================================================================ */
+.bannercalc-price-block {
+    background: var(--bp-gradient-dark);
+    color: var(--bp-text-inverse);
+    border-radius: var(--bp-radius-md);
+    padding: 24px 28px;
+    margin-top: 24px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* CMYK bar at top of price block */
+.bannercalc-price-block::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #00AEEF 25%, #EC008C 25%, #EC008C 50%, #FFF200 50%, #FFF200 75%, #1A1A1A 75%);
+}
+
+.bannercalc-price-placeholder {
+    text-align: center;
+    color: var(--bp-muted);
+    font-family: var(--bp-font-body);
+    font-size: 14px;
+    font-weight: 400;
+    padding: 8px 0;
+}
+
+.bannercalc-price-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 0;
+}
+
+.bannercalc-price-base .bannercalc-price-label,
+.bannercalc-price-addons .bannercalc-price-label {
+    font-family: var(--bp-font-mono);
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--bp-muted);
+}
+
+.bannercalc-price-base .bannercalc-price-value,
+.bannercalc-price-addons .bannercalc-price-value {
+    font-family: var(--bp-font-mono);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--bp-off-white);
+}
+
+.bannercalc-price-total {
+    margin-top: 10px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.bannercalc-price-total .bannercalc-price-label {
+    font-family: var(--bp-font-display);
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--bp-white);
+}
+
+.bannercalc-price-total .bannercalc-price-value {
+    font-family: var(--bp-font-display);
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--bp-white);
+    letter-spacing: -0.5px;
+}
+
+/* ================================================================
+   ADD TO BASKET BUTTON (WooCommerce override)
+================================================================ */
+.bannercalc-configurator ~ .single_add_to_cart_button,
+.bannercalc-configurator ~ form .single_add_to_cart_button {
+    background: var(--bp-cyan) !important;
+    color: var(--bp-text-inverse) !important;
+    font-family: var(--bp-font-display) !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    letter-spacing: 1px !important;
+    text-transform: uppercase !important;
+    border: none !important;
+    border-radius: var(--bp-radius-sm) !important;
+    padding: 14px 32px !important;
+    transition: all 0.25s ease !important;
+}
+
+.bannercalc-configurator ~ .single_add_to_cart_button:hover,
+.bannercalc-configurator ~ form .single_add_to_cart_button:hover {
+    background: var(--bp-cyan-dark) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 174, 239, 0.3) !important;
+}
+
+/* ================================================================
+   RESPONSIVE
+================================================================ */
+@media (max-width: 600px) {
+    .bannercalc-preset-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .bannercalc-dimension-inputs {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .bannercalc-dimension-separator {
+        display: none;
+    }
+
+    .bannercalc-price-total .bannercalc-price-value {
+        font-size: 22px;
+    }
+
+    .bannercalc-attribute-options {
+        gap: 6px;
+    }
+
+    .bannercalc-attr-btn {
+        padding: 8px 12px;
+    }
+}
+
+@media (max-width: 380px) {
+    .bannercalc-preset-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .bannercalc-size-toggle {
+        flex-direction: column;
+    }
+
+    .bannercalc-unit-selector {
+        flex-wrap: wrap;
+    }
+}
