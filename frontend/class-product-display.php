@@ -17,7 +17,17 @@ class ProductDisplay {
         // Hook into single product page to render configurator.
         add_action( 'woocommerce_before_add_to_cart_button', [ $this, 'render_configurator' ], 10 );
 
-        // Hide default WooCommerce variation dropdowns on BannerCalc products.
+        // Make BannerCalc products purchasable even without a WC price.
+        add_filter( 'woocommerce_product_get_price', [ $this, 'ensure_purchasable_price' ], 10, 2 );
+        add_filter( 'woocommerce_product_get_regular_price', [ $this, 'ensure_purchasable_price' ], 10, 2 );
+
+        // Hide default WC price display — our configurator shows the calculated price.
+        add_filter( 'woocommerce_get_price_html', [ $this, 'replace_price_html' ], 10, 2 );
+
+        // Suppress WC variation dropdowns on BannerCalc products (safety net).
+        add_action( 'woocommerce_before_single_product', [ $this, 'suppress_wc_variation_form' ] );
+
+        // Hide the default WC quantity input for BannerCalc products (optional — keep if needed).
         add_filter( 'woocommerce_product_data_tabs', [ $this, 'maybe_hide_variations_tab' ] );
     }
 
@@ -75,6 +85,83 @@ class ProductDisplay {
         include BANNERCALC_PLUGIN_DIR . 'frontend/views/configurator.php';
 
         echo '</div>';
+    }
+
+    /**
+     * Suppress WooCommerce variation dropdowns for BannerCalc products.
+     *
+     * If a BannerCalc-enabled product is still set to Variable, remove the
+     * default WC variation add-to-cart template so only our configurator shows.
+     */
+    public function suppress_wc_variation_form(): void {
+        global $product;
+
+        if ( ! $product || ! $product->is_type( 'variable' ) ) {
+            return;
+        }
+
+        $plugin = \BannerCalc\Plugin::instance();
+
+        if ( ! $plugin->is_enabled_for_product( $product->get_id() ) ) {
+            return;
+        }
+
+        // Remove the default variable product add-to-cart template.
+        remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_add_to_cart', 30 );
+
+        // Re-add the simple product add-to-cart template instead (which has our hook).
+        add_action( 'woocommerce_single_product_summary', function() {
+            wc_get_template( 'single-product/add-to-cart/simple.php' );
+        }, 30 );
+    }
+
+    /**
+     * Return a placeholder price for BannerCalc products that have no WC price.
+     *
+     * This makes WooCommerce consider the product purchasable so the
+     * add-to-cart form (and our configurator hook) renders.
+     *
+     * @param string      $price
+     * @param \WC_Product $product
+     * @return string
+     */
+    public function ensure_purchasable_price( $price, $product ): string {
+        if ( '' !== $price ) {
+            return $price;
+        }
+
+        $plugin = \BannerCalc\Plugin::instance();
+
+        if ( $plugin->is_enabled_for_product( $product->get_id() ) ) {
+            return '0';
+        }
+
+        return $price;
+    }
+
+    /**
+     * Replace the default WC price HTML with a "Calculated at checkout" hint
+     * for BannerCalc-enabled products on the single product page.
+     *
+     * @param string      $price_html
+     * @param \WC_Product $product
+     * @return string
+     */
+    public function replace_price_html( $price_html, $product ): string {
+        if ( ! is_product() ) {
+            return $price_html;
+        }
+
+        $plugin = \BannerCalc\Plugin::instance();
+
+        if ( ! $plugin->is_enabled_for_product( $product->get_id() ) ) {
+            return $price_html;
+        }
+
+        // Return a styled hint instead of £0.00.
+        return '<span class="bannercalc-price-hint" style="font-family:var(--bp-font-mono,monospace);font-size:13px;color:#8892A0;">'
+             . esc_html__( 'Price calculated below ↓', 'bannercalc' )
+             . '</span>';
     }
 
     /**
