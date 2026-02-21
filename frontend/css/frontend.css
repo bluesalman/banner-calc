@@ -816,7 +816,7 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 7x 14px;
+    padding: 7px 14px;
     background: var(--bp-off-white);
     border-radius: 10px;
     border: 1px solid var(--bp-light-gray);
