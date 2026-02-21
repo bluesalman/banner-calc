@@ -25,6 +25,7 @@ $sizing_modes = [
 $categories = get_terms( [
     'taxonomy'   => 'product_cat',
     'hide_empty' => false,
+    'parent'     => 0,
     'orderby'    => 'name',
     'order'      => 'ASC',
 ] );

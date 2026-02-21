@@ -26,6 +26,7 @@ $all_units = \BannerCalc\UnitConverter::get_unit_labels();
 
     <?php settings_errors( 'bannercalc_settings_group' ); ?>
 
+    <div class="bannercalc-content-card">
     <form method="post" action="options.php">
         <?php settings_fields( 'bannercalc_settings_group' ); ?>
 
@@ -114,6 +115,7 @@ $all_units = \BannerCalc\UnitConverter::get_unit_labels();
             <?php submit_button( __( 'Save Settings', 'bannercalc' ), 'bannercalc-btn-primary', 'submit', false ); ?>
         </div>
     </form>
+    </div><!-- /.bannercalc-content-card -->
 
     <!-- Version Footer -->
     <div class="bannercalc-admin-footer">

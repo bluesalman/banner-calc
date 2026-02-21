@@ -130,12 +130,20 @@ class Plugin {
             return [];
         }
 
-        // Get the first product category with BannerCalc config.
+        // Get config from the top-level parent category.
+        // Walk up the hierarchy so child categories inherit from their parent.
         $category_ids = $product->get_category_ids();
         $cat_config   = [];
 
         foreach ( $category_ids as $cat_id ) {
-            $config = get_term_meta( $cat_id, '_bannercalc_config', true );
+            // Find the top-level parent for this category.
+            $root_id   = $cat_id;
+            $ancestors = get_ancestors( $cat_id, 'product_cat', 'taxonomy' );
+            if ( ! empty( $ancestors ) ) {
+                $root_id = end( $ancestors ); // last element is the top-level parent
+            }
+
+            $config = get_term_meta( $root_id, '_bannercalc_config', true );
             if ( ! empty( $config ) && ! empty( $config['enabled'] ) ) {
                 $cat_config = $config;
                 break;

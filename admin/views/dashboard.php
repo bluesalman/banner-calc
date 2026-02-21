@@ -14,10 +14,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 $settings   = \BannerCalc\Plugin::get_settings();
 $is_enabled = ! empty( $settings['enabled'] );
 
-// Gather category stats.
+// Gather category stats (parent-level only).
 $categories = get_terms( [
     'taxonomy'   => 'product_cat',
     'hide_empty' => false,
+    'parent'     => 0,
 ] );
 
 $total_cats    = 0;
@@ -46,6 +47,9 @@ if ( ! is_wp_error( $categories ) ) {
         <h1 class="bannercalc-page-title"><?php esc_html_e( 'BannerCalc', 'bannercalc' ); ?></h1>
         <p class="bannercalc-page-desc"><?php esc_html_e( 'Product Configurator & Pricing Engine for WooCommerce', 'bannercalc' ); ?></p>
     </div>
+
+    <!-- Main Content Card -->
+    <div class="bannercalc-content-card">
 
     <!-- Status Cards Row -->
     <div class="bannercalc-cards-row">
@@ -157,6 +161,8 @@ if ( ! is_wp_error( $categories ) ) {
         </div>
     </div>
     <?php endif; ?>
+
+    </div><!-- /.bannercalc-content-card -->
 
     <!-- Version Footer -->
     <div class="bannercalc-admin-footer">

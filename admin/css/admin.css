@@ -157,6 +157,17 @@
 }
 
 /* ================================================================
+   CONTENT CARD (white container)
+================================================================ */
+.bannercalc-content-card {
+    background: var(--bp-white);
+    border: 1px solid var(--bp-light-gray);
+    border-radius: var(--bp-radius-md);
+    padding: 28px 32px;
+    margin-bottom: 28px;
+}
+
+/* ================================================================
    DASHBOARD — STATUS CARDS
 ================================================================ */
 .bannercalc-cards-row {
