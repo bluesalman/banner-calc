@@ -126,4 +126,3 @@ if ( ! empty( $preset_sizes ) ) {
         </div>
     </div>
 <?php endif; ?>
-<?php endif; ?>

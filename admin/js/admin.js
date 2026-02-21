@@ -113,5 +113,3 @@
         BannerCalcAdmin.init();
     });
 })(jQuery);
-
-})(jQuery);
