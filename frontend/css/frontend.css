@@ -816,7 +816,7 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 12px 14px;
+    padding: 7x 14px;
     background: var(--bp-off-white);
     border-radius: 10px;
     border: 1px solid var(--bp-light-gray);
@@ -1121,7 +1121,7 @@ form.cart a.product_type_customizable {
     display: block !important;
     text-align: center !important;
     padding: 11px 24px !important;
-    margin: 0 15px 12px !important;
+    margin: 15px auto !important;
     background: transparent !important;
     color: var(--bp-cyan-dark) !important;
     border: 1.5px solid var(--bp-cyan) !important;
