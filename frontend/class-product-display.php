@@ -17,6 +17,10 @@ class ProductDisplay {
         // Hook into single product page to render configurator.
         add_action( 'woocommerce_before_add_to_cart_button', [ $this, 'render_configurator' ], 10 );
 
+        // Wrap quantity + add-to-cart button in a flex row.
+        add_action( 'woocommerce_before_add_to_cart_quantity', [ $this, 'open_quantity_row' ], 1 );
+        add_action( 'woocommerce_after_add_to_cart_button', [ $this, 'close_quantity_row' ], 99 );
+
         // Make BannerCalc products purchasable even without a WC price.
         add_filter( 'woocommerce_product_get_price', [ $this, 'ensure_purchasable_price' ], 10, 2 );
         add_filter( 'woocommerce_product_get_regular_price', [ $this, 'ensure_purchasable_price' ], 10, 2 );
@@ -85,6 +89,44 @@ class ProductDisplay {
         include BANNERCALC_PLUGIN_DIR . 'frontend/views/configurator.php';
 
         echo '</div>';
+    }
+
+    /**
+     * Open the quantity + button flex wrapper for BannerCalc products.
+     */
+    public function open_quantity_row(): void {
+        global $product;
+
+        if ( ! $product ) {
+            return;
+        }
+
+        $plugin = \BannerCalc\Plugin::instance();
+
+        if ( ! $plugin->is_enabled_for_product( $product->get_id() ) ) {
+            return;
+        }
+
+        echo '<div class="bannercalc-quantity-row">';
+    }
+
+    /**
+     * Close the quantity + button flex wrapper for BannerCalc products.
+     */
+    public function close_quantity_row(): void {
+        global $product;
+
+        if ( ! $product ) {
+            return;
+        }
+
+        $plugin = \BannerCalc\Plugin::instance();
+
+        if ( ! $plugin->is_enabled_for_product( $product->get_id() ) ) {
+            return;
+        }
+
+        echo '</div><!-- .bannercalc-quantity-row -->';
     }
 
     /**

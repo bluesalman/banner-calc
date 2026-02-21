@@ -51,14 +51,14 @@ class Frontend {
             'bannercalc-frontend',
             BANNERCALC_PLUGIN_URL . 'frontend/css/frontend.css',
             [ 'bannercalc-google-fonts' ],
-            BANNERCALC_VERSION
+            BANNERCALC_VERSION . '.' . filemtime( BANNERCALC_PLUGIN_DIR . 'frontend/css/frontend.css' )
         );
 
         wp_enqueue_script(
             'bannercalc-frontend',
             BANNERCALC_PLUGIN_URL . 'frontend/js/frontend.js',
             [ 'jquery' ],
-            BANNERCALC_VERSION,
+            BANNERCALC_VERSION . '.' . filemtime( BANNERCALC_PLUGIN_DIR . 'frontend/js/frontend.js' ),
             true
         );
 

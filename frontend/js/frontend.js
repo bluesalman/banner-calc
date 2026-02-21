@@ -327,7 +327,7 @@
                 this.state.areaSqft = this.state.areaSqm * SQFT_PER_SQM;
 
                 $('#bannercalc-area').html(
-                    'Area: ' + this.state.areaSqft.toFixed(2) + ' sqft (' + this.state.areaSqm.toFixed(2) + ' sqm)'
+                    'Area: <strong>' + this.state.areaSqft.toFixed(2) + ' sqft</strong> (' + this.state.areaSqm.toFixed(4) + ' sqm)'
                 );
             } else {
                 this.state.areaSqft = null;

@@ -1,14 +1,17 @@
-/**
- * BannerCalc Frontend Styles — v2
- *
- * Pixel-perfect match of bannercalc-configurator-v2 prototype.
- * Branded per Banner Printing Ltd Brand Guide v1.0
- *
- * @package BannerCalc
- */
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Banner Printing — Product Configurator v2</title>
 
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
 /* ================================================================
-   BRAND TOKENS
+   BANNER PRINTING — BRAND TOKENS
 ================================================================ */
 :root {
     /* CMYK Primary */
@@ -82,6 +85,25 @@
 }
 
 /* ================================================================
+   BASE RESET & PAGE
+================================================================ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+
+body {
+    font-family: var(--bp-font-body);
+    color: var(--bp-text-primary);
+    background: #F3F1EE;
+    line-height: 1.5;
+}
+
+.demo-wrapper {
+    max-width: 680px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+/* ================================================================
    CONFIGURATOR SHELL — elevated card with depth
 ================================================================ */
 #bannercalc-configurator.bannercalc-configurator {
@@ -91,10 +113,20 @@
     overflow: hidden;
     box-shadow: var(--bp-shadow-lg);
     position: relative;
-    font-family: var(--bp-font-body);
-    color: var(--bp-text-primary);
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Subtle warm glow behind configurator */
+#bannercalc-configurator.bannercalc-configurator::after {
+    content: '';
+    position: absolute;
+    top: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80%;
+    height: 80px;
+    background: radial-gradient(ellipse, rgba(0,174,239,0.06) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: -1;
 }
 
 /* ================================================================
@@ -297,7 +329,7 @@
 }
 
 /* ================================================================
-   CUSTOM SIZE — UNIT SELECTOR
+   CUSTOM SIZE INPUT
 ================================================================ */
 .bannercalc-unit-selector {
     display: flex;
@@ -332,19 +364,13 @@
     box-shadow: 0 2px 8px rgba(0, 174, 239, 0.3);
 }
 
-/* ================================================================
-   DIMENSION INPUTS
-================================================================ */
+/* Dimension inputs */
 .bannercalc-dimension-inputs {
     display: grid;
     grid-template-columns: 1fr auto 1fr;
     gap: 12px;
     align-items: end;
     margin-bottom: 12px;
-}
-
-.bannercalc-dimension-field {
-    min-width: 0;
 }
 
 .bannercalc-dimension-field label {
@@ -363,11 +389,6 @@
     align-items: center;
 }
 
-.bannercalc-input-group.error .bannercalc-dim-input {
-    border-color: var(--bp-error);
-    box-shadow: var(--bp-shadow-inner), 0 0 0 3px rgba(237, 28, 36, 0.08);
-}
-
 .bannercalc-dim-input {
     width: 100%;
     padding: 11px 44px 11px 14px;
@@ -384,10 +405,7 @@
     box-shadow: var(--bp-shadow-inner);
 }
 .bannercalc-dim-input::-webkit-inner-spin-button,
-.bannercalc-dim-input::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-}
+.bannercalc-dim-input::-webkit-outer-spin-button { -webkit-appearance: none; }
 .bannercalc-dim-input:focus {
     border-color: var(--bp-cyan);
     box-shadow: var(--bp-shadow-inner), 0 0 0 3px rgba(0, 174, 239, 0.1);
@@ -417,17 +435,11 @@
     padding-bottom: 2px;
 }
 
-/* ─── Constraints & Area ─── */
 .bannercalc-constraints {
     font-family: var(--bp-font-mono);
     font-size: 11px;
     color: var(--bp-text-muted);
     margin-bottom: 12px;
-}
-
-.bannercalc-constraints.error {
-    color: var(--bp-error);
-    font-weight: 500;
 }
 
 .bannercalc-area-display {
@@ -471,15 +483,7 @@
     gap: 16px;
 }
 
-.bannercalc-attr-row .bannercalc-attribute {
-    margin-bottom: 0;
-}
-
 /* Attribute header */
-.bannercalc-attribute {
-    margin-bottom: 18px;
-}
-
 .bannercalc-attr-header {
     display: flex;
     align-items: center;
@@ -500,11 +504,6 @@
     font-size: 11px;
     color: var(--bp-cyan-dark);
     font-weight: 500;
-}
-
-.bannercalc-required {
-    color: var(--bp-error);
-    font-weight: 700;
 }
 
 /* ================================================================
@@ -614,9 +613,6 @@
     white-space: nowrap;
     box-shadow: var(--bp-shadow-xs);
     position: relative;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
 }
 
 .bannercalc-pill:hover {
@@ -624,24 +620,6 @@
     color: var(--bp-text-primary);
     box-shadow: var(--bp-shadow-sm);
     transform: translateY(-0.5px);
-}
-
-.bannercalc-pill.error {
-    border-color: var(--bp-error);
-    animation: shake 0.4s ease;
-}
-
-@keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-4px); }
-    75% { transform: translateX(4px); }
-}
-
-.bannercalc-pill-price {
-    font-family: var(--bp-font-mono);
-    font-size: 10px;
-    font-weight: 500;
-    opacity: 0.7;
 }
 
 /* Hemming pills — cyan active */
@@ -704,15 +682,6 @@
     color: #2A8A38;
     font-weight: 600;
     box-shadow: 0 2px 10px rgba(57, 181, 74, 0.18);
-}
-
-/* Fallback: generic pill active (any attribute not specifically styled above) */
-.bannercalc-pill.active {
-    border-color: var(--bp-cyan);
-    background: linear-gradient(135deg, rgba(0,174,239,0.08), rgba(0,174,239,0.03));
-    color: var(--bp-cyan-dark);
-    font-weight: 600;
-    box-shadow: 0 2px 8px rgba(0, 174, 239, 0.15);
 }
 
 /* ================================================================
@@ -781,12 +750,6 @@
 .bannercalc-switch-label.is-on {
     color: var(--bp-cyan-dark);
     font-weight: 600;
-}
-
-.bannercalc-switch-price {
-    font-family: var(--bp-font-mono);
-    font-size: 10px;
-    color: var(--bp-text-muted);
 }
 
 /* ================================================================
@@ -909,7 +872,7 @@
 }
 
 /* ================================================================
-   PERSONALIZE BUTTON (WooCommerce product customizer link)
+   PERSONALIZE BUTTON
 ================================================================ */
 a.product_type_customizable {
     display: block;
@@ -937,47 +900,7 @@ a.product_type_customizable:hover {
 }
 
 /* ================================================================
-   QUANTITY + ADD TO BASKET (WooCommerce override)
-================================================================ */
-form.cart .quantity {
-    display: flex;
-    align-items: center;
-    border: 1.5px solid var(--bp-light-gray);
-    border-radius: 10px;
-    overflow: hidden;
-    background: var(--bp-white);
-    box-shadow: var(--bp-shadow-xs);
-}
-
-form.cart .single_add_to_cart_button {
-    flex: 1;
-    padding: 12px 24px;
-    background: linear-gradient(135deg, var(--bp-black), var(--bp-ink));
-    color: var(--bp-white);
-    border: none;
-    border-radius: 10px;
-    font-family: var(--bp-font-display);
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    text-align: center;
-    box-shadow: var(--bp-shadow-md);
-}
-form.cart .single_add_to_cart_button:hover {
-    background: linear-gradient(135deg, var(--bp-ink), #3a3a3a);
-    transform: translateY(-1px);
-    box-shadow: var(--bp-shadow-lg);
-}
-form.cart .single_add_to_cart_button:active {
-    transform: translateY(0);
-    box-shadow: var(--bp-shadow-sm);
-}
-
-/* ================================================================
-   FILE UPLOAD (WooCommerce Drag & Drop / codedropz compatibility)
+   FILE UPLOAD
 ================================================================ */
 .wc-dnd-file-upload {
     padding: 0 28px 8px;
@@ -1041,7 +964,7 @@ form.cart .single_add_to_cart_button:active {
 }
 
 /* ================================================================
-   QUANTITY + ADD TO BASKET ROW
+   QUANTITY + ADD TO BASKET
 ================================================================ */
 .bannercalc-quantity-row {
     display: flex;
@@ -1051,7 +974,7 @@ form.cart .single_add_to_cart_button:active {
     border-top: 1px solid var(--bp-light-gray);
 }
 
-.bannercalc-quantity-row .quantity {
+.quantity {
     display: flex;
     align-items: center;
     border: 1.5px solid var(--bp-light-gray);
@@ -1060,7 +983,7 @@ form.cart .single_add_to_cart_button:active {
     background: var(--bp-white);
     box-shadow: var(--bp-shadow-xs);
 }
-.bannercalc-quantity-row .quantity .input-button {
+.quantity .input-button {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1072,11 +995,14 @@ form.cart .single_add_to_cart_button:active {
     transition: all 0.15s;
     user-select: none;
 }
-.bannercalc-quantity-row .quantity .input-button:hover {
+.quantity .input-button:hover {
     background: var(--bp-off-white);
     color: var(--bp-text-primary);
 }
-.bannercalc-quantity-row .quantity .input-text.qty {
+.quantity .input-button.minus::after { content: '−'; font-weight: 500; }
+.quantity .input-button.plus::after { content: '+'; font-weight: 500; }
+
+.quantity .input-text.qty {
     width: 48px;
     text-align: center;
     border: none;
@@ -1091,12 +1017,10 @@ form.cart .single_add_to_cart_button:active {
     background: transparent;
     -moz-appearance: textfield;
 }
-.bannercalc-quantity-row .quantity .input-text.qty::-webkit-inner-spin-button,
-.bannercalc-quantity-row .quantity .input-text.qty::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-}
+.quantity .input-text.qty::-webkit-inner-spin-button,
+.quantity .input-text.qty::-webkit-outer-spin-button { -webkit-appearance: none; }
 
-.bannercalc-quantity-row .single_add_to_cart_button {
+.single_add_to_cart_button {
     flex: 1;
     padding: 12px 24px;
     background: linear-gradient(135deg, var(--bp-black), var(--bp-ink));
@@ -1113,18 +1037,39 @@ form.cart .single_add_to_cart_button:active {
     text-align: center;
     box-shadow: var(--bp-shadow-md);
 }
-.bannercalc-quantity-row .single_add_to_cart_button:hover {
+.single_add_to_cart_button:hover {
     background: linear-gradient(135deg, var(--bp-ink), #3a3a3a);
     transform: translateY(-1px);
     box-shadow: var(--bp-shadow-lg);
 }
-.bannercalc-quantity-row .single_add_to_cart_button:active {
+.single_add_to_cart_button:active {
     transform: translateY(0);
     box-shadow: var(--bp-shadow-sm);
 }
 
 /* ================================================================
-   STAGGERED ENTRANCE ANIMATION
+   RESPONSIVE
+================================================================ */
+@media (max-width: 540px) {
+    .bannercalc-section { padding: 20px 18px; }
+    .bannercalc-preset-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 6px;
+    }
+    .bannercalc-attr-row--2col,
+    .bannercalc-attr-row--compact {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+    .bannercalc-price-block { margin: 12px 14px 14px; }
+    .bannercalc-quantity-row { padding: 16px 18px 20px; }
+    a.product_type_customizable { margin: 0 18px 4px; }
+    .wc-dnd-file-upload { padding: 0 18px 8px; }
+    .bannercalc-price-section .bannercalc-section-overline { padding: 16px 18px 0; }
+}
+
+/* ================================================================
+   STAGGERED ENTRANCE
 ================================================================ */
 @keyframes fadeSlideIn {
     from { opacity: 0; transform: translateY(6px); }
@@ -1144,31 +1089,356 @@ form.cart .single_add_to_cart_button:active {
 .bannercalc-preset-card:nth-child(8) { animation-delay: 0.21s; }
 .bannercalc-preset-card:nth-child(9) { animation-delay: 0.24s; }
 .bannercalc-preset-card:nth-child(10) { animation-delay: 0.27s; }
+</style>
+</head>
 
-/* ================================================================
-   RESPONSIVE
-================================================================ */
-@media (max-width: 540px) {
-    .bannercalc-section { padding: 20px 18px; }
-    .bannercalc-preset-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 6px;
-    }
-    .bannercalc-attr-row--2col,
-    .bannercalc-attr-row--compact {
-        grid-template-columns: 1fr;
-        gap: 14px;
-    }
-    .bannercalc-price-block { margin: 12px 14px 14px; }
-    .bannercalc-price-section .bannercalc-section-overline { padding: 16px 18px 0; }
-    .bannercalc-quantity-row { padding: 16px 18px 20px; }
-    a.product_type_customizable { margin: 0 18px 4px; }
-    .wc-dnd-file-upload { padding: 0 18px 8px; }
-    .bannercalc-dimension-inputs {
-        grid-template-columns: 1fr;
-        gap: 8px;
-    }
-    .bannercalc-dimension-separator {
-        display: none;
-    }
-}
+<body>
+
+<div class="demo-wrapper">
+
+<form class="cart" action="#" method="post" enctype="multipart/form-data">
+    <div id="bannercalc-configurator" class="bannercalc-configurator" data-config='{}'>
+
+        <!-- CMYK Brand Bar -->
+        <div class="bannercalc-cmyk-bar"><span></span><span></span><span></span><span></span></div>
+
+        <!-- 1. SIZE SECTION -->
+        <div class="bannercalc-section bannercalc-size-section">
+            <div class="bannercalc-section-overline">SIZE</div>
+            <h3 class="bannercalc-section-title">Select Size</h3>
+
+            <div class="bannercalc-size-toggle">
+                <button type="button" class="bannercalc-toggle-btn active" data-mode="preset">Popular Sizes</button>
+                <button type="button" class="bannercalc-toggle-btn" data-mode="custom">Custom Size</button>
+            </div>
+
+            <!-- Preset sizes -->
+            <div class="bannercalc-preset-sizes" id="bannercalc-presets">
+                <div class="bannercalc-preset-grid">
+                    <button type="button" class="bannercalc-preset-card" data-slug="3ft-x-2ft" data-width-m="0.9144" data-height-m="0.6096" data-description="Small event banners, market stalls" data-popularity="5">
+                        <span class="bannercalc-preset-badge">Popular</span>
+                        <span class="bannercalc-preset-label">3ft × 2ft</span>
+                        <span class="bannercalc-preset-price">£9.90</span>
+                    </button>
+                    <button type="button" class="bannercalc-preset-card active" data-slug="4ft-x-2ft" data-width-m="1.2192" data-height-m="0.6096" data-description="Shop fronts, promotions" data-popularity="5">
+                        <span class="bannercalc-preset-badge">Popular</span>
+                        <span class="bannercalc-preset-label">4ft × 2ft</span>
+                        <span class="bannercalc-preset-price">£13.20</span>
+                    </button>
+                    <button type="button" class="bannercalc-preset-card" data-slug="6ft-x-2ft" data-width-m="1.8288" data-height-m="0.6096" data-description="Outdoor events, fences" data-popularity="5">
+                        <span class="bannercalc-preset-badge">Popular</span>
+                        <span class="bannercalc-preset-label">6ft × 2ft</span>
+                        <span class="bannercalc-preset-price">£19.80</span>
+                    </button>
+                    <button type="button" class="bannercalc-preset-card" data-slug="4ft-x-3ft" data-width-m="1.2192" data-height-m="0.9144" data-description="Trade shows, exhibitions" data-popularity="4">
+                        <span class="bannercalc-preset-label">4ft × 3ft</span>
+                        <span class="bannercalc-preset-price">£19.80</span>
+                    </button>
+                    <button type="button" class="bannercalc-preset-card" data-slug="6ft-x-3ft" data-width-m="1.8288" data-height-m="0.9144" data-description="Building wraps, large events" data-popularity="4">
+                        <span class="bannercalc-preset-label">6ft × 3ft</span>
+                        <span class="bannercalc-preset-price">£29.70</span>
+                    </button>
+                    <button type="button" class="bannercalc-preset-card" data-slug="8ft-x-2ft" data-width-m="2.4384" data-height-m="0.6096" data-description="Street banners, shop fascias" data-popularity="4">
+                        <span class="bannercalc-preset-label">8ft × 2ft</span>
+                        <span class="bannercalc-preset-price">£26.40</span>
+                    </button>
+                    <button type="button" class="bannercalc-preset-card" data-slug="8ft-x-3ft" data-width-m="2.4384" data-height-m="0.9144" data-description="Construction hoarding, festivals" data-popularity="4">
+                        <span class="bannercalc-preset-label">8ft × 3ft</span>
+                        <span class="bannercalc-preset-price">£39.60</span>
+                    </button>
+                    <button type="button" class="bannercalc-preset-card" data-slug="8ft-x-4ft" data-width-m="2.4384" data-height-m="1.2192" data-description="Stage backdrops, large displays" data-popularity="3">
+                        <span class="bannercalc-preset-label">8ft × 4ft</span>
+                        <span class="bannercalc-preset-price">£52.80</span>
+                    </button>
+                    <button type="button" class="bannercalc-preset-card" data-slug="10ft-x-3ft" data-width-m="3.048" data-height-m="0.9144" data-description="Warehouse sales, grand openings" data-popularity="3">
+                        <span class="bannercalc-preset-label">10ft × 3ft</span>
+                        <span class="bannercalc-preset-price">£49.50</span>
+                    </button>
+                    <button type="button" class="bannercalc-preset-card" data-slug="12ft-x-3ft" data-width-m="3.6576" data-height-m="0.9144" data-description="Building frontage, sport events" data-popularity="3">
+                        <span class="bannercalc-preset-label">12ft × 3ft</span>
+                        <span class="bannercalc-preset-price">£59.40</span>
+                    </button>
+                </div>
+
+                <div class="bannercalc-preset-description" id="bannercalc-preset-desc">
+                    <span class="bannercalc-desc-icon">ⓘ</span>
+                    <span class="bannercalc-desc-text" id="bannercalc-desc-text">Shop fronts, promotions</span>
+                </div>
+            </div>
+
+            <!-- Custom size (hidden) -->
+            <div class="bannercalc-custom-size" id="bannercalc-custom" style="display:none;">
+                <div class="bannercalc-unit-selector">
+                    <button type="button" class="bannercalc-unit-btn" data-unit="mm">mm</button>
+                    <button type="button" class="bannercalc-unit-btn" data-unit="cm">cm</button>
+                    <button type="button" class="bannercalc-unit-btn" data-unit="inch">in</button>
+                    <button type="button" class="bannercalc-unit-btn active" data-unit="ft">ft</button>
+                    <button type="button" class="bannercalc-unit-btn" data-unit="m">m</button>
+                </div>
+                <div class="bannercalc-dimension-inputs">
+                    <div class="bannercalc-dimension-field">
+                        <label for="bannercalc-width">Width</label>
+                        <div class="bannercalc-input-group">
+                            <input type="number" id="bannercalc-width" class="bannercalc-dim-input" step="0.01" min="0.01" placeholder="0.00" data-dimension="width">
+                            <span class="bannercalc-unit-label" id="bannercalc-width-unit">ft</span>
+                        </div>
+                    </div>
+                    <span class="bannercalc-dimension-separator">×</span>
+                    <div class="bannercalc-dimension-field">
+                        <label for="bannercalc-height">Height</label>
+                        <div class="bannercalc-input-group">
+                            <input type="number" id="bannercalc-height" class="bannercalc-dim-input" step="0.01" min="0.01" placeholder="0.00" data-dimension="height">
+                            <span class="bannercalc-unit-label" id="bannercalc-height-unit">ft</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="bannercalc-constraints" id="bannercalc-constraints">Min: 0.33ft × 0.33ft  |  Max: 32.81ft × 32.81ft</div>
+                <div class="bannercalc-area-display" id="bannercalc-area">
+                    Area: <strong>10.00 sqft</strong> (0.9290 sqm)
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. ATTRIBUTES -->
+        <div class="bannercalc-section bannercalc-attributes-section">
+            <div class="bannercalc-section-overline">OPTIONS</div>
+
+            <!-- Eyelets + Pole Pockets -->
+            <div class="bannercalc-attr-row bannercalc-attr-row--2col">
+                <div class="bannercalc-attribute bannercalc-attr--pa_eyelets" data-taxonomy="pa_eyelets" data-required="0" data-display="dropdown">
+                    <div class="bannercalc-attr-header">
+                        <span class="bannercalc-attr-label">Eyelets</span>
+                    </div>
+                    <div class="bannercalc-attr-dropdown-wrap">
+                        <select class="bannercalc-attr-dropdown" data-taxonomy="pa_eyelets">
+                            <option value="">Select Eyelets…</option>
+                            <option value="2-top-corners">2 Top Corners</option>
+                            <option value="4-corner-swuare">3 at Top</option>
+                            <option value="3-top-3-bottom">3 Top 3 Bottom</option>
+                            <option value="4-at-top">4 at Top</option>
+                            <option value="4-corners">4 Corners</option>
+                            <option value="4-top-4-bottom">4 Top 4 Bottom</option>
+                            <option value="50cm-apart">50cm Apart</option>
+                            <option value="all-sides">All Sides</option>
+                            <option value="none">None</option>
+                            <option value="top-only">Top Only</option>
+                        </select>
+                    </div>
+                    <input type="hidden" name="bannercalc[attributes][pa_eyelets]" value="" class="bannercalc-attr-input" data-taxonomy="pa_eyelets">
+                </div>
+
+                <div class="bannercalc-attribute bannercalc-attr--pa_pole-pockets" data-taxonomy="pa_pole-pockets" data-required="0" data-display="dropdown">
+                    <div class="bannercalc-attr-header">
+                        <span class="bannercalc-attr-label">Pole Pockets</span>
+                    </div>
+                    <div class="bannercalc-attr-dropdown-wrap">
+                        <select class="bannercalc-attr-dropdown" data-taxonomy="pa_pole-pockets">
+                            <option value="">Select Pole Pockets…</option>
+                            <option value="1-5-inches-top-bottom">1.5″ Top &amp; Bottom</option>
+                            <option value="2-5-inches-left-right">2.5″ Left &amp; Right</option>
+                            <option value="3-inches-top-bottom">3″ Top &amp; Bottom</option>
+                            <option value="all-sides">All Sides</option>
+                            <option value="none">None</option>
+                            <option value="top-bottom">Top &amp; Bottom</option>
+                            <option value="top-bottom-1-5">Top Bottom 1.5″</option>
+                            <option value="top-bottom-2-5-inches">Top Bottom 2.5″</option>
+                            <option value="top-bottom-3-5-inches">Top Bottom 3.5″</option>
+                            <option value="top-only">Top Only</option>
+                        </select>
+                    </div>
+                    <input type="hidden" name="bannercalc[attributes][pa_pole-pockets]" value="" class="bannercalc-attr-input" data-taxonomy="pa_pole-pockets">
+                </div>
+            </div>
+
+            <!-- Hemming + Packaging -->
+            <div class="bannercalc-attr-row bannercalc-attr-row--compact">
+                <div class="bannercalc-attribute bannercalc-attr--pa_hemming" data-taxonomy="pa_hemming" data-required="0" data-display="pills">
+                    <div class="bannercalc-attr-header">
+                        <span class="bannercalc-attr-label">Hemming</span>
+                        <span class="bannercalc-attr-selected" id="bannercalc-selected-pa_hemming"></span>
+                    </div>
+                    <div class="bannercalc-attr-pills">
+                        <button type="button" class="bannercalc-pill" data-taxonomy="pa_hemming" data-slug="no">No</button>
+                        <button type="button" class="bannercalc-pill active" data-taxonomy="pa_hemming" data-slug="taped-edge">Taped Edge</button>
+                        <button type="button" class="bannercalc-pill" data-taxonomy="pa_hemming" data-slug="yes">Yes</button>
+                    </div>
+                    <input type="hidden" name="bannercalc[attributes][pa_hemming]" value="" class="bannercalc-attr-input" data-taxonomy="pa_hemming">
+                </div>
+
+                <div class="bannercalc-attribute bannercalc-attr--pa_packaging" data-taxonomy="pa_packaging" data-required="0" data-display="pills">
+                    <div class="bannercalc-attr-header">
+                        <span class="bannercalc-attr-label">Packaging</span>
+                        <span class="bannercalc-attr-selected" id="bannercalc-selected-pa_packaging"></span>
+                    </div>
+                    <div class="bannercalc-attr-pills">
+                        <button type="button" class="bannercalc-pill active" data-taxonomy="pa_packaging" data-slug="folded">Folded</button>
+                        <button type="button" class="bannercalc-pill" data-taxonomy="pa_packaging" data-slug="no-folds">No Folds</button>
+                        <button type="button" class="bannercalc-pill" data-taxonomy="pa_packaging" data-slug="rolled">Rolled</button>
+                    </div>
+                    <input type="hidden" name="bannercalc[attributes][pa_packaging]" value="" class="bannercalc-attr-input" data-taxonomy="pa_packaging">
+                </div>
+            </div>
+
+            <!-- Cable Ties -->
+            <div class="bannercalc-attribute bannercalc-attr--pa_cable-ties" data-taxonomy="pa_cable-ties" data-required="0" data-display="toggle">
+                <div class="bannercalc-toggle-switch">
+                    <div class="bannercalc-attr-header" style="margin-bottom:0;">
+                        <span class="bannercalc-attr-label">Cable Ties</span>
+                    </div>
+                    <label class="bannercalc-switch">
+                        <input type="checkbox" class="bannercalc-toggle-input" data-taxonomy="pa_cable-ties" data-on-slug="yes" data-off-slug="no">
+                        <span class="bannercalc-switch-slider"></span>
+                    </label>
+                    <span class="bannercalc-switch-label">No</span>
+                </div>
+                <input type="hidden" name="bannercalc[attributes][pa_cable-ties]" value="no" class="bannercalc-attr-input" data-taxonomy="pa_cable-ties">
+            </div>
+
+            <!-- Finish -->
+            <div class="bannercalc-attr-row" style="margin-top: 18px;">
+                <div class="bannercalc-attribute bannercalc-attr--pa_finish" data-taxonomy="pa_finish" data-required="0" data-display="pills">
+                    <div class="bannercalc-attr-header">
+                        <span class="bannercalc-attr-label">Finish</span>
+                        <span class="bannercalc-attr-selected" id="bannercalc-selected-pa_finish"></span>
+                    </div>
+                    <div class="bannercalc-attr-pills">
+                        <button type="button" class="bannercalc-pill active" data-taxonomy="pa_finish" data-slug="gloss">Gloss</button>
+                        <button type="button" class="bannercalc-pill" data-taxonomy="pa_finish" data-slug="matte">Matte</button>
+                        <button type="button" class="bannercalc-pill" data-taxonomy="pa_finish" data-slug="satin">Satin</button>
+                        <button type="button" class="bannercalc-pill" data-taxonomy="pa_finish" data-slug="textured">Textured</button>
+                    </div>
+                    <input type="hidden" name="bannercalc[attributes][pa_finish]" value="" class="bannercalc-attr-input" data-taxonomy="pa_finish">
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. PRICING -->
+        <div class="bannercalc-section bannercalc-price-section">
+            <div class="bannercalc-section-overline">PRICING</div>
+            <div class="bannercalc-price-block" id="bannercalc-price-block">
+                <div class="bannercalc-price-details" id="bannercalc-price-details">
+                    <div class="bannercalc-price-row bannercalc-price-base">
+                        <span class="bannercalc-price-label" id="bannercalc-base-label">8.00 sqft × £1.65 = £13.20</span>
+                        <span class="bannercalc-price-value" id="bannercalc-base-value">£13.20</span>
+                    </div>
+                    <div class="bannercalc-price-row bannercalc-price-total">
+                        <span class="bannercalc-price-label">Estimated Price</span>
+                        <span class="bannercalc-price-value" id="bannercalc-total-value">£13.20</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hidden fields -->
+        <input type="hidden" name="bannercalc[product_id]" value="16638">
+        <input type="hidden" name="bannercalc[sizing_mode]" value="" id="bannercalc-input-sizing-mode">
+        <input type="hidden" name="bannercalc[preset_slug]" value="" id="bannercalc-input-preset-slug">
+        <input type="hidden" name="bannercalc[unit]" value="" id="bannercalc-input-unit">
+        <input type="hidden" name="bannercalc[width_raw]" value="" id="bannercalc-input-width">
+        <input type="hidden" name="bannercalc[height_raw]" value="" id="bannercalc-input-height">
+        <input type="hidden" name="bannercalc[calculated_price]" value="" id="bannercalc-input-price">
+    </div>
+
+    <a href="#" rel="nofollow" data-product_id="16638" class="button product_type_customizable">Personalize</a>
+
+    <div class="wc-dnd-file-upload">
+        <label>Upload Your Design</label>
+        <div class="codedropz-upload-wrapper">
+            <input type="file" class="wc-drag-n-drop-file d-none" style="display:none;">
+            <div class="codedropz-upload-handler">
+                <div class="codedropz-upload-container">
+                    <div class="codedropz-upload-inner">
+                        <div class="codedropz-label">
+                            <span class="cd-icon">☁</span>
+                            <span class="text">Drag your design here</span>
+                            <span class="cd-separator">|</span>
+                            <a class="cd-upload-btn" href="javascript:void(0)">Upload from Your Device</a>
+                        </div>
+                    </div>
+                </div>
+                <span class="dnd-upload-counter"><span>0</span> of 3</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="bannercalc-quantity-row">
+        <div class="quantity">
+            <span class="input-button minus"></span>
+            <input type="number" class="input-text qty text" name="quantity" value="1" min="1" step="1" inputmode="numeric" autocomplete="off">
+            <span class="input-button plus"></span>
+        </div>
+        <button type="submit" name="add-to-cart" value="16638" class="single_add_to_cart_button button alt">Add to Basket</button>
+    </div>
+</form>
+
+</div>
+
+<script>
+// Preset card selection
+document.querySelectorAll('.bannercalc-preset-card').forEach(card => {
+    card.addEventListener('click', () => {
+        document.querySelectorAll('.bannercalc-preset-card').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        const desc = card.dataset.description;
+        if (desc) {
+            document.getElementById('bannercalc-desc-text').textContent = desc;
+            document.getElementById('bannercalc-preset-desc').style.display = 'flex';
+        }
+    });
+});
+
+// Pill selection
+document.querySelectorAll('.bannercalc-pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+        const taxonomy = pill.dataset.taxonomy;
+        document.querySelectorAll(`.bannercalc-pill[data-taxonomy="${taxonomy}"]`).forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+    });
+});
+
+// Toggle switch
+document.querySelectorAll('.bannercalc-toggle-input').forEach(toggle => {
+    toggle.addEventListener('change', () => {
+        const label = toggle.closest('.bannercalc-toggle-switch').querySelector('.bannercalc-switch-label');
+        label.textContent = toggle.checked ? 'Yes' : 'No';
+        label.classList.toggle('is-on', toggle.checked);
+    });
+});
+
+// Size mode toggle
+document.querySelectorAll('.bannercalc-toggle-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.bannercalc-toggle-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const mode = btn.dataset.mode;
+        document.getElementById('bannercalc-presets').style.display = mode === 'preset' ? '' : 'none';
+        document.getElementById('bannercalc-custom').style.display = mode === 'custom' ? '' : 'none';
+    });
+});
+
+// Unit selector
+document.querySelectorAll('.bannercalc-unit-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.bannercalc-unit-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const labels = { mm: 'mm', cm: 'cm', inch: 'in', ft: 'ft', m: 'm' };
+        document.getElementById('bannercalc-width-unit').textContent = labels[btn.dataset.unit] || btn.dataset.unit;
+        document.getElementById('bannercalc-height-unit').textContent = labels[btn.dataset.unit] || btn.dataset.unit;
+    });
+});
+
+// Quantity
+document.querySelector('.input-button.minus').addEventListener('click', () => {
+    const i = document.querySelector('.input-text.qty');
+    let v = parseInt(i.value) - 1;
+    if (v < 1) v = 1;
+    i.value = v;
+});
+document.querySelector('.input-button.plus').addEventListener('click', () => {
+    const i = document.querySelector('.input-text.qty');
+    i.value = parseInt(i.value) + 1;
+});
+</script>
+
+</body>
+</html>
