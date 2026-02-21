@@ -241,6 +241,33 @@
                 self.calculatePrice();
                 self.updatePriceDisplay();
             });
+
+            // Toggle switch (yes/no attributes like cable ties).
+            this.el.on('change', '.bannercalc-toggle-input', function() {
+                var $cb = $(this);
+                var taxonomy = $cb.data('taxonomy');
+                var isOn = $cb.is(':checked');
+                var slug = isOn ? $cb.data('on-slug') : $cb.data('off-slug');
+
+                self.state.selectedAttributes[taxonomy] = slug;
+
+                // Update hidden input.
+                self.el.find('.bannercalc-attr-input[data-taxonomy="' + taxonomy + '"]').val(slug);
+
+                // Update label text and style.
+                var $wrap = $cb.closest('.bannercalc-toggle-switch');
+                var $label = $wrap.find('.bannercalc-switch-label');
+                if (isOn) {
+                    $label.text($cb.data('on-slug').replace(/-/g, ' ').replace(/\b\w/g, function(c){return c.toUpperCase();}));
+                    $label.addClass('is-on');
+                } else {
+                    $label.text($cb.data('off-slug').replace(/-/g, ' ').replace(/\b\w/g, function(c){return c.toUpperCase();}));
+                    $label.removeClass('is-on');
+                }
+
+                self.calculatePrice();
+                self.updatePriceDisplay();
+            });
         },
 
         /**

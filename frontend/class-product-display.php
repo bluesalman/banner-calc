@@ -116,10 +116,13 @@ class ProductDisplay {
     }
 
     /**
-     * Return a placeholder price for BannerCalc products that have no WC price.
+     * Return a meaningful price for BannerCalc products that have no WC price.
      *
-     * This makes WooCommerce consider the product purchasable so the
-     * add-to-cart form (and our configurator hook) renders.
+     * Uses the category's minimum charge so WooCommerce considers the product
+     * purchasable AND payment gateways (PayPal, Apple Pay, etc.) see a non-zero
+     * amount and display their buttons on the product page.
+     *
+     * The real calculated price is set by CartHandler at add-to-cart time.
      *
      * @param string      $price
      * @param \WC_Product $product
@@ -132,11 +135,15 @@ class ProductDisplay {
 
         $plugin = \BannerCalc\Plugin::instance();
 
-        if ( $plugin->is_enabled_for_product( $product->get_id() ) ) {
-            return '0';
+        if ( ! $plugin->is_enabled_for_product( $product->get_id() ) ) {
+            return $price;
         }
 
-        return $price;
+        // Use minimum charge so payment gateways recognise a purchasable product.
+        $config     = $plugin->get_product_config( $product->get_id() );
+        $min_charge = (float) ( $config['minimum_charge'] ?? 0 );
+
+        return $min_charge > 0 ? (string) $min_charge : '0.01';
     }
 
     /**
