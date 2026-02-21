@@ -83,48 +83,52 @@
 
 /* ================================================================
    THEME RESET — override WooCommerce / theme button defaults
-   Uses #bannercalc-configurator ID for high specificity.
+   Uses doubled ID (#id#id) for maximum specificity without !important.
+   Plugin re-applied rules use !important to always win over this reset.
 ================================================================ */
-#bannercalc-configurator button,
-#bannercalc-configurator button[type="button"],
-#bannercalc-configurator button[type="submit"],
-#bannercalc-configurator .button,
+#bannercalc-configurator#bannercalc-configurator button,
+#bannercalc-configurator#bannercalc-configurator button[type="button"],
+#bannercalc-configurator#bannercalc-configurator button[type="submit"],
+#bannercalc-configurator#bannercalc-configurator .button,
+#bannercalc-configurator#bannercalc-configurator select,
+#bannercalc-configurator#bannercalc-configurator input[type="number"],
 .bannercalc-quantity-row button,
 .bannercalc-quantity-row button[type="button"],
 .bannercalc-quantity-row button[type="submit"],
-.bannercalc-quantity-row .button {
-    background: none !important;
-    background-color: transparent !important;
-    background-image: none !important;
-    border: none !important;
-    border-radius: 0 !important;
-    box-shadow: none !important;
-    color: inherit !important;
-    font-family: inherit !important;
-    font-size: inherit !important;
-    font-weight: inherit !important;
-    letter-spacing: inherit !important;
-    line-height: inherit !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    text-transform: none !important;
-    text-decoration: none !important;
-    text-shadow: none !important;
-    transition: none !important;
-    min-height: 0 !important;
-    height: auto !important;
-    width: auto !important;
-    vertical-align: baseline !important;
-    -webkit-appearance: none !important;
-    -moz-appearance: none !important;
-    appearance: none !important;
-    outline: none !important;
+.bannercalc-quantity-row .button,
+.bannercalc-quantity-row input[type="number"] {
+    background: none;
+    background-color: transparent;
+    background-image: none;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    color: inherit;
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    letter-spacing: inherit;
+    line-height: inherit;
+    margin: 0;
+    padding: 0;
+    text-transform: none;
+    text-decoration: none;
+    text-shadow: none;
+    transition: none;
+    min-height: 0;
+    height: auto;
+    width: auto;
+    vertical-align: baseline;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    outline: none;
 }
 
 /* Re-apply pointer cursor on all interactive elements */
 #bannercalc-configurator button,
 .bannercalc-quantity-row button {
-    cursor: pointer !important;
+    cursor: pointer;
 }
 
 /* ================================================================
