@@ -897,8 +897,8 @@
 }
 
 .bannercalc-price-block {
-    margin: 12px 20px 20px;
-    background: var(--bp-muted);
+    margin: 12px 15px 20px;
+    background: var(--bp-black);
     border-radius: 14px;
     overflow: hidden;
     position: relative;
@@ -938,7 +938,7 @@
     text-align: center;
     font-size: 14px;
     font-weight: 500;
-    color: var(--bp-warm-white);
+    color: rgba(255,255,255,0.5);
 }
 
 .bannercalc-price-details {
@@ -1159,7 +1159,7 @@ form.cart .quantity {
 form.cart .single_add_to_cart_button {
     flex: 1 !important;
     padding: 12px 24px !important;
-    background: linear-gradient(135deg, var(--bp-black), var(--bp-ink)) !important;
+    background: linear-gradient(135deg, var(--bp-cyan), var(--bp-cyan-dark)) !important;
     color: var(--bp-white) !important;
     border: none !important;
     border-radius: 10px !important;
@@ -1171,14 +1171,14 @@ form.cart .single_add_to_cart_button {
     cursor: pointer !important;
     transition: all 0.2s ease !important;
     text-align: center !important;
-    box-shadow: var(--bp-shadow-md) !important;
+    box-shadow: var(--bp-shadow-cyan) !important;
     line-height: 1.4 !important;
     min-height: 0 !important;
 }
 form.cart .single_add_to_cart_button:hover {
-    background: linear-gradient(135deg, var(--bp-ink), #3a3a3a) !important;
+    background: linear-gradient(135deg, var(--bp-cyan-dark), #0077a8) !important;
     transform: translateY(-1px) !important;
-    box-shadow: var(--bp-shadow-lg) !important;
+    box-shadow: 0 6px 20px rgba(0, 174, 239, 0.25) !important;
 }
 form.cart .single_add_to_cart_button:active {
     transform: translateY(0) !important;
@@ -1254,9 +1254,9 @@ form.cart .single_add_to_cart_button:active {
 .bannercalc-quantity-row {
     display: flex !important;
     align-items: center !important;
-    gap: 16px !important;
-    padding: 20px 15px 24px !important;
-    border-top: 1px solid var(--bp-light-gray) !important;
+    gap: 12px !important;
+    padding: 0 15px 20px !important;
+    border-top: none !important;
 }
 
 .bannercalc-quantity-row .quantity {
@@ -1317,7 +1317,7 @@ form.cart .single_add_to_cart_button:active {
 .bannercalc-quantity-row .single_add_to_cart_button {
     flex: 1 !important;
     padding: 12px 24px !important;
-    background: linear-gradient(135deg, var(--bp-black), var(--bp-ink)) !important;
+    background: linear-gradient(135deg, var(--bp-cyan), var(--bp-cyan-dark)) !important;
     color: var(--bp-white) !important;
     border: none !important;
     border-radius: 10px !important;
@@ -1329,14 +1329,14 @@ form.cart .single_add_to_cart_button:active {
     cursor: pointer !important;
     transition: all 0.2s ease !important;
     text-align: center !important;
-    box-shadow: var(--bp-shadow-md) !important;
+    box-shadow: var(--bp-shadow-cyan) !important;
     line-height: 1.4 !important;
     min-height: 0 !important;
 }
 .bannercalc-quantity-row .single_add_to_cart_button:hover {
-    background: linear-gradient(135deg, var(--bp-ink), #3a3a3a) !important;
+    background: linear-gradient(135deg, var(--bp-cyan-dark), #0077a8) !important;
     transform: translateY(-1px) !important;
-    box-shadow: var(--bp-shadow-lg) !important;
+    box-shadow: 0 6px 20px rgba(0, 174, 239, 0.25) !important;
 }
 .bannercalc-quantity-row .single_add_to_cart_button:active {
     transform: translateY(0) !important;
@@ -1382,7 +1382,7 @@ form.cart .single_add_to_cart_button:active {
     }
     .bannercalc-price-block { margin: 12px 14px 14px; }
     .bannercalc-price-section .bannercalc-section-overline { padding: 16px 18px 0; }
-    .bannercalc-quantity-row { padding: 16px 18px 20px !important; }
+    .bannercalc-quantity-row { padding: 0 18px 16px !important; }
     form.cart a.product_type_customizable { margin: 0 18px 4px !important; }
     .wc-dnd-file-upload { padding: 0 18px 8px; }
     .bannercalc-accordion-trigger { padding: 12px 14px !important; font-size: 12px !important; }
@@ -1394,8 +1394,4 @@ form.cart .single_add_to_cart_button:active {
     .bannercalc-dimension-separator {
         display: none;
     }
-}
-
-.bannercalc-card.bannercalc-card--extras {
-    margin-top: 16px;
 }

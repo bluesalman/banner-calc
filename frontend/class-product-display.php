@@ -134,7 +134,7 @@ class ProductDisplay {
         include BANNERCALC_PLUGIN_DIR . 'frontend/views/price-display.php';
         echo '</div>';
 
-        echo '</div>'; // .bannercalc-card--extras
+        // Card stays open — quantity row will be rendered inside, then close_quantity_row() closes the card.
     }
 
     /**
@@ -173,6 +173,7 @@ class ProductDisplay {
         }
 
         echo '</div><!-- .bannercalc-quantity-row -->';
+        echo '</div><!-- .bannercalc-card--extras -->';
     }
 
     /**
