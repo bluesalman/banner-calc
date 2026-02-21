@@ -898,7 +898,7 @@
 
 .bannercalc-price-block {
     margin: 12px 20px 20px;
-    background: var(--bp-black);
+    background: var(--bp-muted);
     border-radius: 14px;
     overflow: hidden;
     position: relative;
@@ -938,7 +938,7 @@
     text-align: center;
     font-size: 14px;
     font-weight: 500;
-    color: var(--bp-muted);
+    color: var(--bp-warm-white);
 }
 
 .bannercalc-price-details {
@@ -1087,7 +1087,7 @@
     display: block !important;
     text-align: center !important;
     padding: 11px 24px !important;
-    margin: 0 0 12px !important;
+    margin: 15px auto !important;
     background: transparent !important;
     color: var(--bp-cyan-dark) !important;
     border: 1.5px solid var(--bp-cyan) !important;
@@ -1202,8 +1202,7 @@ form.cart .single_add_to_cart_button:active {
 
 .codedropz-upload-handler {
     border: 2px dashed var(--bp-mid-gray);
-    border-radius: 12px;
-    padding: 24px;
+    border-radius: 12px;    
     text-align: center;
     background: linear-gradient(135deg, var(--bp-off-white) 0%, rgba(0,174,239,0.02) 100%);
     transition: all 0.25s;
@@ -1395,4 +1394,8 @@ form.cart .single_add_to_cart_button:active {
     .bannercalc-dimension-separator {
         display: none;
     }
+}
+
+.bannercalc-card.bannercalc-card--extras {
+    margin-top: 16px;
 }
