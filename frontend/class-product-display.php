@@ -17,8 +17,8 @@ class ProductDisplay {
         // Hook into single product page to render configurator.
         add_action( 'woocommerce_before_add_to_cart_button', [ $this, 'render_configurator' ], 10 );
 
-        // Card 3: pricing + personalize + upload wrapper.
-        add_action( 'woocommerce_before_add_to_cart_button', [ $this, 'open_pricing_card' ], 11 );
+        // Card 3: design accordion + pricing (fully self-contained).
+        add_action( 'woocommerce_before_add_to_cart_button', [ $this, 'render_extras_card' ], 11 );
 
         // Wrap quantity + add-to-cart button in a flex row.
         add_action( 'woocommerce_before_add_to_cart_quantity', [ $this, 'open_quantity_row' ], 1 );
@@ -95,16 +95,17 @@ class ProductDisplay {
     }
 
     /**
-     * Open Card 3: pricing section + space for Personalize & Upload (rendered by other plugins).
+     * Render Card 3: design accordion (Personalize + Upload) + pricing.
+     * JS will relocate the Personalize link & file uploader into the accordion.
      */
-    public function open_pricing_card(): void {
+    public function render_extras_card(): void {
         global $product;
 
         if ( ! $product ) {
             return;
         }
 
-        $plugin  = \BannerCalc\Plugin::instance();
+        $plugin = \BannerCalc\Plugin::instance();
 
         if ( ! $plugin->is_enabled_for_product( $product->get_id() ) ) {
             return;
@@ -113,12 +114,27 @@ class ProductDisplay {
         $settings = \BannerCalc\Plugin::get_settings();
         $currency = $settings['currency_symbol'];
 
-        echo '<div class="bannercalc-card bannercalc-card--pricing">';
+        echo '<div class="bannercalc-card bannercalc-card--extras">';
+
+        // Design accordion (collapsed by default — JS moves Personalize + Upload here).
+        echo '<details class="bannercalc-design-accordion" id="bannercalc-design-accordion">';
+        echo '<summary class="bannercalc-accordion-trigger">';
+        echo '<span class="bannercalc-accordion-icon"><span class="dashicons dashicons-cloud-upload"></span></span>';
+        echo '<span class="bannercalc-accordion-label">' . esc_html__( 'Upload or Design with Online Designer', 'bannercalc' ) . '</span>';
+        echo '<span class="bannercalc-accordion-arrow dashicons dashicons-arrow-down-alt2"></span>';
+        echo '</summary>';
+        echo '<div class="bannercalc-accordion-content" id="bannercalc-design-slot">';
+        // JS will move .product_type_customizable and .wc-dnd-file-upload here.
+        echo '</div>';
+        echo '</details>';
+
+        // Pricing section.
         echo '<div class="bannercalc-section bannercalc-price-section">';
         echo '<div class="bannercalc-section-overline">' . esc_html__( 'PRICING', 'bannercalc' ) . '</div>';
         include BANNERCALC_PLUGIN_DIR . 'frontend/views/price-display.php';
-        echo '</div>'; // .bannercalc-price-section
-        // Card stays open — Personalize link & file upload (from other plugins) will land here.
+        echo '</div>';
+
+        echo '</div>'; // .bannercalc-card--extras
     }
 
     /**
@@ -136,9 +152,6 @@ class ProductDisplay {
         if ( ! $plugin->is_enabled_for_product( $product->get_id() ) ) {
             return;
         }
-
-        // Close Card 3 (pricing + extras).
-        echo '</div><!-- .bannercalc-card--pricing -->';
 
         echo '<div class="bannercalc-quantity-row">';
     }

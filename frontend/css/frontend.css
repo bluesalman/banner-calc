@@ -1003,17 +1003,119 @@
 }
 
 /* ================================================================
-   CARD 3 — PRICING + EXTRAS
+   CARD 3 — DESIGN ACCORDION + PRICING
 ================================================================ */
-.bannercalc-card--pricing {
+.bannercalc-card--extras {
     overflow: visible;
 }
-.bannercalc-card--pricing .bannercalc-price-section {
+.bannercalc-card--extras .bannercalc-price-section {
     border-top: none !important;
 }
 
 /* ================================================================
-   PERSONALIZE BUTTON (WooCommerce product customizer link)
+   DESIGN ACCORDION (Upload / Online Designer)
+================================================================ */
+.bannercalc-design-accordion {
+    border-bottom: 1px solid var(--bp-light-gray);
+}
+
+.bannercalc-accordion-trigger {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    padding: 14px 15px !important;
+    cursor: pointer !important;
+    background: linear-gradient(135deg, var(--bp-off-white) 0%, rgba(0,174,239,0.02) 100%) !important;
+    list-style: none !important;          /* hide default <details> marker */
+    -webkit-appearance: none !important;
+    font-family: var(--bp-font-display) !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: var(--bp-text-primary) !important;
+    letter-spacing: 0.2px !important;
+    transition: background 0.2s !important;
+    user-select: none !important;
+}
+.bannercalc-accordion-trigger::-webkit-details-marker {
+    display: none !important;
+}
+.bannercalc-accordion-trigger::marker {
+    display: none !important;
+    content: '' !important;
+}
+.bannercalc-accordion-trigger:hover {
+    background: linear-gradient(135deg, var(--bp-light-gray) 0%, rgba(0,174,239,0.04) 100%) !important;
+}
+
+.bannercalc-accordion-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: var(--bp-cyan-ghost);
+    color: var(--bp-cyan);
+    flex-shrink: 0;
+}
+.bannercalc-accordion-icon .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    line-height: 16px;
+}
+
+.bannercalc-accordion-label {
+    flex: 1;
+}
+
+.bannercalc-accordion-arrow {
+    color: var(--bp-muted);
+    font-size: 18px !important;
+    transition: transform 0.25s ease;
+}
+.bannercalc-design-accordion[open] .bannercalc-accordion-arrow {
+    transform: rotate(180deg);
+}
+
+.bannercalc-accordion-content {
+    padding: 4px 15px 15px;
+}
+
+/* Personalize button when inside accordion */
+.bannercalc-accordion-content a.product_type_customizable {
+    display: block !important;
+    text-align: center !important;
+    padding: 11px 24px !important;
+    margin: 0 0 12px !important;
+    background: transparent !important;
+    color: var(--bp-cyan-dark) !important;
+    border: 1.5px solid var(--bp-cyan) !important;
+    border-radius: 10px !important;
+    font-family: var(--bp-font-display) !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    letter-spacing: 1px !important;
+    text-transform: uppercase !important;
+    text-decoration: none !important;
+    transition: all 0.2s ease !important;
+    box-shadow: 0 2px 8px rgba(0, 174, 239, 0.08) !important;
+    line-height: 1.4 !important;
+}
+.bannercalc-accordion-content a.product_type_customizable:hover {
+    background: var(--bp-cyan-ghost) !important;
+    border-color: var(--bp-cyan-dark) !important;
+    box-shadow: 0 4px 14px rgba(0, 174, 239, 0.15) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* File upload when inside accordion */
+.bannercalc-accordion-content .wc-dnd-file-upload {
+    padding: 0 !important;
+}
+
+/* ================================================================
+   PERSONALIZE BUTTON fallback (before JS relocation)
 ================================================================ */
 form.cart a.product_type_customizable {
     display: block !important;
@@ -1284,6 +1386,8 @@ form.cart .single_add_to_cart_button:active {
     .bannercalc-quantity-row { padding: 16px 18px 20px !important; }
     form.cart a.product_type_customizable { margin: 0 18px 4px !important; }
     .wc-dnd-file-upload { padding: 0 18px 8px; }
+    .bannercalc-accordion-trigger { padding: 12px 14px !important; font-size: 12px !important; }
+    .bannercalc-accordion-content { padding: 4px 14px 14px; }
     .bannercalc-dimension-inputs {
         grid-template-columns: 1fr;
         gap: 8px;

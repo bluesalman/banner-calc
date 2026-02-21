@@ -20,9 +20,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <!-- ═══════════ CARD 1: SIZE ═══════════ -->
 <div class="bannercalc-card bannercalc-card--size">
-    <!-- CMYK Brand Bar -->
-    <div class="bannercalc-cmyk-bar"><span></span><span></span><span></span><span></span></div>
-
     <?php if ( $sizing_mode !== 'none' ) : ?>
     <div class="bannercalc-section bannercalc-size-section">
         <?php include BANNERCALC_PLUGIN_DIR . 'frontend/views/size-selector.php'; ?>

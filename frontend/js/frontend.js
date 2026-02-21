@@ -532,6 +532,28 @@
     // Initialise on DOM ready.
     $(document).ready(function() {
         BannerCalc.init();
+
+        // Relocate Personalize link + file uploader into the design accordion.
+        var $slot = $('#bannercalc-design-slot');
+        if ($slot.length) {
+            var $personalize = $('form.cart a.product_type_customizable');
+            var $uploader    = $('form.cart .wc-dnd-file-upload');
+            var hasContent   = false;
+
+            if ($personalize.length) {
+                $personalize.appendTo($slot);
+                hasContent = true;
+            }
+            if ($uploader.length) {
+                $uploader.appendTo($slot);
+                hasContent = true;
+            }
+
+            // Hide accordion entirely if nothing to show.
+            if (!hasContent) {
+                $('#bannercalc-design-accordion').hide();
+            }
+        }
     });
 
 })(jQuery);
