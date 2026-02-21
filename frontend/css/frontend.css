@@ -905,27 +905,16 @@
     box-shadow: var(--bp-shadow-xl), 0 0 0 1px rgba(255,255,255,0.05) inset;
 }
 
-/* CMYK stripe at top of price block */
+/* CMYK stripe removed — clean top edge */
 .bannercalc-price-block::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: linear-gradient(90deg,
-        var(--bp-cyan) 0%, var(--bp-cyan) 25%,
-        var(--bp-magenta) 25%, var(--bp-magenta) 50%,
-        var(--bp-yellow) 50%, var(--bp-yellow) 75%,
-        var(--bp-key) 75%, var(--bp-key) 100%
-    );
+    display: none;
 }
 
 /* Subtle gradient glow inside price block */
 .bannercalc-price-block::after {
     content: '';
     position: absolute;
-    top: 3px;
+    top: 0;
     left: 0;
     right: 0;
     height: 40px;
@@ -1158,13 +1147,14 @@ form.cart .quantity {
 
 form.cart .single_add_to_cart_button {
     flex: 1 !important;
-    padding: 12px 24px !important;
+    padding: 16px 24px !important;
+    height: 60px !important;
     background: linear-gradient(135deg, var(--bp-cyan), var(--bp-cyan-dark)) !important;
     color: var(--bp-white) !important;
     border: none !important;
     border-radius: 10px !important;
     font-family: var(--bp-font-display) !important;
-    font-size: 13px !important;
+    font-size: 20px !important;
     font-weight: 700 !important;
     letter-spacing: 1px !important;
     text-transform: uppercase !important;
@@ -1172,7 +1162,7 @@ form.cart .single_add_to_cart_button {
     transition: all 0.2s ease !important;
     text-align: center !important;
     box-shadow: var(--bp-shadow-cyan) !important;
-    line-height: 1.4 !important;
+    line-height: 1 !important;
     min-height: 0 !important;
 }
 form.cart .single_add_to_cart_button:hover {
@@ -1263,7 +1253,7 @@ form.cart .single_add_to_cart_button:active {
     display: flex !important;
     align-items: center !important;
     border: 1.5px solid var(--bp-light-gray) !important;
-    border-radius: 10px !important;
+    border-radius: 12px !important;
     overflow: hidden !important;
     background: var(--bp-white) !important;
     box-shadow: var(--bp-shadow-xs) !important;
@@ -1272,10 +1262,10 @@ form.cart .single_add_to_cart_button:active {
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    width: 40px !important;
-    height: 40px !important;
+    width: 52px !important;
+    height: 60px !important;
     cursor: pointer !important;
-    font-size: 18px !important;
+    font-size: 22px !important;
     color: var(--bp-text-muted) !important;
     transition: all 0.15s !important;
     user-select: none !important;
@@ -1291,16 +1281,16 @@ form.cart .single_add_to_cart_button:active {
     color: var(--bp-text-primary) !important;
 }
 .bannercalc-quantity-row .quantity .input-text.qty {
-    width: 48px !important;
+    width: 56px !important;
     text-align: center !important;
     border: none !important;
     border-left: 1px solid var(--bp-light-gray) !important;
     border-right: 1px solid var(--bp-light-gray) !important;
     font-family: var(--bp-font-mono) !important;
-    font-size: 14px !important;
+    font-size: 20px !important;
     font-weight: 600 !important;
     color: var(--bp-text-primary) !important;
-    height: 40px !important;
+    height: 60px !important;
     outline: none !important;
     background: transparent !important;
     -moz-appearance: textfield !important;
@@ -1316,13 +1306,14 @@ form.cart .single_add_to_cart_button:active {
 
 .bannercalc-quantity-row .single_add_to_cart_button {
     flex: 1 !important;
-    padding: 12px 24px !important;
+    padding: 16px 24px !important;
+    height: 60px !important;
     background: linear-gradient(135deg, var(--bp-cyan), var(--bp-cyan-dark)) !important;
     color: var(--bp-white) !important;
     border: none !important;
     border-radius: 10px !important;
     font-family: var(--bp-font-display) !important;
-    font-size: 13px !important;
+    font-size: 20px !important;
     font-weight: 700 !important;
     letter-spacing: 1px !important;
     text-transform: uppercase !important;
@@ -1330,7 +1321,7 @@ form.cart .single_add_to_cart_button:active {
     transition: all 0.2s ease !important;
     text-align: center !important;
     box-shadow: var(--bp-shadow-cyan) !important;
-    line-height: 1.4 !important;
+    line-height: 1 !important;
     min-height: 0 !important;
 }
 .bannercalc-quantity-row .single_add_to_cart_button:hover {
