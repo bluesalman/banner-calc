@@ -1388,3 +1388,6 @@ form.cart .single_add_to_cart_button:active {
         display: none;
     }
 }
+.bannercalc-card.bannercalc-card--extras {
+    margin-top: 16px !important;
+}
