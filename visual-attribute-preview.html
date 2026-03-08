@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Banner Printing — Visual Attribute Preview</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root {
+    --bp-cyan: #00AEEF;
+    --bp-magenta: #EC008C;
+    --bp-yellow: #FFF200;
+    --bp-key: #1A1A1A;
+    --bp-cyan-dark: #0090C9;
+    --bp-cyan-light: #5CC8F5;
+    --bp-cyan-ghost: rgba(0, 174, 239, 0.06);
+    --bp-magenta-dark: #C70076;
+    --bp-magenta-ghost: rgba(236, 0, 140, 0.05);
+    --bp-orange: #F26522;
+    --bp-green: #39B54A;
+    --bp-green-ghost: rgba(57, 181, 74, 0.06);
+    --bp-white: #FFFFFF;
+    --bp-off-white: #F8F8F9;
+    --bp-warm-white: #FEFCF8;
+    --bp-light-gray: #EDEFF2;
+    --bp-mid-gray: #BFC4CE;
+    --bp-muted: #8892A0;
+    --bp-dark-gray: #555E6E;
+    --bp-ink: #2D2D2D;
+    --bp-black: #1A1A1A;
+    --bp-text-primary: #1A1A1A;
+    --bp-text-secondary: #555E6E;
+    --bp-text-muted: #8892A0;
+    --bp-font-display: 'Outfit', -apple-system, sans-serif;
+    --bp-font-body: 'Plus Jakarta Sans', -apple-system, sans-serif;
+    --bp-font-mono: 'IBM Plex Mono', monospace;
+    --bp-radius-sm: 8px;
+    --bp-radius-md: 14px;
+    --bp-shadow-xs: 0 1px 2px rgba(0,0,0,0.04);
+    --bp-shadow-sm: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03);
+    --bp-shadow-md: 0 4px 12px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04);
+    --bp-shadow-lg: 0 8px 30px rgba(0,0,0,0.07), 0 2px 8px rgba(0,0,0,0.04);
+    --bp-shadow-cyan: 0 4px 16px rgba(0, 174, 239, 0.12);
+    --bp-shadow-inner: inset 0 1px 3px rgba(0,0,0,0.06);
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { -webkit-font-smoothing: antialiased; }
+
+body {
+    font-family: var(--bp-font-body);
+    color: var(--bp-text-primary);
+    background: #F3F1EE;
+    line-height: 1.5;
+}
+
+.page-wrap {
+    max-width: 820px;
+    margin: 32px auto;
+    padding: 0 20px;
+}
+
+/* Header */
+.page-header {
+    text-align: center;
+    margin-bottom: 28px;
+}
+.page-header .badge {
+    display: inline-block;
+    font-family: var(--bp-font-mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--bp-cyan-dark);
+    background: rgba(0,174,239,0.08);
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 12px;
+}
+.page-header h1 {
+    font-family: var(--bp-font-display);
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    margin-bottom: 6px;
+}
+.page-header p {
+    font-size: 14px;
+    color: var(--bp-text-muted);
+    max-width: 520px;
+    margin: 0 auto;
+}
+
+/* Main layout */
+.configurator-layout {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 20px;
+    align-items: start;
+}
+
+@media (max-width: 700px) {
+    .configurator-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ================================================================
+   VISUAL PREVIEW PANEL
+================================================================ */
+.preview-panel {
+    background: var(--bp-white);
+    border: 1px solid rgba(0,0,0,0.06);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: var(--bp-shadow-lg);
+    position: sticky;
+    top: 20px;
+}
+
+.preview-header {
+    padding: 16px 20px 12px;
+    border-bottom: 1px solid var(--bp-light-gray);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.preview-header .preview-title {
+    font-family: var(--bp-font-mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--bp-text-muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.preview-header .preview-title::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--bp-green);
+    animation: pulse 2s ease infinite;
+}
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}
+.preview-size-label {
+    font-family: var(--bp-font-mono);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--bp-text-primary);
+    background: var(--bp-off-white);
+    padding: 3px 10px;
+    border-radius: 6px;
+}
+
+.preview-canvas {
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 280px;
+    background:
+        radial-gradient(circle at 20% 30%, rgba(0,174,239,0.03) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(236,0,140,0.02) 0%, transparent 50%),
+        var(--bp-off-white);
+}
+
+.preview-canvas svg {
+    filter: drop-shadow(0 4px 16px rgba(0,0,0,0.10)) drop-shadow(0 1px 4px rgba(0,0,0,0.06));
+    transition: all 0.4s ease;
+}
+
+/* Legend */
+.preview-legend {
+    padding: 12px 20px 16px;
+    border-top: 1px solid var(--bp-light-gray);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--bp-text-muted);
+    transition: all 0.2s;
+}
+.legend-item.active {
+    color: var(--bp-text-primary);
+}
+.legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    transition: all 0.2s;
+}
+.legend-dot.eyelets { background: var(--bp-cyan); }
+.legend-dot.pole-pockets { background: var(--bp-magenta); }
+.legend-dot.hemming { background: var(--bp-orange); }
+.legend-dot.cable-ties { background: var(--bp-green); }
+.legend-dot.inactive { background: var(--bp-mid-gray); opacity: 0.4; }
+
+/* ================================================================
+   CONTROLS PANEL
+================================================================ */
+.controls-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.control-card {
+    background: var(--bp-white);
+    border: 1px solid rgba(0,0,0,0.06);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: var(--bp-shadow-sm);
+    transition: box-shadow 0.2s;
+}
+.control-card:hover {
+    box-shadow: var(--bp-shadow-md);
+}
+
+.control-card-header {
+    padding: 12px 16px 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: default;
+}
+.control-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+.control-dot.cyan { background: var(--bp-cyan); box-shadow: 0 0 0 3px var(--bp-cyan-ghost); }
+.control-dot.magenta { background: var(--bp-magenta); box-shadow: 0 0 0 3px var(--bp-magenta-ghost); }
+.control-dot.orange { background: var(--bp-orange); box-shadow: 0 0 0 3px rgba(242,101,34,0.08); }
+.control-dot.green { background: var(--bp-green); box-shadow: 0 0 0 3px var(--bp-green-ghost); }
+.control-dot.gray { background: var(--bp-muted); box-shadow: 0 0 0 3px rgba(136,146,160,0.08); }
+
+.control-card-title {
+    font-family: var(--bp-font-body);
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--bp-text-primary);
+}
+
+.control-card-body {
+    padding: 0 12px 12px;
+}
+
+/* Option pills inside controls */
+.option-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.opt-pill {
+    padding: 6px 11px;
+    border: 1.5px solid var(--bp-light-gray);
+    border-radius: 7px;
+    background: var(--bp-white);
+    cursor: pointer;
+    font-family: var(--bp-font-body);
+    font-size: 11.5px;
+    font-weight: 500;
+    color: var(--bp-text-secondary);
+    transition: all 0.15s ease;
+    line-height: 1;
+    white-space: nowrap;
+    box-shadow: var(--bp-shadow-xs);
+}
+.opt-pill:hover {
+    border-color: var(--bp-mid-gray);
+    color: var(--bp-text-primary);
+    transform: translateY(-0.5px);
+    box-shadow: var(--bp-shadow-sm);
+}
+
+/* Per-attribute active colors */
+.opt-pill.active[data-group="eyelets"] {
+    border-color: var(--bp-cyan);
+    background: linear-gradient(135deg, rgba(0,174,239,0.08), rgba(0,174,239,0.02));
+    color: var(--bp-cyan-dark);
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(0,174,239,0.15);
+}
+.opt-pill.active[data-group="pole-pockets"] {
+    border-color: var(--bp-magenta);
+    background: linear-gradient(135deg, rgba(236,0,140,0.08), rgba(236,0,140,0.02));
+    color: var(--bp-magenta-dark);
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(236,0,140,0.12);
+}
+.opt-pill.active[data-group="hemming"] {
+    border-color: var(--bp-orange);
+    background: linear-gradient(135deg, rgba(242,101,34,0.08), rgba(242,101,34,0.02));
+    color: #D05518;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(242,101,34,0.12);
+}
+.opt-pill.active[data-group="cable-ties"] {
+    border-color: var(--bp-green);
+    background: linear-gradient(135deg, rgba(57,181,74,0.08), rgba(57,181,74,0.02));
+    color: #2A8A38;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(57,181,74,0.12);
+}
+.opt-pill.active[data-group="finish"] {
+    border-color: var(--bp-dark-gray);
+    background: linear-gradient(135deg, rgba(85,94,110,0.08), rgba(85,94,110,0.02));
+    color: var(--bp-ink);
+    font-weight: 600;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+.opt-pill.active[data-group="packaging"] {
+    border-color: var(--bp-muted);
+    background: var(--bp-off-white);
+    color: var(--bp-text-primary);
+    font-weight: 600;
+}
+
+/* Size preset pills */
+.size-pills {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 5px;
+}
+.size-pill {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 10px;
+    border: 1.5px solid var(--bp-light-gray);
+    border-radius: 8px;
+    background: var(--bp-white);
+    cursor: pointer;
+    transition: all 0.15s;
+    box-shadow: var(--bp-shadow-xs);
+}
+.size-pill:hover {
+    border-color: rgba(0,174,239,0.4);
+    box-shadow: var(--bp-shadow-sm);
+}
+.size-pill.active {
+    border-color: var(--bp-cyan);
+    background: linear-gradient(135deg, rgba(0,174,239,0.06), rgba(0,174,239,0.02));
+    box-shadow: var(--bp-shadow-cyan);
+}
+.size-pill .s-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--bp-text-primary);
+}
+.size-pill .s-price {
+    font-family: var(--bp-font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--bp-cyan-dark);
+}
+
+/* Visual feasibility badge */
+.visual-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-family: var(--bp-font-mono);
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 4px;
+    margin-left: auto;
+}
+.visual-badge.yes {
+    color: var(--bp-green);
+    background: var(--bp-green-ghost);
+}
+.visual-badge.partial {
+    color: var(--bp-orange);
+    background: rgba(242,101,34,0.06);
+}
+.visual-badge.no {
+    color: var(--bp-muted);
+    background: var(--bp-off-white);
+}
+
+/* ================================================================
+   ANALYSIS TABLE
+================================================================ */
+.analysis-section {
+    margin-top: 28px;
+    background: var(--bp-white);
+    border: 1px solid rgba(0,0,0,0.06);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: var(--bp-shadow-md);
+}
+.analysis-header {
+    padding: 18px 24px 14px;
+    border-bottom: 1px solid var(--bp-light-gray);
+}
+.analysis-header h2 {
+    font-family: var(--bp-font-display);
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -0.2px;
+}
+.analysis-header p {
+    font-size: 13px;
+    color: var(--bp-text-muted);
+    margin-top: 2px;
+}
+
+.attr-analysis {
+    padding: 0;
+}
+.attr-row {
+    display: grid;
+    grid-template-columns: 140px 1fr 90px;
+    gap: 12px;
+    align-items: start;
+    padding: 14px 24px;
+    border-bottom: 1px solid var(--bp-light-gray);
+    transition: background 0.15s;
+}
+.attr-row:last-child { border-bottom: none; }
+.attr-row:hover { background: var(--bp-off-white); }
+
+.attr-name {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.attr-name .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+.attr-name span {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--bp-text-primary);
+}
+
+.attr-values {
+    font-size: 12.5px;
+    color: var(--bp-text-secondary);
+    line-height: 1.6;
+}
+.attr-values code {
+    display: inline-block;
+    font-family: var(--bp-font-mono);
+    font-size: 11px;
+    background: var(--bp-off-white);
+    border: 1px solid var(--bp-light-gray);
+    padding: 1px 6px;
+    border-radius: 4px;
+    margin: 1px 2px;
+    color: var(--bp-text-primary);
+}
+
+.attr-visual {
+    text-align: right;
+}
+
+/* Technique note */
+.technique-note {
+    font-size: 11px;
+    color: var(--bp-text-muted);
+    font-style: italic;
+    margin-top: 3px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="page-wrap">
+
+<div class="page-header">
+    <div class="badge">Interactive Prototype</div>
+    <h1>Visual Attribute Preview</h1>
+    <p>Select options on the right — watch them render live on the banner SVG. Attributes marked with a green badge can be visually previewed.</p>
+</div>
+
+<!-- Main Layout: Preview + Controls -->
+<div class="configurator-layout">
+
+    <!-- LEFT: SVG Preview -->
+    <div class="preview-panel">
+        <div class="preview-header">
+            <span class="preview-title">Live Preview</span>
+            <span class="preview-size-label" id="sizeLabel">4ft × 2ft</span>
+        </div>
+
+        <div class="preview-canvas" id="previewCanvas">
+            <!-- SVG gets injected here by JS -->
+        </div>
+
+        <div class="preview-legend">
+            <div class="legend-item" id="leg-eyelets">
+                <span class="legend-dot eyelets inactive"></span> Eyelets
+            </div>
+            <div class="legend-item" id="leg-pole-pockets">
+                <span class="legend-dot pole-pockets inactive"></span> Pole Pockets
+            </div>
+            <div class="legend-item" id="leg-hemming">
+                <span class="legend-dot hemming inactive"></span> Hemming
+            </div>
+            <div class="legend-item" id="leg-cable-ties">
+                <span class="legend-dot cable-ties inactive"></span> Cable Ties
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT: Controls -->
+    <div class="controls-panel">
+
+        <!-- Size -->
+        <div class="control-card">
+            <div class="control-card-header">
+                <span class="control-dot cyan"></span>
+                <span class="control-card-title">Banner Size</span>
+            </div>
+            <div class="control-card-body">
+                <div class="size-pills" id="sizePills">
+                    <button class="size-pill active" data-w="4" data-h="2" onclick="selectSize(this)">
+                        <span class="s-label">4ft × 2ft</span>
+                        <span class="s-price">£13.20</span>
+                    </button>
+                    <button class="size-pill" data-w="6" data-h="2" onclick="selectSize(this)">
+                        <span class="s-label">6ft × 2ft</span>
+                        <span class="s-price">£19.80</span>
+                    </button>
+                    <button class="size-pill" data-w="8" data-h="3" onclick="selectSize(this)">
+                        <span class="s-label">8ft × 3ft</span>
+                        <span class="s-price">£39.60</span>
+                    </button>
+                    <button class="size-pill" data-w="6" data-h="3" onclick="selectSize(this)">
+                        <span class="s-label">6ft × 3ft</span>
+                        <span class="s-price">£29.70</span>
+                    </button>
+                    <button class="size-pill" data-w="10" data-h="3" onclick="selectSize(this)">
+                        <span class="s-label">10ft × 3ft</span>
+                        <span class="s-price">£49.50</span>
+                    </button>
+                    <button class="size-pill" data-w="8" data-h="4" onclick="selectSize(this)">
+                        <span class="s-label">8ft × 4ft</span>
+                        <span class="s-price">£52.80</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Eyelets -->
+        <div class="control-card">
+            <div class="control-card-header">
+                <span class="control-dot cyan"></span>
+                <span class="control-card-title">Eyelets</span>
+                <span class="visual-badge yes">● Visual</span>
+            </div>
+            <div class="control-card-body">
+                <div class="option-pills" id="eyeletsPills">
+                    <button class="opt-pill active" data-group="eyelets" data-val="none" onclick="selectOption('eyelets', this)">None</button>
+                    <button class="opt-pill" data-group="eyelets" data-val="4-corners" onclick="selectOption('eyelets', this)">4 Corners</button>
+                    <button class="opt-pill" data-group="eyelets" data-val="3t-3b" onclick="selectOption('eyelets', this)">3T 3B</button>
+                    <button class="opt-pill" data-group="eyelets" data-val="4t-4b" onclick="selectOption('eyelets', this)">4T 4B</button>
+                    <button class="opt-pill" data-group="eyelets" data-val="50cm" onclick="selectOption('eyelets', this)">Every 50cm</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pole Pockets -->
+        <div class="control-card">
+            <div class="control-card-header">
+                <span class="control-dot magenta"></span>
+                <span class="control-card-title">Pole Pockets</span>
+                <span class="visual-badge yes">● Visual</span>
+            </div>
+            <div class="control-card-body">
+                <div class="option-pills" id="polePocketsPills">
+                    <button class="opt-pill active" data-group="pole-pockets" data-val="none" onclick="selectOption('pole-pockets', this)">None</button>
+                    <button class="opt-pill" data-group="pole-pockets" data-val="top" onclick="selectOption('pole-pockets', this)">Top</button>
+                    <button class="opt-pill" data-group="pole-pockets" data-val="top-bottom" onclick="selectOption('pole-pockets', this)">Top & Bottom</button>
+                    <button class="opt-pill" data-group="pole-pockets" data-val="3inch" onclick="selectOption('pole-pockets', this)">3″</button>
+                    <button class="opt-pill" data-group="pole-pockets" data-val="4inch" onclick="selectOption('pole-pockets', this)">4″</button>
+                    <button class="opt-pill" data-group="pole-pockets" data-val="5inch" onclick="selectOption('pole-pockets', this)">5″</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hemming -->
+        <div class="control-card">
+            <div class="control-card-header">
+                <span class="control-dot orange"></span>
+                <span class="control-card-title">Hemming</span>
+                <span class="visual-badge yes">● Visual</span>
+            </div>
+            <div class="control-card-body">
+                <div class="option-pills">
+                    <button class="opt-pill active" data-group="hemming" data-val="none" onclick="selectOption('hemming', this)">None</button>
+                    <button class="opt-pill" data-group="hemming" data-val="standard" onclick="selectOption('hemming', this)">Standard Hemmed</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cable Ties -->
+        <div class="control-card">
+            <div class="control-card-header">
+                <span class="control-dot green"></span>
+                <span class="control-card-title">Cable Ties</span>
+                <span class="visual-badge yes">● Visual</span>
+            </div>
+            <div class="control-card-body">
+                <div class="option-pills">
+                    <button class="opt-pill active" data-group="cable-ties" data-val="no" onclick="selectOption('cable-ties', this)">No</button>
+                    <button class="opt-pill" data-group="cable-ties" data-val="yes" onclick="selectOption('cable-ties', this)">Yes (+£1.99)</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Finish -->
+        <div class="control-card">
+            <div class="control-card-header">
+                <span class="control-dot gray"></span>
+                <span class="control-card-title">Finish</span>
+                <span class="visual-badge partial">◐ Subtle</span>
+            </div>
+            <div class="control-card-body">
+                <div class="option-pills">
+                    <button class="opt-pill active" data-group="finish" data-val="matte" onclick="selectOption('finish', this)">Matte</button>
+                    <button class="opt-pill" data-group="finish" data-val="gloss" onclick="selectOption('finish', this)">Gloss</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Packaging -->
+        <div class="control-card">
+            <div class="control-card-header">
+                <span class="control-dot gray"></span>
+                <span class="control-card-title">Packaging</span>
+                <span class="visual-badge no">— N/A</span>
+            </div>
+            <div class="control-card-body">
+                <div class="option-pills">
+                    <button class="opt-pill active" data-group="packaging" data-val="folded" onclick="selectOption('packaging', this)">Folded</button>
+                    <button class="opt-pill" data-group="packaging" data-val="unfolded" onclick="selectOption('packaging', this)">Unfolded</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Analysis Table -->
+<div class="analysis-section">
+    <div class="analysis-header">
+        <h2>Attribute Visual Feasibility Analysis</h2>
+        <p>Based on Sheet 2 data — which attribute values can be drawn on the banner preview</p>
+    </div>
+    <div class="attr-analysis">
+        <div class="attr-row">
+            <div class="attr-name">
+                <span class="dot" style="background: var(--bp-cyan)"></span>
+                <span>Eyelets</span>
+            </div>
+            <div class="attr-values">
+                <code>4 corners</code> <code>3 top 3 bottom</code> <code>4 top 4 bottom</code> <code>Every 50cm</code>
+                <div class="technique-note">SVG circles positioned at calculated edge coordinates. Spacing adapts to selected banner dimensions.</div>
+            </div>
+            <div class="attr-visual">
+                <span class="visual-badge yes">● Full Visual</span>
+            </div>
+        </div>
+
+        <div class="attr-row">
+            <div class="attr-name">
+                <span class="dot" style="background: var(--bp-magenta)"></span>
+                <span>Pole Pockets</span>
+            </div>
+            <div class="attr-values">
+                <code>3 inch</code> <code>4 inch</code> <code>5 inch</code> <code>Top</code> <code>Top & Bottom</code>
+                <div class="technique-note">SVG rects as shaded strips along top/bottom edges. Width scales proportionally to pocket depth vs banner height.</div>
+            </div>
+            <div class="attr-visual">
+                <span class="visual-badge yes">● Full Visual</span>
+            </div>
+        </div>
+
+        <div class="attr-row">
+            <div class="attr-name">
+                <span class="dot" style="background: var(--bp-orange)"></span>
+                <span>Hemming</span>
+            </div>
+            <div class="attr-values">
+                <code>Standard hemmed edges</code>
+                <div class="technique-note">SVG dashed inner border rectangle showing the stitched fold line around all edges.</div>
+            </div>
+            <div class="attr-visual">
+                <span class="visual-badge yes">● Full Visual</span>
+            </div>
+        </div>
+
+        <div class="attr-row">
+            <div class="attr-name">
+                <span class="dot" style="background: var(--bp-green)"></span>
+                <span>Cable Ties</span>
+            </div>
+            <div class="attr-values">
+                <code>Yes</code> <code>No</code>
+                <div class="technique-note">Small green loops rendered at eyelet positions when both eyelets and cable ties are enabled.</div>
+            </div>
+            <div class="attr-visual">
+                <span class="visual-badge yes">● Full Visual</span>
+            </div>
+        </div>
+
+        <div class="attr-row">
+            <div class="attr-name">
+                <span class="dot" style="background: var(--bp-muted)"></span>
+                <span>Finish</span>
+            </div>
+            <div class="attr-values">
+                <code>Matte</code> <code>Gloss</code>
+                <div class="technique-note">SVG gradient overlay — gloss adds a diagonal light reflection band; matte is flat. Subtle but communicates the difference.</div>
+            </div>
+            <div class="attr-visual">
+                <span class="visual-badge partial">◐ Subtle</span>
+            </div>
+        </div>
+
+        <div class="attr-row">
+            <div class="attr-name">
+                <span class="dot" style="background: var(--bp-mid-gray)"></span>
+                <span>Packaging</span>
+            </div>
+            <div class="attr-values">
+                <code>Folded</code> <code>Unfolded</code> <code>Rolled</code>
+                <div class="technique-note">Post-production attribute — not visually representable on the banner itself. Best kept as simple pill selector.</div>
+            </div>
+            <div class="attr-visual">
+                <span class="visual-badge no">— Not Visual</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+</div>
+
+<script>
+// ============================================================
+// STATE
+// ============================================================
+const state = {
+    size: { w: 4, h: 2 },
+    eyelets: 'none',
+    'pole-pockets': 'none',
+    hemming: 'none',
+    'cable-ties': 'no',
+    finish: 'matte',
+    packaging: 'folded',
+    pocketDepth: 0 // in inches
+};
+
+// ============================================================
+// OPTION SELECTION
+// ============================================================
+function selectOption(group, el) {
+    document.querySelectorAll(`.opt-pill[data-group="${group}"]`).forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    state[group] = el.dataset.val;
+
+    // Handle pole pocket depth
+    if (group === 'pole-pockets') {
+        const v = el.dataset.val;
+        if (v === '3inch') state.pocketDepth = 3;
+        else if (v === '4inch') state.pocketDepth = 4;
+        else if (v === '5inch') state.pocketDepth = 5;
+        else if (v === 'top' || v === 'top-bottom') state.pocketDepth = 3; // default 3"
+        else state.pocketDepth = 0;
+
+        // If selecting a depth, also set position to top-bottom if currently none
+        if (['3inch','4inch','5inch'].includes(v)) {
+            state['pole-pockets'] = 'top-bottom';
+        }
+    }
+
+    renderPreview();
+    updateLegend();
+}
+
+function selectSize(el) {
+    document.querySelectorAll('.size-pill').forEach(s => s.classList.remove('active'));
+    el.classList.add('active');
+    state.size.w = parseInt(el.dataset.w);
+    state.size.h = parseInt(el.dataset.h);
+    document.getElementById('sizeLabel').textContent = `${state.size.w}ft × ${state.size.h}ft`;
+    renderPreview();
+}
+
+function updateLegend() {
+    const setLeg = (id, dotClass, isActive) => {
+        const el = document.getElementById(id);
+        const dot = el.querySelector('.legend-dot');
+        if (isActive) {
+            el.classList.add('active');
+            dot.classList.remove('inactive');
+        } else {
+            el.classList.remove('active');
+            dot.classList.add('inactive');
+        }
+    };
+    setLeg('leg-eyelets', 'eyelets', state.eyelets !== 'none');
+    setLeg('leg-pole-pockets', 'pole-pockets', state['pole-pockets'] !== 'none');
+    setLeg('leg-hemming', 'hemming', state.hemming !== 'none');
+    setLeg('leg-cable-ties', 'cable-ties', state['cable-ties'] === 'yes');
+}
+
+// ============================================================
+// SVG RENDERING ENGINE
+// ============================================================
+function renderPreview() {
+    const canvas = document.getElementById('previewCanvas');
+    const { w, h } = state.size;
+
+    // Scale banner to fit canvas
+    const maxW = 440, maxH = 240;
+    const scale = Math.min(maxW / w, maxH / h);
+    const bw = w * scale;
+    const bh = h * scale;
+    const pad = 40;
+    const svgW = bw + pad * 2;
+    const svgH = bh + pad * 2;
+
+    let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${svgW}" height="${svgH}" viewBox="0 0 ${svgW} ${svgH}">`;
+
+    // Defs
+    svg += `<defs>`;
+    // Gloss gradient
+    svg += `<linearGradient id="glossShine" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="white" stop-opacity="0"/>
+        <stop offset="35%" stop-color="white" stop-opacity="0"/>
+        <stop offset="50%" stop-color="white" stop-opacity="0.12"/>
+        <stop offset="65%" stop-color="white" stop-opacity="0"/>
+        <stop offset="100%" stop-color="white" stop-opacity="0"/>
+    </linearGradient>`;
+    // Pole pocket pattern
+    svg += `<pattern id="pocketHash" patternUnits="userSpaceOnUse" width="6" height="6" patternTransform="rotate(45)">
+        <line x1="0" y1="0" x2="0" y2="6" stroke="rgba(236,0,140,0.25)" stroke-width="1.5"/>
+    </pattern>`;
+    // Drop shadow
+    svg += `<filter id="bannerShadow" x="-5%" y="-5%" width="110%" height="115%">
+        <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="rgba(0,0,0,0.12)"/>
+    </filter>`;
+    svg += `</defs>`;
+
+    const bx = pad, by = pad;
+
+    // Banner body
+    svg += `<rect x="${bx}" y="${by}" width="${bw}" height="${bh}" rx="3" fill="#f0f0f0" filter="url(#bannerShadow)" stroke="#d0d0d0" stroke-width="0.5"/>`;
+    // Banner white face
+    svg += `<rect x="${bx}" y="${by}" width="${bw}" height="${bh}" rx="3" fill="white"/>`;
+
+    // Gloss finish overlay
+    if (state.finish === 'gloss') {
+        svg += `<rect x="${bx}" y="${by}" width="${bw}" height="${bh}" rx="3" fill="url(#glossShine)"/>`;
+    }
+
+    // Banner placeholder content (subtle text)
+    svg += `<text x="${bx + bw/2}" y="${by + bh/2 - 8}" text-anchor="middle" font-family="Outfit, sans-serif" font-size="14" font-weight="700" fill="#ccc" letter-spacing="1">YOUR DESIGN</text>`;
+    svg += `<text x="${bx + bw/2}" y="${by + bh/2 + 10}" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#d5d5d5" letter-spacing="0.5">${w}ft × ${h}ft</text>`;
+
+    // ---- HEMMING ----
+    if (state.hemming === 'standard') {
+        const inset = 6;
+        svg += `<rect x="${bx + inset}" y="${by + inset}" width="${bw - inset*2}" height="${bh - inset*2}" rx="2" fill="none" stroke="#F26522" stroke-width="1.2" stroke-dasharray="4 3" opacity="0.6"/>`;
+    }
+
+    // ---- POLE POCKETS ----
+    const ppVal = state['pole-pockets'];
+    if (ppVal !== 'none') {
+        // Convert pocket depth to SVG pixels (proportional to banner height)
+        // e.g., 3" on a 2ft (24") banner = 3/24 = 12.5% of height
+        const bannerHeightInches = h * 12;
+        const depthInches = state.pocketDepth || 3;
+        const pocketPx = Math.max(12, (depthInches / bannerHeightInches) * bh);
+
+        const drawPocket = (x, y, pw, ph, label) => {
+            svg += `<rect x="${x}" y="${y}" width="${pw}" height="${ph}" fill="url(#pocketHash)" stroke="rgba(236,0,140,0.4)" stroke-width="1"/>`;
+            svg += `<text x="${x + pw/2}" y="${y + ph/2 + 3}" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="7" fill="rgba(236,0,140,0.6)">${label}</text>`;
+        };
+
+        const label = `${depthInches}″ pocket`;
+
+        // Top pocket
+        if (['top', 'top-bottom', '3inch', '4inch', '5inch'].includes(ppVal)) {
+            drawPocket(bx, by, bw, pocketPx, label);
+        }
+        // Bottom pocket
+        if (['top-bottom', '3inch', '4inch', '5inch'].includes(ppVal)) {
+            drawPocket(bx, by + bh - pocketPx, bw, pocketPx, label);
+        }
+    }
+
+    // ---- EYELETS ----
+    const eyeletPositions = [];
+    if (state.eyelets !== 'none') {
+        const ey = state.eyelets;
+        const r = 5; // eyelet radius
+        const inset = 12; // distance from edge
+
+        const addEyelet = (cx, cy) => {
+            eyeletPositions.push({ cx, cy });
+            svg += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#00AEEF" stroke-width="1.8" opacity="0.85"/>`;
+            svg += `<circle cx="${cx}" cy="${cy}" r="1.5" fill="#00AEEF" opacity="0.5"/>`;
+        };
+
+        if (ey === '4-corners') {
+            addEyelet(bx + inset, by + inset);
+            addEyelet(bx + bw - inset, by + inset);
+            addEyelet(bx + inset, by + bh - inset);
+            addEyelet(bx + bw - inset, by + bh - inset);
+        } else if (ey === '3t-3b') {
+            // 3 top
+            addEyelet(bx + inset, by + inset);
+            addEyelet(bx + bw/2, by + inset);
+            addEyelet(bx + bw - inset, by + inset);
+            // 3 bottom
+            addEyelet(bx + inset, by + bh - inset);
+            addEyelet(bx + bw/2, by + bh - inset);
+            addEyelet(bx + bw - inset, by + bh - inset);
+        } else if (ey === '4t-4b') {
+            const spacing = bw / 5;
+            for (let i = 1; i <= 4; i++) {
+                addEyelet(bx + spacing * i, by + inset);
+                addEyelet(bx + spacing * i, by + bh - inset);
+            }
+        } else if (ey === '50cm') {
+            // 50cm = ~1.64ft. Calculate spacing based on actual width
+            const spacingFt = 1.64;
+            const spacingPx = spacingFt * scale;
+            const countW = Math.max(2, Math.floor(w / spacingFt) + 1);
+            const countH = Math.max(2, Math.floor(h / spacingFt) + 1);
+
+            // Top and bottom edges
+            for (let i = 0; i < countW; i++) {
+                const cx = bx + inset + (i / (countW - 1)) * (bw - inset * 2);
+                addEyelet(cx, by + inset);
+                addEyelet(cx, by + bh - inset);
+            }
+            // Left and right edges (skip corners)
+            for (let i = 1; i < countH - 1; i++) {
+                const cy = by + inset + (i / (countH - 1)) * (bh - inset * 2);
+                addEyelet(bx + inset, cy);
+                addEyelet(bx + bw - inset, cy);
+            }
+        }
+    }
+
+    // ---- CABLE TIES ----
+    if (state['cable-ties'] === 'yes' && eyeletPositions.length > 0) {
+        eyeletPositions.forEach(({ cx, cy }) => {
+            // Small loop coming out of eyelet
+            const loopR = 7;
+            // Determine direction (push outward from center)
+            const centerX = bx + bw / 2;
+            const centerY = by + bh / 2;
+            const dx = cx - centerX;
+            const dy = cy - centerY;
+            const len = Math.sqrt(dx*dx + dy*dy) || 1;
+            const nx = dx / len;
+            const ny = dy / len;
+            const lx = cx + nx * (loopR + 3);
+            const ly = cy + ny * (loopR + 3);
+
+            svg += `<circle cx="${lx}" cy="${ly}" r="${loopR}" fill="none" stroke="#39B54A" stroke-width="1.5" opacity="0.7" stroke-dasharray="2 2"/>`;
+            svg += `<line x1="${cx}" y1="${cy}" x2="${lx - nx * (loopR - 2)}" y2="${ly - ny * (loopR - 2)}" stroke="#39B54A" stroke-width="1.2" opacity="0.5"/>`;
+        });
+    }
+
+    // Dimension labels
+    // Width arrow
+    const arrowY = by + bh + 20;
+    svg += `<line x1="${bx}" y1="${arrowY}" x2="${bx + bw}" y2="${arrowY}" stroke="#BFC4CE" stroke-width="1" marker-start="url(#arrowL)" marker-end="url(#arrowR)"/>`;
+    svg += `<text x="${bx + bw/2}" y="${arrowY + 14}" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#8892A0" font-weight="500">${w}ft</text>`;
+
+    // Height arrow
+    const arrowX = bx - 16;
+    svg += `<line x1="${arrowX}" y1="${by}" x2="${arrowX}" y2="${by + bh}" stroke="#BFC4CE" stroke-width="1"/>`;
+    svg += `<text x="${arrowX}" y="${by + bh/2 + 3}" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#8892A0" font-weight="500" transform="rotate(-90,${arrowX},${by + bh/2})">${h}ft</text>`;
+
+    svg += `</svg>`;
+    canvas.innerHTML = svg;
+}
+
+// ============================================================
+// INIT
+// ============================================================
+renderPreview();
+updateLegend();
+</script>
+
+</body>
+</html>
