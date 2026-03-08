@@ -3,7 +3,7 @@ Contributors: bannercalc
 Tags: woocommerce, product configurator, pricing calculator, banner, custom size
 Requires at least: 6.4
 Tested up to: 6.7
-Stable tag: 1.0.0
+Stable tag: 1.5.0
 Requires PHP: 8.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -44,6 +44,15 @@ No. BannerCalc is designed for Simple products. All pricing is calculated dynami
 Yes. You can set category-level defaults and then override specific values per product using the product metabox.
 
 == Changelog ==
+
+= 1.5.0 =
+* Service type / delivery speed markup (standard, urgent-48, urgent-24)
+* Professional design service option with 3-way selector (Upload Files / Design Online / Pro Design)
+* Admin per-attribute pricing UI on category config page
+* Interactive SVG banner preview showing eyelets, pole pockets, hemming & cable ties
+* Pricing engine extended with design service add-on and service markup steps
+* Cart, checkout & order display updated for new fields
+* Version bump to 1.5.0
 
 = 1.0.0 =
 * Initial release

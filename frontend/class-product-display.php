@@ -24,6 +24,9 @@ class ProductDisplay {
         add_action( 'woocommerce_before_add_to_cart_quantity', [ $this, 'open_quantity_row' ], 1 );
         add_action( 'woocommerce_after_add_to_cart_button', [ $this, 'close_quantity_row' ], 99 );
 
+        // Banner preview tab switcher + SVG panel (injected above gallery).
+        add_action( 'woocommerce_before_single_product', [ $this, 'render_preview_container' ], 30 );
+
         // Make BannerCalc products purchasable even without a WC price.
         add_filter( 'woocommerce_product_get_price', [ $this, 'ensure_purchasable_price' ], 10, 2 );
         add_filter( 'woocommerce_product_get_regular_price', [ $this, 'ensure_purchasable_price' ], 10, 2 );
@@ -84,6 +87,8 @@ class ProductDisplay {
             'attributePricing' => $attribute_pricing,
             'currency'        => $currency,
             'decimals'        => (int) $settings['price_display_decimals'],
+            'serviceTypes'    => $settings['service_types'] ?? [],
+            'designService'   => $settings['design_service'] ?? [],
         ] );
 
         echo '<div id="bannercalc-configurator" class="bannercalc-configurator" data-config="' . esc_attr( $js_config ) . '">';
@@ -113,20 +118,85 @@ class ProductDisplay {
 
         $settings = \BannerCalc\Plugin::get_settings();
         $currency = $settings['currency_symbol'];
+        $design_service_config = $settings['design_service'] ?? [];
+        $service_types         = $settings['service_types'] ?? [];
 
         echo '<div class="bannercalc-card bannercalc-card--extras">';
 
-        // Design accordion (collapsed by default — JS moves Personalize + Upload here).
-        echo '<details class="bannercalc-design-accordion" id="bannercalc-design-accordion">';
-        echo '<summary class="bannercalc-accordion-trigger">';
-        echo '<span class="bannercalc-accordion-icon"><span class="dashicons dashicons-cloud-upload"></span></span>';
-        echo '<span class="bannercalc-accordion-label">' . esc_html__( 'Upload or Design with Online Designer', 'bannercalc' ) . '</span>';
-        echo '<span class="bannercalc-accordion-arrow dashicons dashicons-arrow-down-alt2"></span>';
-        echo '</summary>';
-        echo '<div class="bannercalc-accordion-content" id="bannercalc-design-slot">';
-        // JS will move .product_type_customizable and .wc-dnd-file-upload here.
+        // 3-way design mode selector (replaces the old accordion).
+        echo '<div class="bannercalc-section bannercalc-design-mode-section">';
+        echo '<div class="bannercalc-section-overline">' . esc_html__( 'DESIGN', 'bannercalc' ) . '</div>';
+        echo '<div class="bannercalc-attribute bannercalc-attr--design-mode">';
+        echo '<div class="bannercalc-attr-header"><span class="bannercalc-attr-label">' . esc_html__( 'How would you like your design?', 'bannercalc' ) . '</span></div>';
+        echo '<div class="bannercalc-attr-pills bannercalc-design-mode-pills">';
+        echo '<button type="button" class="bannercalc-pill bannercalc-design-pill active" data-design-mode="upload">' . esc_html__( 'Upload Files', 'bannercalc' ) . '</button>';
+        echo '<button type="button" class="bannercalc-pill bannercalc-design-pill" data-design-mode="online">' . esc_html__( 'Design Online', 'bannercalc' ) . '</button>';
+
+        if ( ! empty( $design_service_config['enabled'] ) ) {
+            $ds_price = (float) ( $design_service_config['price'] ?? 0 );
+            echo '<button type="button" class="bannercalc-pill bannercalc-design-pill" data-design-mode="pro">';
+            echo esc_html__( 'Pro Design', 'bannercalc' );
+            if ( $ds_price > 0 ) {
+                echo ' <span class="bannercalc-pill-price">+' . esc_html( $currency . number_format( $ds_price, 2 ) ) . '</span>';
+            }
+            echo '</button>';
+        }
+
         echo '</div>';
-        echo '</details>';
+        echo '<input type="hidden" name="bannercalc[design_mode]" value="upload" id="bannercalc-input-design-mode" />';
+        echo '</div>';
+
+        // Conditional content panels.
+        // Panel 1: Upload files.
+        echo '<div class="bannercalc-design-panel bannercalc-design-panel--upload" id="bannercalc-design-upload" style="margin-top:12px;">';
+        echo '<div id="bannercalc-design-slot">';
+        // JS will move .wc-dnd-file-upload here.
+        echo '</div>';
+        echo '</div>';
+
+        // Panel 2: Design online.
+        echo '<div class="bannercalc-design-panel bannercalc-design-panel--online" id="bannercalc-design-online" style="display:none;margin-top:12px;">';
+        echo '<div id="bannercalc-personalize-slot">';
+        // JS will move .product_type_customizable here.
+        echo '</div>';
+        echo '</div>';
+
+        // Panel 3: Professional design service.
+        if ( ! empty( $design_service_config['enabled'] ) ) {
+            echo '<div class="bannercalc-design-panel bannercalc-design-panel--pro" id="bannercalc-design-pro" style="display:none;margin-top:12px;">';
+            echo '<div class="bannercalc-pro-design-form">';
+            echo '<p class="bannercalc-design-service-desc">' . esc_html( $design_service_config['description'] ?? '' ) . ' — <strong>' . esc_html( $currency . number_format( (float) ( $design_service_config['price'] ?? 0 ), 2 ) ) . '</strong></p>';
+            echo '<label class="bannercalc-pro-field"><span>' . esc_html__( 'Design Brief', 'bannercalc' ) . '</span>';
+            echo '<textarea name="bannercalc[design_brief]" rows="3" placeholder="' . esc_attr__( 'Describe what you would like on your banner…', 'bannercalc' ) . '" class="bannercalc-textarea"></textarea></label>';
+            echo '<label class="bannercalc-pro-field"><span>' . esc_html__( 'Brand Colours / Text', 'bannercalc' ) . '</span>';
+            echo '<input type="text" name="bannercalc[design_colours]" placeholder="' . esc_attr__( 'e.g. Blue, White, Company Name…', 'bannercalc' ) . '" class="bannercalc-input" /></label>';
+            echo '</div>';
+            echo '<input type="hidden" name="bannercalc[design_service]" value="0" id="bannercalc-input-design-service" />';
+            echo '</div>';
+        }
+
+        echo '</div>'; // .bannercalc-design-mode-section
+
+        // Service type selector.
+        if ( ! empty( $service_types ) && count( $service_types ) > 1 ) {
+            echo '<div class="bannercalc-section bannercalc-service-section">';
+            echo '<div class="bannercalc-attribute bannercalc-attr--service-type">';
+            echo '<div class="bannercalc-attr-header"><span class="bannercalc-attr-label">' . esc_html__( 'Delivery Speed', 'bannercalc' ) . '</span></div>';
+            echo '<div class="bannercalc-attr-pills">';
+            foreach ( $service_types as $st ) {
+                $is_default = ! empty( $st['default'] );
+                $markup     = (float) ( $st['markup'] ?? 0 );
+                $label      = esc_html( $st['label'] ?? $st['slug'] );
+                if ( $markup > 0 ) {
+                    $label .= ' <span class="bannercalc-pill-price">(+' . (int) $markup . '%)</span>';
+                }
+                echo '<button type="button" class="bannercalc-pill bannercalc-service-pill' . ( $is_default ? ' active' : '' ) . '" data-service="' . esc_attr( $st['slug'] ) . '">' . $label . '</button>';
+            }
+            echo '</div>';
+            echo '<input type="hidden" name="bannercalc[service_type]" value="standard" id="bannercalc-input-service-type" />';
+            echo '</div>';
+            echo '</div>';
+        }
 
         // Pricing section.
         echo '<div class="bannercalc-section bannercalc-price-section">';
@@ -135,6 +205,54 @@ class ProductDisplay {
         echo '</div>';
 
         // Card stays open — quantity row will be rendered inside, then close_quantity_row() closes the card.
+    }
+
+    /**
+     * Render the banner preview tab switcher and SVG container.
+     * Injected before the product — JS will relocate into the gallery column.
+     */
+    public function render_preview_container(): void {
+        global $product;
+
+        if ( ! $product ) {
+            return;
+        }
+
+        $plugin = \BannerCalc\Plugin::instance();
+
+        if ( ! $plugin->is_enabled_for_product( $product->get_id() ) ) {
+            return;
+        }
+        ?>
+        <!-- BannerCalc Preview Tabs (hidden until visual attribute is selected) -->
+        <div class="bannercalc-preview-tabs" id="bannercalc-preview-tabs" style="display:none;">
+            <button type="button" class="bannercalc-preview-tab active" data-tab="gallery"><?php esc_html_e( 'Product Image', 'bannercalc' ); ?></button>
+            <button type="button" class="bannercalc-preview-tab" data-tab="preview"><?php esc_html_e( 'Your Banner', 'bannercalc' ); ?></button>
+        </div>
+        <div class="bannercalc-preview-panel" id="bannercalc-preview-panel" style="display:none;">
+            <div class="bannercalc-preview-header">
+                <span class="bannercalc-preview-title"><?php esc_html_e( 'Live Preview', 'bannercalc' ); ?></span>
+                <span class="bannercalc-preview-size-label" id="bannercalc-preview-size">—</span>
+            </div>
+            <div class="bannercalc-preview-canvas" id="bannercalc-preview-canvas">
+                <!-- SVG rendered by JavaScript -->
+            </div>
+            <div class="bannercalc-preview-legend" id="bannercalc-preview-legend">
+                <div class="bannercalc-legend-item" data-legend="eyelets">
+                    <span class="bannercalc-legend-dot bannercalc-legend-dot--eyelets"></span> <?php esc_html_e( 'Eyelets', 'bannercalc' ); ?>
+                </div>
+                <div class="bannercalc-legend-item" data-legend="pole-pockets">
+                    <span class="bannercalc-legend-dot bannercalc-legend-dot--pole-pockets"></span> <?php esc_html_e( 'Pole Pockets', 'bannercalc' ); ?>
+                </div>
+                <div class="bannercalc-legend-item" data-legend="hemming">
+                    <span class="bannercalc-legend-dot bannercalc-legend-dot--hemming"></span> <?php esc_html_e( 'Hemming', 'bannercalc' ); ?>
+                </div>
+                <div class="bannercalc-legend-item" data-legend="cable-ties">
+                    <span class="bannercalc-legend-dot bannercalc-legend-dot--cable-ties"></span> <?php esc_html_e( 'Cable Ties', 'bannercalc' ); ?>
+                </div>
+            </div>
+        </div>
+        <?php
     }
 
     /**

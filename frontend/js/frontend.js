@@ -49,6 +49,12 @@
             selectedAttributes: {},
             basePrice: 0,
             addonsTotal: 0,
+            designService: false,
+            designServicePrice: 0,
+            serviceType: 'standard',
+            serviceMarkupPct: 0,
+            serviceMarkupAmt: 0,
+            designMode: 'upload',
             calculatedPrice: 0,
             isValid: false,
             validationErrors: []
@@ -70,6 +76,15 @@
 
             this.state.selectedUnit = this.config.defaultUnit || 'ft';
             this.state.sizingMode = (this.config.sizingMode === 'custom_only') ? 'custom' : 'preset';
+
+            // Set default service type.
+            var serviceTypes = this.config.serviceTypes || [];
+            for (var i = 0; i < serviceTypes.length; i++) {
+                if (serviceTypes[i]['default']) {
+                    this.state.serviceType = serviceTypes[i].slug;
+                    break;
+                }
+            }
 
             // Set default attribute values.
             this.initDefaults();
@@ -268,6 +283,37 @@
                 self.calculatePrice();
                 self.updatePriceDisplay();
             });
+
+            // Service type pills.
+            this.el.on('click', '.bannercalc-service-pill', function() {
+                self.el.find('.bannercalc-service-pill').removeClass('active');
+                $(this).addClass('active');
+                self.state.serviceType = $(this).data('service');
+                $('#bannercalc-input-service-type').val(self.state.serviceType);
+                self.calculatePrice();
+                self.updatePriceDisplay();
+            });
+
+            // Design mode pills (3-way selector).
+            this.el.closest('form').on('click', '.bannercalc-design-pill', function() {
+                $('.bannercalc-design-pill').removeClass('active');
+                $(this).addClass('active');
+                var mode = $(this).data('design-mode');
+                self.state.designMode = mode;
+                $('#bannercalc-input-design-mode').val(mode);
+
+                // Show/hide conditional panels.
+                $('#bannercalc-design-upload').toggle(mode === 'upload');
+                $('#bannercalc-design-online').toggle(mode === 'online');
+                $('#bannercalc-design-pro').toggle(mode === 'pro');
+
+                // Auto-enable/disable design service based on mode.
+                self.state.designService = (mode === 'pro');
+                $('#bannercalc-input-design-service').val(mode === 'pro' ? '1' : '0');
+
+                self.calculatePrice();
+                self.updatePriceDisplay();
+            });
         },
 
         /**
@@ -422,8 +468,41 @@
 
             this.state.basePrice = parseFloat(basePrice.toFixed(2));
             this.state.addonsTotal = parseFloat(addonsTotal.toFixed(2));
-            this.state.calculatedPrice = parseFloat((basePrice + addonsTotal).toFixed(2));
+
+            // Design service.
+            this.state.designServicePrice = 0;
+            if (this.state.designService) {
+                var dsConfig = this.config.designService || {};
+                if (dsConfig.enabled) {
+                    this.state.designServicePrice = parseFloat(dsConfig.price || 0);
+                    addonsTotal += this.state.designServicePrice;
+                }
+            }
+
+            // Service type markup.
+            this.state.serviceMarkupPct = 0;
+            this.state.serviceMarkupAmt = 0;
+            if (this.state.serviceType && this.state.serviceType !== 'standard') {
+                var serviceTypes = this.config.serviceTypes || [];
+                for (var s = 0; s < serviceTypes.length; s++) {
+                    if (serviceTypes[s].slug === this.state.serviceType) {
+                        this.state.serviceMarkupPct = parseFloat(serviceTypes[s].markup || 0);
+                        break;
+                    }
+                }
+                if (this.state.serviceMarkupPct > 0) {
+                    this.state.serviceMarkupAmt = parseFloat(((basePrice + addonsTotal) * (this.state.serviceMarkupPct / 100)).toFixed(2));
+                }
+            }
+
+            this.state.calculatedPrice = parseFloat((basePrice + addonsTotal + this.state.serviceMarkupAmt).toFixed(2));
             this.state.isValid = this.state.validationErrors.length === 0;
+
+            // Update preview.
+            if (BannerCalcPreview.initialized) {
+                BannerCalcPreview.checkVisibility();
+                BannerCalcPreview.render();
+            }
         },
 
         /**
@@ -454,6 +533,31 @@
                 $('#bannercalc-addons-value').text(cur + this.state.addonsTotal.toFixed(dec));
             } else {
                 $('#bannercalc-addons-row').hide();
+            }
+
+            // Design service row.
+            if (this.state.designService && this.state.designServicePrice > 0) {
+                $('#bannercalc-design-row').show();
+                $('#bannercalc-design-value').text('+' + cur + this.state.designServicePrice.toFixed(dec));
+            } else {
+                $('#bannercalc-design-row').hide();
+            }
+
+            // Service markup row.
+            if (this.state.serviceMarkupAmt > 0) {
+                var serviceTypes = this.config.serviceTypes || [];
+                var stLabel = 'Delivery Markup';
+                for (var s = 0; s < serviceTypes.length; s++) {
+                    if (serviceTypes[s].slug === this.state.serviceType) {
+                        stLabel = serviceTypes[s].label + ' (+' + parseInt(serviceTypes[s].markup) + '%)';
+                        break;
+                    }
+                }
+                $('#bannercalc-service-row').show();
+                $('#bannercalc-service-label').text(stLabel + ':');
+                $('#bannercalc-service-value').text('+' + cur + this.state.serviceMarkupAmt.toFixed(dec));
+            } else {
+                $('#bannercalc-service-row').hide();
             }
 
             // Total.
@@ -526,32 +630,427 @@
             $('#bannercalc-input-width').val(this.state.widthRaw || '');
             $('#bannercalc-input-height').val(this.state.heightRaw || '');
             $('#bannercalc-input-price').val(this.state.calculatedPrice || '');
+            $('#bannercalc-input-service-type').val(this.state.serviceType || 'standard');
+            $('#bannercalc-input-design-service').val(this.state.designService ? '1' : '0');
+            $('#bannercalc-input-design-mode').val(this.state.designMode || 'upload');
+        }
+    };
+
+    // ============================================================
+    // BANNER PREVIEW — SVG Rendering Module
+    // ============================================================
+    var BannerCalcPreview = {
+        initialized: false,
+        tabsEl: null,
+        panelEl: null,
+        canvasEl: null,
+        galleryEl: null,
+
+        init: function() {
+            this.tabsEl   = $('#bannercalc-preview-tabs');
+            this.panelEl  = $('#bannercalc-preview-panel');
+            this.canvasEl = $('#bannercalc-preview-canvas');
+
+            if (!this.tabsEl.length || !this.panelEl.length) return;
+
+            // Find the product gallery to toggle.
+            this.galleryEl = $('.woocommerce-product-gallery');
+
+            // Relocate tabs + panel into the gallery column (before gallery).
+            if (this.galleryEl.length) {
+                this.tabsEl.insertBefore(this.galleryEl);
+                this.panelEl.insertBefore(this.galleryEl);
+            }
+
+            this.bindEvents();
+            this.initialized = true;
+        },
+
+        bindEvents: function() {
+            var self = this;
+
+            // Tab switching.
+            $(document).on('click', '.bannercalc-preview-tab', function() {
+                var tab = $(this).data('tab');
+                $('.bannercalc-preview-tab').removeClass('active');
+                $(this).addClass('active');
+
+                if (tab === 'preview') {
+                    self.panelEl.show();
+                    self.galleryEl.hide();
+                    self.render();
+                } else {
+                    self.panelEl.hide();
+                    self.galleryEl.show();
+                }
+            });
+        },
+
+        /**
+         * Check if preview tabs should be shown (any visual attribute selected).
+         */
+        checkVisibility: function() {
+            if (!this.initialized) return;
+
+            var attrs = BannerCalc.state.selectedAttributes;
+            var hasVisual = false;
+
+            var visualAttrs = ['pa_eyelets', 'pa_pole-pockets', 'pa_hemming', 'pa_cable-ties'];
+            var noneValues  = ['none', 'no', ''];
+
+            for (var i = 0; i < visualAttrs.length; i++) {
+                var val = attrs[visualAttrs[i]] || '';
+                if (val && noneValues.indexOf(val) === -1) {
+                    hasVisual = true;
+                    break;
+                }
+            }
+
+            if (hasVisual) {
+                this.tabsEl.fadeIn(200);
+            }
+            // Once shown, keep tabs visible (don't auto-hide).
+        },
+
+        /**
+         * Update the legend active states.
+         */
+        updateLegend: function() {
+            var attrs = BannerCalc.state.selectedAttributes;
+            var noneValues = ['none', 'no', ''];
+
+            var map = {
+                'eyelets':      'pa_eyelets',
+                'pole-pockets': 'pa_pole-pockets',
+                'hemming':      'pa_hemming',
+                'cable-ties':   'pa_cable-ties'
+            };
+
+            for (var key in map) {
+                var val = attrs[map[key]] || '';
+                var isActive = val && noneValues.indexOf(val) === -1;
+                // Cable ties also need eyelets to be active.
+                if (key === 'cable-ties') {
+                    var eyVal = attrs['pa_eyelets'] || '';
+                    isActive = isActive && eyVal && noneValues.indexOf(eyVal) === -1;
+                }
+                var $item = $('[data-legend="' + key + '"]');
+                $item.toggleClass('active', isActive);
+            }
+        },
+
+        /**
+         * Render the SVG preview based on current state.
+         */
+        render: function() {
+            if (!this.initialized || !this.canvasEl.length) return;
+
+            var state = BannerCalc.state;
+            var wM = state.widthMetres;
+            var hM = state.heightMetres;
+
+            if (!wM || !hM) {
+                this.canvasEl.html('<p style="color:#8892A0;font-size:13px;text-align:center;">Select a size to see preview</p>');
+                return;
+            }
+
+            // Convert metres to feet for display.
+            var wFt = wM / 0.3048;
+            var hFt = hM / 0.3048;
+            var unit = state.selectedUnit || 'ft';
+            var factor = TO_METRES[unit] || 0.3048;
+            var abbr = UNIT_ABBR[unit] || 'ft';
+            var wDisp = (wM / factor).toFixed(1);
+            var hDisp = (hM / factor).toFixed(1);
+
+            // Update size label.
+            $('#bannercalc-preview-size').text(wDisp + abbr + ' × ' + hDisp + abbr);
+
+            // Calculate SVG dimensions — scale to fit container.
+            var containerW = this.canvasEl.width() - 40 || 400;
+            var maxW = Math.min(containerW, 500);
+            var maxH = 260;
+            var scale = Math.min(maxW / wFt, maxH / hFt);
+            var bw = wFt * scale;
+            var bh = hFt * scale;
+            var pad = 36;
+            var svgW = bw + pad * 2;
+            var svgH = bh + pad * 2 + 24; // extra for dimension labels
+
+            var attrs = state.selectedAttributes;
+            var noneVals = ['none', 'no', ''];
+
+            var svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + svgW + ' ' + svgH + '" width="' + svgW + '" height="' + svgH + '">';
+
+            // Defs.
+            svg += '<defs>';
+            svg += '<linearGradient id="bcGloss" x1="0" y1="0" x2="1" y2="1">';
+            svg += '<stop offset="0%" stop-color="white" stop-opacity="0"/>';
+            svg += '<stop offset="35%" stop-color="white" stop-opacity="0"/>';
+            svg += '<stop offset="50%" stop-color="white" stop-opacity="0.12"/>';
+            svg += '<stop offset="65%" stop-color="white" stop-opacity="0"/>';
+            svg += '<stop offset="100%" stop-color="white" stop-opacity="0"/>';
+            svg += '</linearGradient>';
+            svg += '<pattern id="bcPocketHash" patternUnits="userSpaceOnUse" width="6" height="6" patternTransform="rotate(45)">';
+            svg += '<line x1="0" y1="0" x2="0" y2="6" stroke="rgba(236,0,140,0.25)" stroke-width="1.5"/>';
+            svg += '</pattern>';
+            svg += '<filter id="bcShadow" x="-5%" y="-5%" width="110%" height="115%">';
+            svg += '<feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="rgba(0,0,0,0.12)"/>';
+            svg += '</filter>';
+            svg += '</defs>';
+
+            var bx = pad, by = pad;
+
+            // Banner body.
+            svg += '<rect x="' + bx + '" y="' + by + '" width="' + bw + '" height="' + bh + '" rx="3" fill="#f0f0f0" filter="url(#bcShadow)" stroke="#d0d0d0" stroke-width="0.5"/>';
+            svg += '<rect x="' + bx + '" y="' + by + '" width="' + bw + '" height="' + bh + '" rx="3" fill="white"/>';
+
+            // Gloss finish overlay.
+            var finish = attrs['pa_finish'] || '';
+            if (finish === 'gloss') {
+                svg += '<rect x="' + bx + '" y="' + by + '" width="' + bw + '" height="' + bh + '" rx="3" fill="url(#bcGloss)"/>';
+            }
+
+            // Placeholder text.
+            svg += '<text x="' + (bx + bw/2) + '" y="' + (by + bh/2 - 8) + '" text-anchor="middle" font-family="Outfit, sans-serif" font-size="14" font-weight="700" fill="#ccc" letter-spacing="1">YOUR DESIGN</text>';
+            svg += '<text x="' + (bx + bw/2) + '" y="' + (by + bh/2 + 10) + '" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#d5d5d5" letter-spacing="0.5">' + wDisp + abbr + ' × ' + hDisp + abbr + '</text>';
+
+            // HEMMING.
+            var hemming = attrs['pa_hemming'] || '';
+            if (hemming === 'yes') {
+                svg += '<rect x="' + (bx+6) + '" y="' + (by+6) + '" width="' + (bw-12) + '" height="' + (bh-12) + '" rx="2" fill="none" stroke="#F26522" stroke-width="1.2" stroke-dasharray="4 3" opacity="0.6"/>';
+            } else if (hemming === 'taped-edge') {
+                svg += '<rect x="' + (bx+6) + '" y="' + (by+6) + '" width="' + (bw-12) + '" height="' + (bh-12) + '" rx="2" fill="none" stroke="#F26522" stroke-width="1.2" stroke-dasharray="2 2" opacity="0.6"/>';
+            }
+
+            // POLE POCKETS.
+            var pp = attrs['pa_pole-pockets'] || '';
+            if (pp && noneVals.indexOf(pp) === -1) {
+                // Parse pocket depth from slug.
+                var pocketInches = 3; // default
+                var depthMatch = pp.match(/(\d+(?:\.\d+)?)\s*(?:inch|inches|")/i);
+                if (depthMatch) pocketInches = parseFloat(depthMatch[1]);
+
+                // Which sides?
+                var sides = { top: false, bottom: false, left: false, right: false };
+                var ppLower = pp.toLowerCase().replace(/-/g, ' ');
+                if (ppLower.indexOf('top') !== -1 || ppLower.indexOf('all') !== -1) sides.top = true;
+                if (ppLower.indexOf('bottom') !== -1 || ppLower.indexOf('all') !== -1) sides.bottom = true;
+                if (ppLower.indexOf('left') !== -1 || ppLower.indexOf('all') !== -1) sides.left = true;
+                if (ppLower.indexOf('right') !== -1 || ppLower.indexOf('all') !== -1) sides.right = true;
+                // "Top & Bottom" or "top-bottom"
+                if (ppLower.indexOf('top') !== -1 && ppLower.indexOf('bottom') !== -1) {
+                    sides.top = true; sides.bottom = true;
+                }
+                // "top-only" or "Top Only"
+                if (ppLower.indexOf('only') !== -1 && ppLower.indexOf('top') !== -1) {
+                    sides.top = true; sides.bottom = false;
+                }
+                // Default: if just a depth number, assume top+bottom.
+                if (!sides.top && !sides.bottom && !sides.left && !sides.right) {
+                    sides.top = true; sides.bottom = true;
+                }
+
+                var bannerHInches = hFt * 12;
+                var pocketPx = Math.max(12, (pocketInches / bannerHInches) * bh);
+                var pLabel = pocketInches + '\u2033 pocket';
+
+                if (sides.top) {
+                    svg += '<rect x="' + bx + '" y="' + by + '" width="' + bw + '" height="' + pocketPx + '" fill="url(#bcPocketHash)" stroke="rgba(236,0,140,0.4)" stroke-width="1"/>';
+                    svg += '<text x="' + (bx + bw/2) + '" y="' + (by + pocketPx/2 + 3) + '" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="7" fill="rgba(236,0,140,0.6)">' + pLabel + '</text>';
+                }
+                if (sides.bottom) {
+                    svg += '<rect x="' + bx + '" y="' + (by + bh - pocketPx) + '" width="' + bw + '" height="' + pocketPx + '" fill="url(#bcPocketHash)" stroke="rgba(236,0,140,0.4)" stroke-width="1"/>';
+                    svg += '<text x="' + (bx + bw/2) + '" y="' + (by + bh - pocketPx/2 + 3) + '" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="7" fill="rgba(236,0,140,0.6)">' + pLabel + '</text>';
+                }
+                if (sides.left) {
+                    var lpPx = Math.max(12, (pocketInches / (wFt * 12)) * bw);
+                    svg += '<rect x="' + bx + '" y="' + by + '" width="' + lpPx + '" height="' + bh + '" fill="url(#bcPocketHash)" stroke="rgba(236,0,140,0.4)" stroke-width="1"/>';
+                }
+                if (sides.right) {
+                    var rpPx = Math.max(12, (pocketInches / (wFt * 12)) * bw);
+                    svg += '<rect x="' + (bx + bw - rpPx) + '" y="' + by + '" width="' + rpPx + '" height="' + bh + '" fill="url(#bcPocketHash)" stroke="rgba(236,0,140,0.4)" stroke-width="1"/>';
+                }
+            }
+
+            // EYELETS.
+            var eyeletPositions = [];
+            var eyelets = attrs['pa_eyelets'] || '';
+            if (eyelets && noneVals.indexOf(eyelets) === -1) {
+                var r = 5, inset = 12;
+
+                var addEyelet = function(cx, cy) {
+                    eyeletPositions.push({ cx: cx, cy: cy });
+                    svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="#00AEEF" stroke-width="1.8" opacity="0.85"/>';
+                    svg += '<circle cx="' + cx + '" cy="' + cy + '" r="1.5" fill="#00AEEF" opacity="0.5"/>';
+                };
+
+                var eLower = eyelets.toLowerCase().replace(/-/g, ' ');
+
+                if (eLower === '4 corners' || eLower === '4corners') {
+                    addEyelet(bx + inset, by + inset);
+                    addEyelet(bx + bw - inset, by + inset);
+                    addEyelet(bx + inset, by + bh - inset);
+                    addEyelet(bx + bw - inset, by + bh - inset);
+                } else if (eLower.indexOf('3') !== -1 && eLower.indexOf('top') !== -1) {
+                    // 3 top 3 bottom
+                    var arr = [bx + inset, bx + bw/2, bx + bw - inset];
+                    for (var ti = 0; ti < arr.length; ti++) { addEyelet(arr[ti], by + inset); }
+                    for (var bi = 0; bi < arr.length; bi++) { addEyelet(arr[bi], by + bh - inset); }
+                } else if (eLower.indexOf('4') !== -1 && eLower.indexOf('top') !== -1) {
+                    // 4 top 4 bottom
+                    var sp4 = bw / 5;
+                    for (var j = 1; j <= 4; j++) {
+                        addEyelet(bx + sp4 * j, by + inset);
+                        addEyelet(bx + sp4 * j, by + bh - inset);
+                    }
+                } else if (eLower.indexOf('50cm') !== -1 || eLower.indexOf('every 50') !== -1) {
+                    // Every 50cm (1.64ft).
+                    var spaceFt = 1.64;
+                    var spacePx = spaceFt * scale;
+                    var countW = Math.max(2, Math.floor(wFt / spaceFt) + 1);
+                    var countH = Math.max(2, Math.floor(hFt / spaceFt) + 1);
+                    // Top and bottom edges
+                    for (var wi = 0; wi < countW; wi++) {
+                        var cx = bx + (wi / (countW - 1)) * bw;
+                        addEyelet(cx, by + inset);
+                        addEyelet(cx, by + bh - inset);
+                    }
+                    // Left and right edges (skip corners)
+                    for (var hi = 1; hi < countH - 1; hi++) {
+                        var cy = by + (hi / (countH - 1)) * bh;
+                        addEyelet(bx + inset, cy);
+                        addEyelet(bx + bw - inset, cy);
+                    }
+                } else if (eLower.indexOf('every 1ft') !== -1 || eLower.indexOf('every 1') !== -1) {
+                    // Every 1ft
+                    var s1 = 1; // 1ft spacing
+                    var c1W = Math.max(2, Math.floor(wFt / s1) + 1);
+                    var c1H = Math.max(2, Math.floor(hFt / s1) + 1);
+                    for (var e1i = 0; e1i < c1W; e1i++) {
+                        var cx1 = bx + (e1i / (c1W - 1)) * bw;
+                        addEyelet(cx1, by + inset);
+                        addEyelet(cx1, by + bh - inset);
+                    }
+                    for (var e1j = 1; e1j < c1H - 1; e1j++) {
+                        var cy1 = by + (e1j / (c1H - 1)) * bh;
+                        addEyelet(bx + inset, cy1);
+                        addEyelet(bx + bw - inset, cy1);
+                    }
+                } else if (eLower.indexOf('every 2ft') !== -1 || eLower.indexOf('every 2') !== -1) {
+                    // Every 2ft
+                    var s2 = 2;
+                    var c2W = Math.max(2, Math.floor(wFt / s2) + 1);
+                    var c2H = Math.max(2, Math.floor(hFt / s2) + 1);
+                    for (var e2i = 0; e2i < c2W; e2i++) {
+                        var cx2 = bx + (e2i / (c2W - 1)) * bw;
+                        addEyelet(cx2, by + inset);
+                        addEyelet(cx2, by + bh - inset);
+                    }
+                    for (var e2j = 1; e2j < c2H - 1; e2j++) {
+                        var cy2 = by + (e2j / (c2H - 1)) * bh;
+                        addEyelet(bx + inset, cy2);
+                        addEyelet(bx + bw - inset, cy2);
+                    }
+                } else if (eLower.indexOf('top only') !== -1 || eLower.indexOf('top-only') !== -1) {
+                    var cTW = Math.max(2, Math.round(wFt) + 1);
+                    for (var eti = 0; eti < cTW; eti++) {
+                        addEyelet(bx + (eti / (cTW - 1)) * bw, by + inset);
+                    }
+                } else if (eLower.indexOf('2 top corners') !== -1 || eLower.indexOf('2top') !== -1) {
+                    addEyelet(bx + inset, by + inset);
+                    addEyelet(bx + bw - inset, by + inset);
+                } else if (eLower.indexOf('all sides') !== -1 || eLower.indexOf('all-sides') !== -1) {
+                    var cAS = Math.max(2, Math.round(wFt) + 1);
+                    var cASh = Math.max(2, Math.round(hFt) + 1);
+                    for (var ai = 0; ai < cAS; ai++) {
+                        var ax = bx + (ai / (cAS - 1)) * bw;
+                        addEyelet(ax, by + inset);
+                        addEyelet(ax, by + bh - inset);
+                    }
+                    for (var aj = 1; aj < cASh - 1; aj++) {
+                        var ay = by + (aj / (cASh - 1)) * bh;
+                        addEyelet(bx + inset, ay);
+                        addEyelet(bx + bw - inset, ay);
+                    }
+                } else {
+                    // Fallback: 4 corners
+                    addEyelet(bx + inset, by + inset);
+                    addEyelet(bx + bw - inset, by + inset);
+                    addEyelet(bx + inset, by + bh - inset);
+                    addEyelet(bx + bw - inset, by + bh - inset);
+                }
+            }
+
+            // CABLE TIES.
+            var cableTies = attrs['pa_cable-ties'] || '';
+            if ((cableTies === 'yes' || cableTies === 'included') && eyeletPositions.length > 0) {
+                for (var ci = 0; ci < eyeletPositions.length; ci++) {
+                    var ep = eyeletPositions[ci];
+                    var loopR = 7;
+                    var centerX = bx + bw / 2;
+                    var centerY = by + bh / 2;
+                    var dx = ep.cx - centerX;
+                    var dy = ep.cy - centerY;
+                    var len = Math.sqrt(dx*dx + dy*dy) || 1;
+                    var nx = dx / len;
+                    var ny = dy / len;
+                    var lx = ep.cx + nx * (loopR + 3);
+                    var ly = ep.cy + ny * (loopR + 3);
+
+                    svg += '<circle cx="' + lx + '" cy="' + ly + '" r="' + loopR + '" fill="none" stroke="#39B54A" stroke-width="1.5" opacity="0.7" stroke-dasharray="2 2"/>';
+                    svg += '<line x1="' + ep.cx + '" y1="' + ep.cy + '" x2="' + (lx - nx * (loopR - 2)) + '" y2="' + (ly - ny * (loopR - 2)) + '" stroke="#39B54A" stroke-width="1.2" opacity="0.5"/>';
+                }
+            }
+
+            // Dimension labels.
+            var arrowY = by + bh + 18;
+            svg += '<line x1="' + bx + '" y1="' + arrowY + '" x2="' + (bx + bw) + '" y2="' + arrowY + '" stroke="#BFC4CE" stroke-width="1"/>';
+            svg += '<text x="' + (bx + bw/2) + '" y="' + (arrowY + 14) + '" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#8892A0" font-weight="500">' + wDisp + abbr + '</text>';
+
+            var arrowX = bx - 14;
+            svg += '<line x1="' + arrowX + '" y1="' + by + '" x2="' + arrowX + '" y2="' + (by + bh) + '" stroke="#BFC4CE" stroke-width="1"/>';
+            svg += '<text x="' + arrowX + '" y="' + (by + bh/2 + 3) + '" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#8892A0" font-weight="500" transform="rotate(-90,' + arrowX + ',' + (by + bh/2) + ')">' + hDisp + abbr + '</text>';
+
+            svg += '</svg>';
+
+            this.canvasEl.html(svg);
+            this.updateLegend();
         }
     };
 
     // Initialise on DOM ready.
     $(document).ready(function() {
         BannerCalc.init();
+        BannerCalcPreview.init();
 
-        // Relocate Personalize link + file uploader into the design accordion.
-        var $slot = $('#bannercalc-design-slot');
-        if ($slot.length) {
+        // Relocate Personalize link into the "Design Online" panel.
+        var $personalizeSlot = $('#bannercalc-personalize-slot');
+        if ($personalizeSlot.length) {
             var $personalize = $('form.cart a.product_type_customizable');
-            var $uploader    = $('form.cart .wc-dnd-file-upload');
-            var hasContent   = false;
-
             if ($personalize.length) {
-                $personalize.appendTo($slot);
-                hasContent = true;
+                $personalize.appendTo($personalizeSlot);
             }
-            if ($uploader.length) {
-                $uploader.appendTo($slot);
-                hasContent = true;
-            }
+        }
 
-            // Hide accordion entirely if nothing to show.
-            if (!hasContent) {
-                $('#bannercalc-design-accordion').hide();
+        // Relocate file uploader into the "Upload Files" panel.
+        var $uploadSlot = $('#bannercalc-design-slot');
+        if ($uploadSlot.length) {
+            var $uploader = $('form.cart .wc-dnd-file-upload');
+            if ($uploader.length) {
+                $uploader.appendTo($uploadSlot);
+            }
+        }
+
+        // Hide design mode panels if their content is empty.
+        if (!$('#bannercalc-personalize-slot').children().length) {
+            // If no personalize button, grey-out the "Design Online" pill.
+            $('.bannercalc-design-pill[data-design-mode="online"]').css('opacity', '0.4').attr('title', 'Online designer not available for this product');
+        }
+        if (!$('#bannercalc-design-slot').children().length && !$('#bannercalc-design-upload').find('.wc-dnd-file-upload').length) {
+            // If no uploader, keep the panel but show a placeholder.
+            if (!$('#bannercalc-design-slot').children().length) {
+                $('#bannercalc-design-slot').html('<p style="color:#8892A0;font-size:13px;">File upload not available for this product.</p>');
             }
         }
     });

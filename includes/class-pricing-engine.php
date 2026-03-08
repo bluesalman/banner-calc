@@ -39,7 +39,7 @@ class PricingEngine {
      *     calculated_price: float,
      * }
      */
-    public function calculate( array $config, float $width_m, float $height_m, array $selected_attributes, ?array $preset = null ): array {
+    public function calculate( array $config, float $width_m, float $height_m, array $selected_attributes, ?array $preset = null, string $service_type = 'standard', bool $design_service = false ): array {
         // Calculate area.
         $area_sqft = $this->units->area_sqft( $width_m, $height_m );
         $area_sqm  = $this->units->area_sqm( $width_m, $height_m );
@@ -91,15 +91,47 @@ class PricingEngine {
             $addons_total += $addon_price;
         }
 
-        $calculated_price = $base_price + $addons_total;
+        // Design service add-on (added to addons_total so it's subject to service markup).
+        $design_service_price = 0.0;
+        if ( $design_service ) {
+            $global_settings      = \BannerCalc\Plugin::get_settings();
+            $ds_config            = $global_settings['design_service'] ?? [];
+            $design_service_price = ( ! empty( $ds_config['enabled'] ) ) ? (float) ( $ds_config['price'] ?? 0 ) : 0.0;
+            $addons_total        += $design_service_price;
+        }
+
+        // Service type markup.
+        $service_markup_pct = 0.0;
+        $service_markup_amt = 0.0;
+
+        if ( $service_type !== 'standard' ) {
+            $global_settings = $global_settings ?? \BannerCalc\Plugin::get_settings();
+            $service_types   = $global_settings['service_types'] ?? [];
+            foreach ( $service_types as $st ) {
+                if ( ( $st['slug'] ?? '' ) === $service_type ) {
+                    $service_markup_pct = (float) ( $st['markup'] ?? 0 );
+                    break;
+                }
+            }
+            if ( $service_markup_pct > 0 ) {
+                $service_markup_amt = ( $base_price + $addons_total ) * ( $service_markup_pct / 100 );
+            }
+        }
+
+        $calculated_price = $base_price + $addons_total + $service_markup_amt;
 
         return [
-            'area_sqft'        => round( $area_sqft, 4 ),
-            'area_sqm'         => round( $area_sqm, 4 ),
-            'base_price'       => round( $base_price, 2 ),
-            'addons'           => $addons,
-            'addons_total'     => round( $addons_total, 2 ),
-            'calculated_price' => round( $calculated_price, 2 ),
+            'area_sqft'           => round( $area_sqft, 4 ),
+            'area_sqm'            => round( $area_sqm, 4 ),
+            'base_price'          => round( $base_price, 2 ),
+            'addons'              => $addons,
+            'addons_total'        => round( $addons_total, 2 ),
+            'design_service'      => $design_service,
+            'design_service_price' => round( $design_service_price, 2 ),
+            'service_type'        => $service_type,
+            'service_markup_pct'  => round( $service_markup_pct, 2 ),
+            'service_markup_amt'  => round( $service_markup_amt, 2 ),
+            'calculated_price'    => round( $calculated_price, 2 ),
         ];
     }
 

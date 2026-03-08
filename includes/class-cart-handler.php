@@ -99,8 +99,12 @@ class CartHandler {
             }
         }
 
+        // Sanitize service type and design service.
+        $service_type   = sanitize_text_field( $raw['service_type'] ?? 'standard' );
+        $design_service = ! empty( $raw['design_service'] );
+
         // Server-side price calculation (prevents client manipulation).
-        $result = $this->pricing->calculate( $config, $width_m, $height_m, $attrs, $preset );
+        $result = $this->pricing->calculate( $config, $width_m, $height_m, $attrs, $preset, $service_type, $design_service );
 
         // Build human-readable size label.
         $unit_abbr  = [ 'mm' => 'mm', 'cm' => 'cm', 'inch' => 'in', 'ft' => 'ft', 'm' => 'm' ];
@@ -112,19 +116,24 @@ class CartHandler {
         }
 
         $cart_item_data['bannercalc'] = [
-            'sizing_mode'      => $sizing_mode,
-            'preset_slug'      => $preset_slug,
-            'unit'             => $unit,
-            'width_raw'        => $width_raw,
-            'height_raw'       => $height_raw,
-            'width_m'          => $width_m,
-            'height_m'         => $height_m,
-            'size_label'       => $size_label,
-            'area_sqft'        => $result['area_sqft'],
-            'selected_attrs'   => $attrs,
-            'base_price'       => $result['base_price'],
-            'addons_total'     => $result['addons_total'],
-            'calculated_price' => $result['calculated_price'],
+            'sizing_mode'          => $sizing_mode,
+            'preset_slug'          => $preset_slug,
+            'unit'                 => $unit,
+            'width_raw'            => $width_raw,
+            'height_raw'           => $height_raw,
+            'width_m'              => $width_m,
+            'height_m'             => $height_m,
+            'size_label'           => $size_label,
+            'area_sqft'            => $result['area_sqft'],
+            'selected_attrs'       => $attrs,
+            'base_price'           => $result['base_price'],
+            'addons_total'         => $result['addons_total'],
+            'design_service'       => $result['design_service'],
+            'design_service_price' => $result['design_service_price'],
+            'service_type'         => $result['service_type'],
+            'service_markup_pct'   => $result['service_markup_pct'],
+            'service_markup_amt'   => $result['service_markup_amt'],
+            'calculated_price'     => $result['calculated_price'],
         ];
 
         return $cart_item_data;
@@ -183,6 +192,31 @@ class CartHandler {
             }
         }
 
+        // Design service.
+        if ( ! empty( $bc['design_service'] ) ) {
+            $item_data[] = [
+                'key'   => __( 'Design Service', 'bannercalc' ),
+                'value' => __( 'Professional Design', 'bannercalc' ) . ' (+£' . number_format( (float) ( $bc['design_service_price'] ?? 0 ), 2 ) . ')',
+            ];
+        }
+
+        // Service type.
+        if ( ! empty( $bc['service_type'] ) && $bc['service_type'] !== 'standard' ) {
+            $settings      = \BannerCalc\Plugin::get_settings();
+            $service_types = $settings['service_types'] ?? [];
+            $st_label      = $bc['service_type'];
+            foreach ( $service_types as $st ) {
+                if ( ( $st['slug'] ?? '' ) === $bc['service_type'] ) {
+                    $st_label = $st['label'] . ' (+' . (int) $st['markup'] . '%)';
+                    break;
+                }
+            }
+            $item_data[] = [
+                'key'   => __( 'Delivery', 'bannercalc' ),
+                'value' => $st_label,
+            ];
+        }
+
         return $item_data;
     }
 
@@ -221,6 +255,13 @@ class CartHandler {
             echo "\n" . esc_html__( 'BannerCalc:', 'bannercalc' ) . "\n";
             echo esc_html__( 'Size: ', 'bannercalc' ) . esc_html( $bc['size_label'] ?? '' ) . "\n";
             echo esc_html__( 'Area: ', 'bannercalc' ) . esc_html( $bc['area_sqft'] ?? 0 ) . " sqft\n";
+
+            if ( ! empty( $bc['design_service'] ) ) {
+                echo esc_html__( 'Design Service: Professional Design (+£', 'bannercalc' ) . number_format( (float) ( $bc['design_service_price'] ?? 0 ), 2 ) . ")\n";
+            }
+            if ( ! empty( $bc['service_type'] ) && $bc['service_type'] !== 'standard' ) {
+                echo esc_html__( 'Delivery: ', 'bannercalc' ) . esc_html( $bc['service_type'] ) . " (+" . (int) ( $bc['service_markup_pct'] ?? 0 ) . "%)\n";
+            }
         } else {
             echo '<div class="bannercalc-order-meta" style="margin-top:8px;font-size:12px;color:#555;">';
             echo '<strong>' . esc_html__( 'BannerCalc:', 'bannercalc' ) . '</strong><br/>';
@@ -234,6 +275,22 @@ class CartHandler {
                     $value = $term ? $term->name : $slug;
                     echo esc_html( $label ) . ': ' . esc_html( $value ) . '<br/>';
                 }
+            }
+
+            if ( ! empty( $bc['design_service'] ) ) {
+                echo esc_html__( 'Design Service: Professional Design (+£', 'bannercalc' ) . number_format( (float) ( $bc['design_service_price'] ?? 0 ), 2 ) . ')<br/>';
+            }
+            if ( ! empty( $bc['service_type'] ) && $bc['service_type'] !== 'standard' ) {
+                $settings      = \BannerCalc\Plugin::get_settings();
+                $service_types = $settings['service_types'] ?? [];
+                $st_display    = $bc['service_type'];
+                foreach ( $service_types as $st ) {
+                    if ( ( $st['slug'] ?? '' ) === $bc['service_type'] ) {
+                        $st_display = $st['label'] . ' (+' . (int) $st['markup'] . '%)';
+                        break;
+                    }
+                }
+                echo esc_html__( 'Delivery: ', 'bannercalc' ) . esc_html( $st_display ) . '<br/>';
             }
 
             echo '</div>';

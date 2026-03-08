@@ -1,6 +1,6 @@
 # BannerCalc — Plugin Functions & Features Documentation
 
-**Version:** 1.4.2  
+**Version:** 1.5.0  
 **Requires:** WordPress 6.4+ · WooCommerce 8.0+ · PHP 8.0+  
 **License:** GPL-2.0-or-later
 
@@ -117,7 +117,7 @@ bannercalc/
 
 | Constant                    | Value                            | Description                            |
 | --------------------------- | -------------------------------- | -------------------------------------- |
-| `BANNERCALC_VERSION`        | `'1.4.2'`                        | Current plugin version                 |
+| `BANNERCALC_VERSION`        | `'1.5.0'`                        | Current plugin version                 |
 | `BANNERCALC_PLUGIN_FILE`    | `__FILE__`                        | Absolute path to main plugin file      |
 | `BANNERCALC_PLUGIN_DIR`     | `plugin_dir_path(__FILE__)`       | Plugin directory path (with trailing /) |
 | `BANNERCALC_PLUGIN_URL`     | `plugin_dir_url(__FILE__)`        | Plugin URL (with trailing /)           |
@@ -134,6 +134,8 @@ Sets default global settings in `wp_options` if they don't exist:
 - `default_unit` → `'ft'`
 - `available_units` → `['mm', 'cm', 'inch', 'ft', 'm']`
 - `price_display_decimals` → `2`
+- `service_types` → 3-tier array (standard 0%, urgent-48 15%, urgent-24 25%)
+- `design_service` → `{ enabled: false, label, price: 14.99, description }`
 
 Flushes rewrite rules.
 
@@ -1008,6 +1010,21 @@ Per-product override interface within the product edit screen metabox.
     'default_unit'           => string,    // 'mm'|'cm'|'inch'|'ft'|'m'
     'available_units'        => string[],  // Subset of above
     'price_display_decimals' => int,       // 0–4
+    'service_types'          => [
+        [
+            'slug'    => string,           // e.g., 'standard'
+            'label'   => string,           // e.g., 'Standard'
+            'markup'  => float,            // Percentage markup (0, 15, 25)
+            'default' => bool,             // Is the default selection
+        ],
+        // ... more tiers
+    ],
+    'design_service'         => [
+        'enabled'     => bool,
+        'label'       => string,           // e.g., 'Professional Design'
+        'price'       => float,            // e.g., 14.99
+        'description' => string,
+    ],
 ]
 ```
 
@@ -1099,6 +1116,14 @@ $cart_item_data['bannercalc'] = [
     'selected_attrs'   => ['pa_hemming' => 'yes', ...],
     'base_price'       => float,
     'addons_total'     => float,
+    'design_service'   => bool,
+    'design_service_price' => float,    // 0 if not selected
+    'design_mode'      => string,       // 'upload'|'online'|'pro'
+    'design_brief'     => string,       // Pro design brief text
+    'design_colours'   => string,       // Pro design colour preferences
+    'service_type'     => string,       // e.g., 'standard', 'urgent-48'
+    'service_markup_pct' => float,      // e.g., 15
+    'service_markup_amt' => float,      // Markup amount in currency
     'calculated_price' => float,        // Final price used by WooCommerce
 ]
 ```
@@ -1132,6 +1157,7 @@ Same structure as cart item meta, persisted to the order on checkout via `woocom
 | `woocommerce_before_add_to_cart_quantity` (1)  | `ProductDisplay`        | Open quantity flex row                           |
 | `woocommerce_after_add_to_cart_button` (99)    | `ProductDisplay`        | Close quantity flex row                          |
 | `woocommerce_before_single_product`            | `ProductDisplay`        | Suppress WC variation form                       |
+| `woocommerce_before_single_product` (30)       | `ProductDisplay`        | Render SVG banner preview container              |
 | `woocommerce_before_calculate_totals` (20)     | `CartHandler`           | Override cart item prices                        |
 | `woocommerce_checkout_create_order_line_item`  | `CartHandler`           | Persist data to order                            |
 | `woocommerce_order_item_meta_end`              | `CartHandler`           | Display config in order/emails                   |
@@ -1182,14 +1208,23 @@ Same structure as cart item meta, persisted to the order on checkout via `woocom
 │        if pricing_type == 'percentage':            │
 │            addon += base_price × (modifier / 100)  │
 │                                                    │
-│ 6. FINAL PRICE                                     │
-│    calculated_price = base_price + addons_total    │
+│ 5.5 DESIGN SERVICE                                 │
+│    if design_service enabled + selected:           │
+│        addons_total += design_service_price        │
+│                                                    │
+│ 6. SERVICE MARKUP                                  │
+│    service_markup_pct = lookup(service_type)       │
+│    subtotal = base_price + addons_total            │
+│    service_markup_amt = subtotal × (pct / 100)     │
+│                                                    │
+│ 7. FINAL PRICE                                     │
+│    calculated_price = subtotal + service_markup_amt│
 └────────────────────────────────────────────────────┘
 ```
 
 ### Example Calculation
 
-For a **2.5ft × 4ft** custom vinyl banner at **£1.60/sqft** with hemming (Yes, +£5) and pole pockets (Top & Bottom, +£5):
+For a **2.5ft × 4ft** custom vinyl banner at **£1.60/sqft** with hemming (Yes, +£5), pole pockets (Top & Bottom, +£5), Pro Design (+£14.99), and Urgent 48hr delivery (+15%):
 
 | Step               | Computation                            | Result    |
 | ------------------ | -------------------------------------- | --------- |
@@ -1200,8 +1235,11 @@ For a **2.5ft × 4ft** custom vinyl banner at **£1.60/sqft** with hemming (Yes,
 | Base price         | 10.00 × £1.60                          | £16.00    |
 | Hemming (fixed)    | +£5.00                                 | £5.00     |
 | Pole Pockets (fixed)| +£5.00                                | £5.00     |
-| Add-ons total      | £5.00 + £5.00                          | £10.00    |
-| **Calculated price** | £16.00 + £10.00                      | **£26.00** |
+| Design Service     | +£14.99                                | £14.99    |
+| Add-ons total      | £5.00 + £5.00 + £14.99                 | £24.99    |
+| Subtotal           | £16.00 + £24.99                        | £40.99    |
+| Service markup     | £40.99 × 15%                           | £6.15     |
+| **Calculated price** | £40.99 + £6.15                       | **£47.14** |
 
 ---
 
@@ -1227,6 +1265,9 @@ Executed when the plugin is deleted (not just deactivated). Removes all plugin d
 - [x] Three add-on pricing types: fixed, per-sqft, percentage
 - [x] Server-side price recalculation (never trusts client)
 - [x] Live frontend price calculation with breakdown display
+- [x] Service type / delivery speed markup (standard, urgent-48h, urgent-24h)
+- [x] Professional design service add-on pricing
+- [x] Design service subject to service markup
 
 ### Size Configuration
 - [x] Preset sizes with clickable card grid
@@ -1261,6 +1302,8 @@ Executed when the plugin is deleted (not just deactivated). Removes all plugin d
 - [x] Top-level admin menu with branded SVG icon
 - [x] Dashboard with status overview and quick links
 - [x] Global settings page with WordPress Settings API
+- [x] Service types & design service configuration in global settings
+- [x] Per-attribute pricing UI on category config page (type, default, required, per-term modifiers)
 - [x] Split-panel category management page
 - [x] Per-product metabox with override capabilities
 - [x] Preset size importer with UK popular sizes seed data
@@ -1285,7 +1328,10 @@ Executed when the plugin is deleted (not just deactivated). Removes all plugin d
 
 ### Frontend UX
 - [x] Branded card-based layout
-- [x] Design accordion for file upload/personalize integration
+- [x] 3-way design mode selector (Upload Files / Design Online / Pro Design)
+- [x] Service type pill selector with urgent tint styling
+- [x] Interactive SVG banner preview (eyelets, pole pockets, hemming, cable ties)
+- [x] Preview tab switcher (Product Image / Your Banner)
 - [x] Flex-row quantity + add to cart button wrapper
 - [x] 300ms debounced dimension inputs
 - [x] Real-time validation with error styling

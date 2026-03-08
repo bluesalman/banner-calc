@@ -111,6 +111,112 @@ $all_units = \BannerCalc\UnitConverter::get_unit_labels();
             </table>
         </div>
 
+        <div class="bannercalc-section-block">
+            <h2 class="bannercalc-section-heading"><?php esc_html_e( 'Service Types / Delivery Speed', 'bannercalc' ); ?></h2>
+            <p class="bannercalc-field-hint" style="margin-bottom:12px;">
+                <?php esc_html_e( 'Configure delivery speed tiers. The markup percentage is applied to the calculated price (base + add-ons).', 'bannercalc' ); ?>
+            </p>
+            <?php
+            $service_types = $settings['service_types'] ?? [
+                [ 'slug' => 'standard',  'label' => 'Standard Delivery',    'markup' => 0,  'default' => true ],
+                [ 'slug' => 'urgent-48', 'label' => 'Urgent — 48 Hours', 'markup' => 15, 'default' => false ],
+                [ 'slug' => 'urgent-24', 'label' => 'Urgent — 24 Hours', 'markup' => 25, 'default' => false ],
+            ];
+            $default_slug = 'standard';
+            foreach ( $service_types as $st ) {
+                if ( ! empty( $st['default'] ) ) {
+                    $default_slug = $st['slug'];
+                    break;
+                }
+            }
+            ?>
+            <table class="form-table bannercalc-form-table">
+                <?php foreach ( $service_types as $si => $st ) : ?>
+                <tr>
+                    <th scope="row" style="width:50px;">
+                        <label>
+                            <input type="radio"
+                                   name="bannercalc_settings[service_types_default]"
+                                   value="<?php echo esc_attr( $st['slug'] ); ?>"
+                                   <?php checked( $default_slug, $st['slug'] ); ?> />
+                            <?php esc_html_e( 'Default', 'bannercalc' ); ?>
+                        </label>
+                    </th>
+                    <td>
+                        <input type="hidden" name="bannercalc_settings[service_types][<?php echo $si; ?>][slug]"
+                               value="<?php echo esc_attr( $st['slug'] ); ?>" />
+                        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+                            <label style="font-size:12px;">
+                                <?php esc_html_e( 'Label:', 'bannercalc' ); ?>
+                                <input type="text"
+                                       name="bannercalc_settings[service_types][<?php echo $si; ?>][label]"
+                                       value="<?php echo esc_attr( $st['label'] ); ?>"
+                                       class="regular-text" style="width:220px;" />
+                            </label>
+                            <label style="font-size:12px;">
+                                <?php esc_html_e( 'Markup %:', 'bannercalc' ); ?>
+                                <input type="number"
+                                       name="bannercalc_settings[service_types][<?php echo $si; ?>][markup]"
+                                       value="<?php echo esc_attr( $st['markup'] ); ?>"
+                                       step="0.1" min="0" max="100" class="small-text" style="width:70px;" />
+                            </label>
+                        </div>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+            </table>
+        </div>
+
+        <div class="bannercalc-section-block">
+            <h2 class="bannercalc-section-heading"><?php esc_html_e( 'Professional Design Service', 'bannercalc' ); ?></h2>
+            <?php
+            $design_service = $settings['design_service'] ?? [
+                'enabled' => true, 'label' => 'Professional Design Service', 'price' => 14.99, 'description' => '',
+            ];
+            ?>
+            <table class="form-table bannercalc-form-table">
+                <tr>
+                    <th scope="row"><?php esc_html_e( 'Enable', 'bannercalc' ); ?></th>
+                    <td>
+                        <label class="bannercalc-toggle-label">
+                            <input type="checkbox"
+                                   name="bannercalc_settings[design_service][enabled]"
+                                   value="1"
+                                   <?php checked( ! empty( $design_service['enabled'] ) ); ?> />
+                            <?php esc_html_e( 'Offer professional design service to customers', 'bannercalc' ); ?>
+                        </label>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row"><?php esc_html_e( 'Label', 'bannercalc' ); ?></th>
+                    <td>
+                        <input type="text"
+                               name="bannercalc_settings[design_service][label]"
+                               value="<?php echo esc_attr( $design_service['label'] ); ?>"
+                               class="regular-text" />
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row"><?php esc_html_e( 'Price (£)', 'bannercalc' ); ?></th>
+                    <td>
+                        <input type="number"
+                               name="bannercalc_settings[design_service][price]"
+                               value="<?php echo esc_attr( $design_service['price'] ); ?>"
+                               step="0.01" min="0" class="small-text" />
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row"><?php esc_html_e( 'Description', 'bannercalc' ); ?></th>
+                    <td>
+                        <input type="text"
+                               name="bannercalc_settings[design_service][description]"
+                               value="<?php echo esc_attr( $design_service['description'] ); ?>"
+                               class="regular-text" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+
         <div class="bannercalc-form-actions">
             <?php submit_button( __( 'Save Settings', 'bannercalc' ), 'bannercalc-btn-primary', 'submit', false ); ?>
         </div>

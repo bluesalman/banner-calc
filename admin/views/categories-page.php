@@ -74,7 +74,25 @@ if ( isset( $_POST['bannercalc_category_save'] ) && wp_verify_nonce( $_POST['_wp
         );
 
         $config['enabled_attributes'] = array_map( 'sanitize_text_field', (array) ( $raw['enabled_attributes'] ?? [] ) );
-        $config['attribute_pricing']  = $raw['attribute_pricing'] ?? [];
+
+        // Sanitize attribute pricing.
+        $raw_attr_pricing = (array) ( $raw['attribute_pricing'] ?? [] );
+        $sanitized_attr_pricing = [];
+        foreach ( $raw_attr_pricing as $ap_tax => $ap_data ) {
+            $ap_tax = sanitize_text_field( $ap_tax );
+            $sanitized_attr_pricing[ $ap_tax ] = [
+                'pricing_type'  => sanitize_text_field( $ap_data['pricing_type'] ?? 'fixed' ),
+                'default_value' => sanitize_text_field( $ap_data['default_value'] ?? '' ),
+                'required'      => ! empty( $ap_data['required'] ),
+                'values'        => [],
+            ];
+            if ( ! empty( $ap_data['values'] ) && is_array( $ap_data['values'] ) ) {
+                foreach ( $ap_data['values'] as $term_slug => $modifier ) {
+                    $sanitized_attr_pricing[ $ap_tax ]['values'][ sanitize_text_field( $term_slug ) ] = (float) $modifier;
+                }
+            }
+        }
+        $config['attribute_pricing'] = $sanitized_attr_pricing;
 
         // Preset sizes — parse repeater rows.
         $preset_sizes = [];
@@ -370,6 +388,92 @@ if ( $editing_cat_id ) {
                                     <?php endforeach;
                                 else : ?>
                                     <p class="bannercalc-field-hint"><?php esc_html_e( 'No WooCommerce attributes found.', 'bannercalc' ); ?></p>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+
+                        <!-- Attribute Pricing -->
+                        <tr>
+                            <th scope="row"><?php esc_html_e( 'Attribute Pricing', 'bannercalc' ); ?></th>
+                            <td>
+                                <?php
+                                $enabled_attr_list = (array) ( $editing_config['enabled_attributes'] ?? [] );
+                                $saved_attr_pricing = (array) ( $editing_config['attribute_pricing'] ?? [] );
+
+                                if ( ! empty( $enabled_attr_list ) ) :
+                                    foreach ( $enabled_attr_list as $ea_tax ) :
+                                        $ea_label = wc_attribute_label( $ea_tax );
+                                        $ea_terms = $attr_mgr->get_attribute_terms( $ea_tax );
+                                        $ea_conf  = $saved_attr_pricing[ $ea_tax ] ?? [];
+                                        $ea_pricing_type = $ea_conf['pricing_type'] ?? 'fixed';
+                                        $ea_values       = $ea_conf['values'] ?? [];
+                                        $ea_default      = $ea_conf['default_value'] ?? '';
+                                        $ea_required     = ! empty( $ea_conf['required'] );
+
+                                        if ( empty( $ea_terms ) ) continue;
+                                ?>
+                                    <div class="bannercalc-attr-pricing-block" style="margin-bottom:20px;padding:14px 16px;border:1px solid #e2e4e7;border-radius:8px;background:#fafbfc;">
+                                        <h4 style="margin:0 0 10px;font-size:13px;font-weight:700;color:#1e1e1e;">
+                                            <?php echo esc_html( $ea_label ); ?>
+                                            <code style="font-size:11px;color:#8892A0;font-weight:400;margin-left:6px;"><?php echo esc_html( $ea_tax ); ?></code>
+                                        </h4>
+                                        <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:10px;">
+                                            <label style="font-size:12px;">
+                                                <?php esc_html_e( 'Pricing Type:', 'bannercalc' ); ?>
+                                                <select name="bannercalc_category[attribute_pricing][<?php echo esc_attr( $ea_tax ); ?>][pricing_type]" style="margin-left:4px;">
+                                                    <option value="fixed" <?php selected( $ea_pricing_type, 'fixed' ); ?>><?php esc_html_e( 'Fixed (£)', 'bannercalc' ); ?></option>
+                                                    <option value="per_sqft" <?php selected( $ea_pricing_type, 'per_sqft' ); ?>><?php esc_html_e( 'Per sqft (£)', 'bannercalc' ); ?></option>
+                                                    <option value="percentage" <?php selected( $ea_pricing_type, 'percentage' ); ?>><?php esc_html_e( 'Percentage (%)', 'bannercalc' ); ?></option>
+                                                </select>
+                                            </label>
+                                            <label style="font-size:12px;">
+                                                <?php esc_html_e( 'Default Value:', 'bannercalc' ); ?>
+                                                <select name="bannercalc_category[attribute_pricing][<?php echo esc_attr( $ea_tax ); ?>][default_value]" style="margin-left:4px;">
+                                                    <option value=""><?php esc_html_e( '— None —', 'bannercalc' ); ?></option>
+                                                    <?php foreach ( $ea_terms as $eat ) : ?>
+                                                        <option value="<?php echo esc_attr( $eat['slug'] ); ?>" <?php selected( $ea_default, $eat['slug'] ); ?>>
+                                                            <?php echo esc_html( $eat['name'] ); ?>
+                                                        </option>
+                                                    <?php endforeach; ?>
+                                                </select>
+                                            </label>
+                                            <label style="font-size:12px;">
+                                                <input type="checkbox"
+                                                       name="bannercalc_category[attribute_pricing][<?php echo esc_attr( $ea_tax ); ?>][required]"
+                                                       value="1"
+                                                       <?php checked( $ea_required ); ?> />
+                                                <?php esc_html_e( 'Required', 'bannercalc' ); ?>
+                                            </label>
+                                        </div>
+                                        <table style="width:100%;border-collapse:collapse;">
+                                            <thead>
+                                                <tr>
+                                                    <th style="text-align:left;padding:4px 8px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#8892A0;"><?php esc_html_e( 'Term', 'bannercalc' ); ?></th>
+                                                    <th style="text-align:left;padding:4px 8px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#8892A0;"><?php esc_html_e( 'Slug', 'bannercalc' ); ?></th>
+                                                    <th style="text-align:left;padding:4px 8px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#8892A0;"><?php esc_html_e( 'Modifier', 'bannercalc' ); ?></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <?php foreach ( $ea_terms as $eat ) : ?>
+                                                    <tr>
+                                                        <td style="padding:3px 8px;font-size:13px;"><?php echo esc_html( $eat['name'] ); ?></td>
+                                                        <td style="padding:3px 8px;font-size:12px;color:#8892A0;"><?php echo esc_html( $eat['slug'] ); ?></td>
+                                                        <td style="padding:3px 8px;">
+                                                            <input type="number"
+                                                                   name="bannercalc_category[attribute_pricing][<?php echo esc_attr( $ea_tax ); ?>][values][<?php echo esc_attr( $eat['slug'] ); ?>]"
+                                                                   value="<?php echo esc_attr( $ea_values[ $eat['slug'] ] ?? '' ); ?>"
+                                                                   step="0.01" min="0" style="width:90px;"
+                                                                   placeholder="0.00" />
+                                                        </td>
+                                                    </tr>
+                                                <?php endforeach; ?>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                <?php
+                                    endforeach;
+                                else : ?>
+                                    <p class="bannercalc-field-hint"><?php esc_html_e( 'Enable attributes above, then save to configure pricing for each.', 'bannercalc' ); ?></p>
                                 <?php endif; ?>
                             </td>
                         </tr>

@@ -3,7 +3,7 @@
  * Plugin Name: BannerCalc
  * Plugin URI:  https://github.com/your-repo/bannercalc
  * Description: Product Configurator & Pricing Engine for WooCommerce. Replaces variation-based configuration with a unified pricing engine using area-based calculations and attribute modifiers.
- * Version:     1.4.3
+ * Version:     1.5.0
  * Author:      BannerCalc
  * Author URI:  https://github.com/your-repo/bannercalc
  * License:     GPL-2.0-or-later
@@ -23,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Plugin constants.
  */
-define( 'BANNERCALC_VERSION', '1.4.2' );
+define( 'BANNERCALC_VERSION', '1.5.0' );
 define( 'BANNERCALC_PLUGIN_FILE', __FILE__ );
 define( 'BANNERCALC_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'BANNERCALC_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
@@ -41,6 +41,17 @@ function bannercalc_activate() {
             'default_unit'           => 'ft',
             'available_units'        => [ 'mm', 'cm', 'inch', 'ft', 'm' ],
             'price_display_decimals' => 2,
+            'service_types'          => [
+                [ 'slug' => 'standard',  'label' => 'Standard Delivery',    'markup' => 0,  'default' => true ],
+                [ 'slug' => 'urgent-48', 'label' => 'Urgent — 48 Hours', 'markup' => 15, 'default' => false ],
+                [ 'slug' => 'urgent-24', 'label' => 'Urgent — 24 Hours', 'markup' => 25, 'default' => false ],
+            ],
+            'design_service'         => [
+                'enabled'     => true,
+                'label'       => 'Professional Design Service',
+                'price'       => 14.99,
+                'description' => 'Our team will create a professional design for your banner',
+            ],
         ] );
     }
 

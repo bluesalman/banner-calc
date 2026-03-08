@@ -187,6 +187,32 @@ class Plugin {
             'default_unit'           => 'ft',
             'available_units'        => [ 'mm', 'cm', 'inch', 'ft', 'm' ],
             'price_display_decimals' => 2,
+            'service_types'          => [
+                [
+                    'slug'    => 'standard',
+                    'label'   => 'Standard Delivery',
+                    'markup'  => 0,
+                    'default' => true,
+                ],
+                [
+                    'slug'    => 'urgent-48',
+                    'label'   => 'Urgent — 48 Hours',
+                    'markup'  => 15,
+                    'default' => false,
+                ],
+                [
+                    'slug'    => 'urgent-24',
+                    'label'   => 'Urgent — 24 Hours',
+                    'markup'  => 25,
+                    'default' => false,
+                ],
+            ],
+            'design_service'         => [
+                'enabled'     => true,
+                'label'       => 'Professional Design Service',
+                'price'       => 14.99,
+                'description' => 'Our team will create a professional design for your banner',
+            ],
         ];
 
         $settings = get_option( 'bannercalc_settings', [] );

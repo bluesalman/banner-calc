@@ -113,6 +113,37 @@ class SettingsPage {
             $sanitized['available_units'] = [ 'ft' ];
         }
 
+        // Service types.
+        $service_types = [];
+        $raw_st = $input['service_types'] ?? [];
+        if ( is_array( $raw_st ) ) {
+            foreach ( $raw_st as $st ) {
+                $service_types[] = [
+                    'slug'    => sanitize_text_field( $st['slug'] ?? '' ),
+                    'label'   => sanitize_text_field( $st['label'] ?? '' ),
+                    'markup'  => max( 0, (float) ( $st['markup'] ?? 0 ) ),
+                    'default' => ! empty( $st['default'] ),
+                ];
+            }
+        }
+        if ( ! empty( $service_types ) ) {
+            // Apply default radio selection.
+            $default_radio = sanitize_text_field( $input['service_types_default'] ?? 'standard' );
+            foreach ( $service_types as &$st_item ) {
+                $st_item['default'] = ( $st_item['slug'] === $default_radio );
+            }
+            unset( $st_item );
+            $sanitized['service_types'] = $service_types;
+        }
+
+        // Design service.
+        $sanitized['design_service'] = [
+            'enabled'     => ! empty( $input['design_service']['enabled'] ),
+            'label'       => sanitize_text_field( $input['design_service']['label'] ?? 'Professional Design Service' ),
+            'price'       => max( 0, (float) ( $input['design_service']['price'] ?? 14.99 ) ),
+            'description' => sanitize_text_field( $input['design_service']['description'] ?? '' ),
+        ];
+
         return $sanitized;
     }
 
