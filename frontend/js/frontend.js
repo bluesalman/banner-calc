@@ -701,25 +701,36 @@
                 setTimeout(function() { self.detectUploadedImage(); }, 500);
             });
 
-            // Listen for drop events on the upload zone to capture dragged files via FileReader.
-            var $dropZone = $('.wc-dnd-file-upload, .codedropz-upload-handler, #bannercalc-design-upload');
-            if ($dropZone.length) {
-                $dropZone[0].addEventListener('drop', function(e) {
-                    var dt = e.dataTransfer;
-                    if (dt && dt.files && dt.files.length > 0) {
-                        var file = dt.files[0];
-                        if (file.type && file.type.indexOf('image/') === 0) {
-                            var reader = new FileReader();
-                            reader.onload = function(ev) {
-                                self.uploadedImageUrl = ev.target.result;
-                                self.render();
-                                self.switchToPreview();
-                            };
-                            reader.readAsDataURL(file);
-                        }
+            // Capture-phase drop listener on document — fires before any plugin
+            // handler can call stopImmediatePropagation, ensuring we always get
+            // the dropped file for preview regardless of how CodeDropz handles it.
+            document.addEventListener('drop', function(e) {
+                // Only act when the drop target is inside our upload area.
+                var inside = !!(
+                    $(e.target).closest('#bannercalc-design-upload, .wc-dnd-file-upload, .codedropz-upload-handler').length
+                );
+                if (!inside) return;
+
+                var dt = e.dataTransfer;
+                if (dt && dt.files && dt.files.length > 0) {
+                    var file = dt.files[0];
+                    if (file.type && file.type.indexOf('image/') === 0) {
+                        var reader = new FileReader();
+                        reader.onload = function(ev) {
+                            self.uploadedImageUrl = ev.target.result;
+                            self.render();
+                            self.switchToPreview();
+                        };
+                        reader.readAsDataURL(file);
                     }
-                }, false);
-            }
+                }
+            }, true); // ← capture phase
+
+            // Also detect when file input changes (covers both click-to-browse and
+            // any plugin that programmatically sets the input).
+            $(document).on('change', '.wc-dnd-file-upload input[type="file"], .codedropz-upload-handler input[type="file"]', function() {
+                setTimeout(function() { self.detectUploadedImage(); }, 300);
+            });
         },
 
         /**
