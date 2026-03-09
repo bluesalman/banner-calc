@@ -647,6 +647,8 @@
         panelEl: null,
         canvasEl: null,
         galleryEl: null,
+        uploadedImageUrl: null,
+        uploadObserver: null,
 
         init: function() {
             this.tabsEl   = $('#bannercalc-preview-tabs');
@@ -665,7 +667,107 @@
             }
 
             this.bindEvents();
+            this.watchUploads();
             this.initialized = true;
+        },
+
+        /**
+         * Watch the DnD file upload plugin for newly uploaded images.
+         * Detects uploads by observing DOM mutations and polling for thumbnails/URLs.
+         */
+        watchUploads: function() {
+            var self = this;
+
+            // Poll periodically — the DnD plugin adds elements dynamically after AJAX.
+            setInterval(function() {
+                self.detectUploadedImage();
+            }, 1500);
+
+            // Also use MutationObserver for faster detection.
+            var target = document.querySelector('#bannercalc-design-upload') || document.querySelector('.wc-dnd-file-upload');
+            if (target && window.MutationObserver) {
+                this.uploadObserver = new MutationObserver(function() {
+                    self.detectUploadedImage();
+                });
+                this.uploadObserver.observe(target, { childList: true, subtree: true });
+            }
+
+            // Hook into codedropz custom events if available.
+            $(document).on('dnd_upload_complete dndUploadFinished', function() {
+                setTimeout(function() { self.detectUploadedImage(); }, 500);
+            });
+        },
+
+        /**
+         * Detect the first uploaded image URL from the DnD upload plugin.
+         */
+        detectUploadedImage: function() {
+            var newUrl = null;
+
+            // Strategy 1: Look for thumbnail images in the upload list.
+            var $thumbs = $('.dnd-upload-image img, .dnd-upload-details .dnd-upload-image img, .wc-dnd-file-upload .dnd-upload-image img');
+            if ($thumbs.length) {
+                var src = $thumbs.first().attr('src') || '';
+                if (src && src.indexOf('data:') !== 0 && src.indexOf('blob:') !== 0) {
+                    newUrl = src;
+                }
+            }
+
+            // Strategy 2: Look for hidden inputs with uploaded file URLs.
+            if (!newUrl) {
+                var $hiddens = $('.dnd-upload-details input[type="hidden"], .wc-dnd-file-upload input[type="hidden"]');
+                $hiddens.each(function() {
+                    var val = $(this).val() || '';
+                    if (val && /\.(jpg|jpeg|png|gif|webp|svg|bmp)/i.test(val)) {
+                        newUrl = val;
+                        return false; // break
+                    }
+                });
+            }
+
+            // Strategy 3: Look for data-file-url or data-url attributes.
+            if (!newUrl) {
+                var $items = $('.dnd-upload-details [data-file-url], .dnd-upload-details [data-url], .wc-dnd-file-upload [data-file-url]');
+                $items.each(function() {
+                    var val = $(this).data('file-url') || $(this).data('url') || '';
+                    if (val && /\.(jpg|jpeg|png|gif|webp|svg|bmp)/i.test(val)) {
+                        newUrl = val;
+                        return false;
+                    }
+                });
+            }
+
+            // Strategy 4: FileReader for local preview from the actual file input.
+            if (!newUrl) {
+                var $fileInput = $('.wc-dnd-file-upload input[type="file"], .codedropz-upload-handler input[type="file"]');
+                if ($fileInput.length && $fileInput[0].files && $fileInput[0].files.length > 0) {
+                    var file = $fileInput[0].files[0];
+                    if (file.type && file.type.indexOf('image/') === 0 && !this.uploadedImageUrl) {
+                        var self = this;
+                        var reader = new FileReader();
+                        reader.onload = function(e) {
+                            if (!self.uploadedImageUrl) {
+                                self.uploadedImageUrl = e.target.result;
+                                self.render();
+                                self.switchToPreview();
+                            }
+                        };
+                        reader.readAsDataURL(file);
+                        return; // async — will re-render on load
+                    }
+                }
+            }
+
+            // Update if changed.
+            if (newUrl && newUrl !== this.uploadedImageUrl) {
+                this.uploadedImageUrl = newUrl;
+                this.render();
+                this.switchToPreview();
+            } else if (!newUrl && this.uploadedImageUrl) {
+                // Files were removed.
+                this.uploadedImageUrl = null;
+                this.render();
+            }
         },
 
         bindEvents: function() {
@@ -767,21 +869,24 @@
             // Update size label.
             $('#bannercalc-preview-size').text(wDisp + abbr + ' × ' + hDisp + abbr);
 
-            // Calculate SVG dimensions — scale to fit container.
-            var containerW = this.canvasEl.width() - 40 || 400;
-            var maxW = Math.min(containerW, 500);
-            var maxH = 260;
-            var scale = Math.min(maxW / wFt, maxH / hFt);
+            // Calculate SVG dimensions — scale to fill available width.
+            var containerW = this.canvasEl.width() || 500;
+            var padTop = 28;   // space for width label on top
+            var padRight = 30; // space for height label on right
+            var padBottom = 15;
+            var padLeft = 15;
+            var availW = containerW - padLeft - padRight;
+            var availH = 600; // generous max; auto-height will handle it
+            var scale = Math.min(availW / wFt, availH / hFt);
             var bw = wFt * scale;
             var bh = hFt * scale;
-            var pad = 36;
-            var svgW = bw + pad * 2;
-            var svgH = bh + pad * 2 + 24; // extra for dimension labels
+            var svgW = bw + padLeft + padRight;
+            var svgH = bh + padTop + padBottom;
 
             var attrs = state.selectedAttributes;
             var noneVals = ['none', 'no', ''];
 
-            var svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + svgW + ' ' + svgH + '" width="' + svgW + '" height="' + svgH + '">';
+            var svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + svgW + ' ' + svgH + '" width="100%" preserveAspectRatio="xMidYMid meet">';
 
             // Defs.
             svg += '<defs>';
@@ -798,9 +903,10 @@
             svg += '<filter id="bcShadow" x="-5%" y="-5%" width="110%" height="115%">';
             svg += '<feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="rgba(0,0,0,0.12)"/>';
             svg += '</filter>';
+            svg += '<clipPath id="bcBannerClip"><rect x="' + padLeft + '" y="' + padTop + '" width="' + bw + '" height="' + bh + '" rx="3"/></clipPath>';
             svg += '</defs>';
 
-            var bx = pad, by = pad;
+            var bx = padLeft, by = padTop;
 
             // Banner body.
             svg += '<rect x="' + bx + '" y="' + by + '" width="' + bw + '" height="' + bh + '" rx="3" fill="#f0f0f0" filter="url(#bcShadow)" stroke="#d0d0d0" stroke-width="0.5"/>';
@@ -812,9 +918,16 @@
                 svg += '<rect x="' + bx + '" y="' + by + '" width="' + bw + '" height="' + bh + '" rx="3" fill="url(#bcGloss)"/>';
             }
 
-            // Placeholder text.
-            svg += '<text x="' + (bx + bw/2) + '" y="' + (by + bh/2 - 10) + '" text-anchor="middle" font-family="Outfit, sans-serif" font-size="18" font-weight="700" fill="#a0a0a0" letter-spacing="2">YOUR DESIGN</text>';
-            svg += '<text x="' + (bx + bw/2) + '" y="' + (by + bh/2 + 14) + '" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#b0b0b0" font-weight="500" letter-spacing="0.5">' + wDisp + abbr + ' × ' + hDisp + abbr + '</text>';
+            // User-uploaded image or placeholder text.
+            if (this.uploadedImageUrl) {
+                svg += '<image href="' + this.uploadedImageUrl.replace(/&/g, '&amp;').replace(/"/g, '&quot;') + '" x="' + bx + '" y="' + by + '" width="' + bw + '" height="' + bh + '" preserveAspectRatio="xMidYMid slice" clip-path="url(#bcBannerClip)"/>';
+                // Subtle dimension overlay at bottom.
+                svg += '<rect x="' + bx + '" y="' + (by + bh - 28) + '" width="' + bw + '" height="28" fill="rgba(0,0,0,0.45)" rx="0"/>';
+                svg += '<text x="' + (bx + bw/2) + '" y="' + (by + bh - 9) + '" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#ffffff" font-weight="600" letter-spacing="0.5">' + wDisp + abbr + ' × ' + hDisp + abbr + '</text>';
+            } else {
+                svg += '<text x="' + (bx + bw/2) + '" y="' + (by + bh/2 - 10) + '" text-anchor="middle" font-family="Outfit, sans-serif" font-size="18" font-weight="700" fill="#a0a0a0" letter-spacing="2">YOUR DESIGN</text>';
+                svg += '<text x="' + (bx + bw/2) + '" y="' + (by + bh/2 + 14) + '" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#b0b0b0" font-weight="500" letter-spacing="0.5">' + wDisp + abbr + ' × ' + hDisp + abbr + '</text>';
+            }
 
             // HEMMING.
             var hemming = attrs['pa_hemming'] || '';
@@ -1008,14 +1121,14 @@
                 }
             }
 
-            // Dimension labels.
-            var arrowY = by + bh + 18;
+            // Dimension labels — Width on TOP, Height on RIGHT.
+            var arrowY = by - 12;
             svg += '<line x1="' + bx + '" y1="' + arrowY + '" x2="' + (bx + bw) + '" y2="' + arrowY + '" stroke="#8892A0" stroke-width="1"/>';
-            svg += '<text x="' + (bx + bw/2) + '" y="' + (arrowY + 16) + '" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#555E6E" font-weight="600">' + wDisp + abbr + '</text>';
+            svg += '<text x="' + (bx + bw/2) + '" y="' + (arrowY - 6) + '" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#555E6E" font-weight="600">' + wDisp + abbr + '</text>';
 
-            var arrowX = bx - 16;
+            var arrowX = bx + bw + 14;
             svg += '<line x1="' + arrowX + '" y1="' + by + '" x2="' + arrowX + '" y2="' + (by + bh) + '" stroke="#8892A0" stroke-width="1"/>';
-            svg += '<text x="' + arrowX + '" y="' + (by + bh/2 + 3) + '" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#555E6E" font-weight="600" transform="rotate(-90,' + arrowX + ',' + (by + bh/2) + ')">' + hDisp + abbr + '</text>';
+            svg += '<text x="' + arrowX + '" y="' + (by + bh/2 + 3) + '" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#555E6E" font-weight="600" transform="rotate(90,' + arrowX + ',' + (by + bh/2) + ')">' + hDisp + abbr + '</text>';
 
             svg += '</svg>';
 

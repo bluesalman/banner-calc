@@ -86,22 +86,6 @@ if ( ! empty( $preset_sizes ) ) {
 
         <div class="bannercalc-dimension-inputs">
             <div class="bannercalc-dimension-field">
-                <label for="bannercalc-width"><?php esc_html_e( 'Width', 'bannercalc' ); ?></label>
-                <div class="bannercalc-input-group">
-                    <input type="number"
-                           id="bannercalc-width"
-                           class="bannercalc-dim-input"
-                           step="0.01"
-                           min="0.01"
-                           placeholder="0.00"
-                           data-dimension="width" />
-                    <span class="bannercalc-unit-label" id="bannercalc-width-unit"><?php echo esc_html( $default_unit ); ?></span>
-                </div>
-            </div>
-
-            <span class="bannercalc-dimension-separator">&times;</span>
-
-            <div class="bannercalc-dimension-field">
                 <label for="bannercalc-height"><?php esc_html_e( 'Height', 'bannercalc' ); ?></label>
                 <div class="bannercalc-input-group">
                     <input type="number"
@@ -112,6 +96,22 @@ if ( ! empty( $preset_sizes ) ) {
                            placeholder="0.00"
                            data-dimension="height" />
                     <span class="bannercalc-unit-label" id="bannercalc-height-unit"><?php echo esc_html( $default_unit ); ?></span>
+                </div>
+            </div>
+
+            <span class="bannercalc-dimension-separator">&times;</span>
+
+            <div class="bannercalc-dimension-field">
+                <label for="bannercalc-width"><?php esc_html_e( 'Width', 'bannercalc' ); ?></label>
+                <div class="bannercalc-input-group">
+                    <input type="number"
+                           id="bannercalc-width"
+                           class="bannercalc-dim-input"
+                           step="0.01"
+                           min="0.01"
+                           placeholder="0.00"
+                           data-dimension="width" />
+                    <span class="bannercalc-unit-label" id="bannercalc-width-unit"><?php echo esc_html( $default_unit ); ?></span>
                 </div>
             </div>
         </div>
