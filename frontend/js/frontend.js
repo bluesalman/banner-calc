@@ -1002,7 +1002,19 @@
             var svgW = padLeft + pocketPxLeft + bw + pocketPxRight + padRight;
             var svgH = padTop + pocketPxTop + bh + pocketPxBot + padBottom;
 
-            var svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + svgW + ' ' + svgH + '" width="100%" preserveAspectRatio="xMidYMid meet">';
+            // Smart width: for landscape/square use 100%, for portrait cap rendered height at 660px.
+            var maxRenderedH = 660;
+            var renderedHAt100 = containerW * (svgH / svgW);
+            var svgWidthAttr;
+            if (renderedHAt100 > maxRenderedH) {
+                // Portrait: constrain width so rendered height = 660px.
+                var constrainedW = Math.round(maxRenderedH * (svgW / svgH));
+                svgWidthAttr = constrainedW + 'px';
+            } else {
+                svgWidthAttr = '100%';
+            }
+
+            var svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + svgW + ' ' + svgH + '" width="' + svgWidthAttr + '" preserveAspectRatio="xMidYMid meet">';
 
             // Defs.
             svg += '<defs>';

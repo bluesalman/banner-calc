@@ -1579,8 +1579,9 @@ form.cart .single_add_to_cart_button:active {
 .bannercalc-preview-canvas svg {
     filter: drop-shadow(0 4px 16px rgba(0,0,0,0.10)) drop-shadow(0 1px 4px rgba(0,0,0,0.06));
     transition: all 0.4s ease;
-    width: 100%;
+    max-width: 100%;
     height: auto;
+    display: block;
 }
 .bannercalc-preview-legend {
     padding: 10px 20px 14px;
