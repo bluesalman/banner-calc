@@ -677,18 +677,22 @@
          */
         watchUploads: function() {
             var self = this;
+            var debounceTimer = null;
+
+            function debouncedDetect() {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(function() {
+                    self.detectUploadedImage();
+                }, 350);
+            }
 
             // Poll periodically — the DnD plugin adds elements dynamically after AJAX.
-            setInterval(function() {
-                self.detectUploadedImage();
-            }, 1500);
+            setInterval(debouncedDetect, 2500);
 
             // Also use MutationObserver for faster detection.
             var target = document.querySelector('#bannercalc-design-upload') || document.querySelector('.wc-dnd-file-upload');
             if (target && window.MutationObserver) {
-                this.uploadObserver = new MutationObserver(function() {
-                    self.detectUploadedImage();
-                });
+                this.uploadObserver = new MutationObserver(debouncedDetect);
                 this.uploadObserver.observe(target, { childList: true, subtree: true });
             }
 
@@ -704,56 +708,65 @@
         detectUploadedImage: function() {
             var newUrl = null;
 
-            // Strategy 1: Look for thumbnail images in the upload list.
-            var $thumbs = $('.dnd-upload-image img, .dnd-upload-details .dnd-upload-image img, .wc-dnd-file-upload .dnd-upload-image img');
-            if ($thumbs.length) {
-                var src = $thumbs.first().attr('src') || '';
-                if (src && src.indexOf('data:') !== 0 && src.indexOf('blob:') !== 0) {
-                    newUrl = src;
+            // Determine whether uploaded file items are still present in the DOM.
+            var hasUploadedFiles = $('.dnd-upload-details, .codedropz-upload-handler .dnd-upload-status, .wc-dnd-file-upload .dnd-upload-image').length > 0;
+
+            if (hasUploadedFiles) {
+                // Strategy 1: Look for thumbnail images in the upload list.
+                var $thumbs = $('.dnd-upload-image img, .dnd-upload-details .dnd-upload-image img, .wc-dnd-file-upload .dnd-upload-image img');
+                if ($thumbs.length) {
+                    var src = $thumbs.first().attr('src') || '';
+                    if (src && src.indexOf('blob:') !== 0) {
+                        newUrl = src;
+                    }
                 }
-            }
 
-            // Strategy 2: Look for hidden inputs with uploaded file URLs.
-            if (!newUrl) {
-                var $hiddens = $('.dnd-upload-details input[type="hidden"], .wc-dnd-file-upload input[type="hidden"]');
-                $hiddens.each(function() {
-                    var val = $(this).val() || '';
-                    if (val && /\.(jpg|jpeg|png|gif|webp|svg|bmp)/i.test(val)) {
-                        newUrl = val;
-                        return false; // break
-                    }
-                });
-            }
+                // Strategy 2: Look for hidden inputs with uploaded file URLs.
+                if (!newUrl) {
+                    var $hiddens = $('.dnd-upload-details input[type="hidden"], .wc-dnd-file-upload input[type="hidden"]');
+                    $hiddens.each(function() {
+                        var val = $(this).val() || '';
+                        if (val && /\.(jpg|jpeg|png|gif|webp|svg|bmp)/i.test(val)) {
+                            newUrl = val;
+                            return false; // break
+                        }
+                    });
+                }
 
-            // Strategy 3: Look for data-file-url or data-url attributes.
-            if (!newUrl) {
-                var $items = $('.dnd-upload-details [data-file-url], .dnd-upload-details [data-url], .wc-dnd-file-upload [data-file-url]');
-                $items.each(function() {
-                    var val = $(this).data('file-url') || $(this).data('url') || '';
-                    if (val && /\.(jpg|jpeg|png|gif|webp|svg|bmp)/i.test(val)) {
-                        newUrl = val;
-                        return false;
-                    }
-                });
-            }
+                // Strategy 3: Look for data-file-url or data-url attributes.
+                if (!newUrl) {
+                    var $items = $('.dnd-upload-details [data-file-url], .dnd-upload-details [data-url], .wc-dnd-file-upload [data-file-url]');
+                    $items.each(function() {
+                        var val = $(this).data('file-url') || $(this).data('url') || '';
+                        if (val && /\.(jpg|jpeg|png|gif|webp|svg|bmp)/i.test(val)) {
+                            newUrl = val;
+                            return false;
+                        }
+                    });
+                }
 
-            // Strategy 4: FileReader for local preview from the actual file input.
-            if (!newUrl) {
-                var $fileInput = $('.wc-dnd-file-upload input[type="file"], .codedropz-upload-handler input[type="file"]');
-                if ($fileInput.length && $fileInput[0].files && $fileInput[0].files.length > 0) {
-                    var file = $fileInput[0].files[0];
-                    if (file.type && file.type.indexOf('image/') === 0 && !this.uploadedImageUrl) {
-                        var self = this;
-                        var reader = new FileReader();
-                        reader.onload = function(e) {
-                            if (!self.uploadedImageUrl) {
+                // Strategy 4: If we already hold a data: URL from FileReader, keep it
+                // as long as the upload items are still in the DOM.
+                if (!newUrl && this.uploadedImageUrl) {
+                    newUrl = this.uploadedImageUrl;
+                }
+
+                // Strategy 5: FileReader for first-time local preview.
+                if (!newUrl) {
+                    var $fileInput = $('.wc-dnd-file-upload input[type="file"], .codedropz-upload-handler input[type="file"]');
+                    if ($fileInput.length && $fileInput[0].files && $fileInput[0].files.length > 0) {
+                        var file = $fileInput[0].files[0];
+                        if (file.type && file.type.indexOf('image/') === 0) {
+                            var self = this;
+                            var reader = new FileReader();
+                            reader.onload = function(e) {
                                 self.uploadedImageUrl = e.target.result;
                                 self.render();
                                 self.switchToPreview();
-                            }
-                        };
-                        reader.readAsDataURL(file);
-                        return; // async — will re-render on load
+                            };
+                            reader.readAsDataURL(file);
+                            return; // async — will re-render on load
+                        }
                     }
                 }
             }
@@ -764,7 +777,7 @@
                 this.render();
                 this.switchToPreview();
             } else if (!newUrl && this.uploadedImageUrl) {
-                // Files were removed.
+                // Upload items removed from DOM — clear preview.
                 this.uploadedImageUrl = null;
                 this.render();
             }

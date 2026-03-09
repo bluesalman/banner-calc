@@ -1556,6 +1556,8 @@ form.cart .single_add_to_cart_button:active {
     align-items: center;
     justify-content: center;
     min-height: 120px;
+    max-height: 660px;
+    overflow: hidden;
     padding: 10px;
     background:
         radial-gradient(circle at 20% 30%, rgba(61,166,249,0.03) 0%, transparent 50%),
