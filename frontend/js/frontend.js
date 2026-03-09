@@ -1214,38 +1214,14 @@
                 }
             }
 
-            // CIRCLE STICKER OVERLAY — adds corner mask and border on top of normal rendering.
-            if (isCircle) {
-                var circCx = bx + bw / 2;
-                var circCy = by + bh / 2;
-                var circR = Math.min(bw, bh) / 2;
-                // Corner mask: evenodd path = outer rect minus inner circle. Fills corners with canvas bg.
-                svg += '<path d="M ' + bx + ' ' + by + ' H ' + (bx + bw) + ' V ' + (by + bh) + ' H ' + bx + ' Z ';
-                svg += 'M ' + circCx + ' ' + (circCy - circR) + ' ';
-                svg += 'A ' + circR + ' ' + circR + ' 0 1 0 ' + circCx + ' ' + (circCy + circR) + ' ';
-                svg += 'A ' + circR + ' ' + circR + ' 0 1 0 ' + circCx + ' ' + (circCy - circR) + ' Z" ';
-                svg += 'fill="#f5f5f7" fill-rule="evenodd"/>';
-                // Circle border.
-                svg += '<circle cx="' + circCx + '" cy="' + circCy + '" r="' + circR + '" fill="none" stroke="#c0c4cc" stroke-width="1"/>';
-                // Inner dashed guide circle.
-                svg += '<circle cx="' + circCx + '" cy="' + circCy + '" r="' + (circR - 4) + '" fill="none" stroke="rgba(61,166,249,0.2)" stroke-width="0.8" stroke-dasharray="6 4"/>';
-            }
-
             // Dimension labels — Width on TOP, Height on RIGHT.
-            if (isCircle) {
-                // Circle: single diameter label on top.
-                var arrowY = by - pocketPxTop - 12;
-                svg += '<line x1="' + bx + '" y1="' + arrowY + '" x2="' + (bx + bw) + '" y2="' + arrowY + '" stroke="#8892A0" stroke-width="1"/>';
-                svg += '<text x="' + (bx + bw/2) + '" y="' + (arrowY - 6) + '" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#555E6E" font-weight="600">\u2300 ' + wDisp + abbr + '</text>';
-            } else {
-                var arrowY = by - pocketPxTop - 12;
-                svg += '<line x1="' + bx + '" y1="' + arrowY + '" x2="' + (bx + bw) + '" y2="' + arrowY + '" stroke="#8892A0" stroke-width="1"/>';
-                svg += '<text x="' + (bx + bw/2) + '" y="' + (arrowY - 6) + '" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#555E6E" font-weight="600">' + wDisp + abbr + '</text>';
+            var arrowY = by - pocketPxTop - 12;
+            svg += '<line x1="' + bx + '" y1="' + arrowY + '" x2="' + (bx + bw) + '" y2="' + arrowY + '" stroke="#8892A0" stroke-width="1"/>';
+            svg += '<text x="' + (bx + bw/2) + '" y="' + (arrowY - 6) + '" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#555E6E" font-weight="600">' + wDisp + abbr + '</text>';
 
-                var arrowX = bx + bw + pocketPxRight + 14;
-                svg += '<line x1="' + arrowX + '" y1="' + by + '" x2="' + arrowX + '" y2="' + (by + bh) + '" stroke="#8892A0" stroke-width="1"/>';
-                svg += '<text x="' + arrowX + '" y="' + (by + bh/2 + 3) + '" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#555E6E" font-weight="600" transform="rotate(90,' + arrowX + ',' + (by + bh/2) + ')">' + hDisp + abbr + '</text>';
-            }
+            var arrowX = bx + bw + pocketPxRight + 14;
+            svg += '<line x1="' + arrowX + '" y1="' + by + '" x2="' + arrowX + '" y2="' + (by + bh) + '" stroke="#8892A0" stroke-width="1"/>';
+            svg += '<text x="' + arrowX + '" y="' + (by + bh/2 + 3) + '" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#555E6E" font-weight="600" transform="rotate(90,' + arrowX + ',' + (by + bh/2) + ')">' + hDisp + abbr + '</text>';
 
             svg += '</svg>';
 
