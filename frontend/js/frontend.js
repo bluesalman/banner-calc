@@ -860,10 +860,9 @@
             var svgEl = this.canvasEl.find('svg');
             if (svgEl.length) {
                 var clone = svgEl[0].cloneNode(true);
-                // Let CSS handle sizing in the fullscreen container.
+                // Remove inline width constraint — let CSS max-width/max-height fit to viewport.
                 clone.removeAttribute('width');
-                clone.setAttribute('width', '100%');
-                clone.setAttribute('height', '100%');
+                clone.removeAttribute('height');
                 $canvas.empty().append(clone);
             }
 
