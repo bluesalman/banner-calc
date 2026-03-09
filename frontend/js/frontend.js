@@ -882,19 +882,49 @@
             // Update size label.
             $('#bannercalc-preview-size').text(wDisp + abbr + ' × ' + hDisp + abbr);
 
-            // Calculate SVG dimensions — scale to fill available width.
+            // Determine pole pocket extra space needed outside the banner.
+            var pp = attrs['pa_pole-pockets'] || '';
+            var ppSides = { top: false, bottom: false, left: false, right: false };
+            var pocketInches = 3;
+            if (pp && noneVals.indexOf(pp) === -1) {
+                var depthMatch = pp.match(/(\d+(?:\.\d+)?)\s*[-\s]*(?:inch|inches|")/i);
+                if (!depthMatch) depthMatch = pp.replace(/-/g, ' ').match(/(\d+(?:\.\d+)?)\s*(?:inch|inches|")/i);
+                if (depthMatch) pocketInches = parseFloat(depthMatch[1]);
+                var ppLower = pp.toLowerCase().replace(/-/g, ' ');
+                if (ppLower.indexOf('top') !== -1 || ppLower.indexOf('all') !== -1) ppSides.top = true;
+                if (ppLower.indexOf('bottom') !== -1 || ppLower.indexOf('all') !== -1) ppSides.bottom = true;
+                if (ppLower.indexOf('left') !== -1 || ppLower.indexOf('all') !== -1) ppSides.left = true;
+                if (ppLower.indexOf('right') !== -1 || ppLower.indexOf('all') !== -1) ppSides.right = true;
+                if (ppLower.indexOf('top') !== -1 && ppLower.indexOf('bottom') !== -1) { ppSides.top = true; ppSides.bottom = true; }
+                if (ppLower.indexOf('only') !== -1 && ppLower.indexOf('top') !== -1) { ppSides.top = true; ppSides.bottom = false; }
+                if (!ppSides.top && !ppSides.bottom && !ppSides.left && !ppSides.right) { ppSides.top = true; ppSides.bottom = true; }
+            }
+
+            // Calculate SVG dimensions — scale to fill available width, cap height at 640px.
             var containerW = this.canvasEl.width() || 500;
             var padTop = 28;   // space for width label on top
             var padRight = 30; // space for height label on right
             var padBottom = 15;
             var padLeft = 15;
             var availW = containerW - padLeft - padRight;
-            var availH = 600; // generous max; auto-height will handle it
-            var scale = Math.min(availW / wFt, availH / hFt);
+            var maxBannerH = 640 - padTop - padBottom; // max banner body height
+            var scale = Math.min(availW / wFt, maxBannerH / hFt);
             var bw = wFt * scale;
             var bh = hFt * scale;
-            var svgW = bw + padLeft + padRight;
-            var svgH = bh + padTop + padBottom;
+
+            // Calculate pocket pixel sizes for the outside extension.
+            var pocketPxTop = 0, pocketPxBot = 0, pocketPxLeft = 0, pocketPxRight = 0;
+            if (pp && noneVals.indexOf(pp) === -1) {
+                var bannerHInches = hFt * 12;
+                var bannerWInches = wFt * 12;
+                if (ppSides.top) pocketPxTop = Math.max(12, (pocketInches / bannerHInches) * bh);
+                if (ppSides.bottom) pocketPxBot = Math.max(12, (pocketInches / bannerHInches) * bh);
+                if (ppSides.left) pocketPxLeft = Math.max(12, (pocketInches / bannerWInches) * bw);
+                if (ppSides.right) pocketPxRight = Math.max(12, (pocketInches / bannerWInches) * bw);
+            }
+
+            var svgW = padLeft + pocketPxLeft + bw + pocketPxRight + padRight;
+            var svgH = padTop + pocketPxTop + bh + pocketPxBot + padBottom;
 
             var attrs = state.selectedAttributes;
             var noneVals = ['none', 'no', ''];
@@ -916,10 +946,10 @@
             svg += '<filter id="bcShadow" x="-5%" y="-5%" width="110%" height="115%">';
             svg += '<feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="rgba(0,0,0,0.12)"/>';
             svg += '</filter>';
-            svg += '<clipPath id="bcBannerClip"><rect x="' + padLeft + '" y="' + padTop + '" width="' + bw + '" height="' + bh + '" rx="3"/></clipPath>';
+            svg += '<clipPath id="bcBannerClip"><rect x="' + (padLeft + pocketPxLeft) + '" y="' + (padTop + pocketPxTop) + '" width="' + bw + '" height="' + bh + '" rx="3"/></clipPath>';
             svg += '</defs>';
 
-            var bx = padLeft, by = padTop;
+            var bx = padLeft + pocketPxLeft, by = padTop + pocketPxTop;
 
             // Banner body.
             svg += '<rect x="' + bx + '" y="' + by + '" width="' + bw + '" height="' + bh + '" rx="3" fill="#f0f0f0" filter="url(#bcShadow)" stroke="#d0d0d0" stroke-width="0.5"/>';
@@ -950,57 +980,23 @@
                 svg += '<rect x="' + (bx+6) + '" y="' + (by+6) + '" width="' + (bw-12) + '" height="' + (bh-12) + '" rx="2" fill="none" stroke="#F26522" stroke-width="1.2" stroke-dasharray="2 2" opacity="0.6"/>';
             }
 
-            // POLE POCKETS.
-            var pp = attrs['pa_pole-pockets'] || '';
+            // POLE POCKETS — drawn OUTSIDE the banner body.
             if (pp && noneVals.indexOf(pp) === -1) {
-                // Parse pocket depth from slug — matches "3 inches", "3-inches", "4 Inches", "4\"" etc.
-                var pocketInches = 3; // default
-                var depthMatch = pp.match(/(\d+(?:\.\d+)?)\s*[-\s]*(?:inch|inches|")/i);
-                if (!depthMatch) {
-                    // Also try matching a bare leading number (e.g. slug "3-inches" → after replace: "3 inches").
-                    depthMatch = pp.replace(/-/g, ' ').match(/(\d+(?:\.\d+)?)\s*(?:inch|inches|")/i);
-                }
-                if (depthMatch) pocketInches = parseFloat(depthMatch[1]);
-
-                // Which sides?
-                var sides = { top: false, bottom: false, left: false, right: false };
-                var ppLower = pp.toLowerCase().replace(/-/g, ' ');
-                if (ppLower.indexOf('top') !== -1 || ppLower.indexOf('all') !== -1) sides.top = true;
-                if (ppLower.indexOf('bottom') !== -1 || ppLower.indexOf('all') !== -1) sides.bottom = true;
-                if (ppLower.indexOf('left') !== -1 || ppLower.indexOf('all') !== -1) sides.left = true;
-                if (ppLower.indexOf('right') !== -1 || ppLower.indexOf('all') !== -1) sides.right = true;
-                // "Top & Bottom" or "top-bottom"
-                if (ppLower.indexOf('top') !== -1 && ppLower.indexOf('bottom') !== -1) {
-                    sides.top = true; sides.bottom = true;
-                }
-                // "top-only" or "Top Only"
-                if (ppLower.indexOf('only') !== -1 && ppLower.indexOf('top') !== -1) {
-                    sides.top = true; sides.bottom = false;
-                }
-                // Default: if just a depth number, assume top+bottom.
-                if (!sides.top && !sides.bottom && !sides.left && !sides.right) {
-                    sides.top = true; sides.bottom = true;
-                }
-
-                var bannerHInches = hFt * 12;
-                var pocketPx = Math.max(12, (pocketInches / bannerHInches) * bh);
                 var pLabel = pocketInches + '\u2033 pocket';
 
-                if (sides.top) {
-                    svg += '<rect x="' + bx + '" y="' + by + '" width="' + bw + '" height="' + pocketPx + '" fill="url(#bcPocketHash)" stroke="rgba(249,110,180,0.4)" stroke-width="1"/>';
-                    svg += '<text x="' + (bx + bw/2) + '" y="' + (by + pocketPx/2 + 3) + '" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="rgba(249,110,180,0.7)" font-weight="500">' + pLabel + '</text>';
+                if (ppSides.top) {
+                    svg += '<rect x="' + bx + '" y="' + (by - pocketPxTop) + '" width="' + bw + '" height="' + pocketPxTop + '" fill="url(#bcPocketHash)" stroke="rgba(249,110,180,0.4)" stroke-width="1"/>';
+                    svg += '<text x="' + (bx + bw/2) + '" y="' + (by - pocketPxTop/2 + 3) + '" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="rgba(249,110,180,0.7)" font-weight="500">' + pLabel + '</text>';
                 }
-                if (sides.bottom) {
-                    svg += '<rect x="' + bx + '" y="' + (by + bh - pocketPx) + '" width="' + bw + '" height="' + pocketPx + '" fill="url(#bcPocketHash)" stroke="rgba(249,110,180,0.4)" stroke-width="1"/>';
-                    svg += '<text x="' + (bx + bw/2) + '" y="' + (by + bh - pocketPx/2 + 3) + '" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="rgba(249,110,180,0.7)" font-weight="500">' + pLabel + '</text>';
+                if (ppSides.bottom) {
+                    svg += '<rect x="' + bx + '" y="' + (by + bh) + '" width="' + bw + '" height="' + pocketPxBot + '" fill="url(#bcPocketHash)" stroke="rgba(249,110,180,0.4)" stroke-width="1"/>';
+                    svg += '<text x="' + (bx + bw/2) + '" y="' + (by + bh + pocketPxBot/2 + 3) + '" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="rgba(249,110,180,0.7)" font-weight="500">' + pLabel + '</text>';
                 }
-                if (sides.left) {
-                    var lpPx = Math.max(12, (pocketInches / (wFt * 12)) * bw);
-                    svg += '<rect x="' + bx + '" y="' + by + '" width="' + lpPx + '" height="' + bh + '" fill="url(#bcPocketHash)" stroke="rgba(249,110,180,0.4)" stroke-width="1"/>';
+                if (ppSides.left) {
+                    svg += '<rect x="' + (bx - pocketPxLeft) + '" y="' + by + '" width="' + pocketPxLeft + '" height="' + bh + '" fill="url(#bcPocketHash)" stroke="rgba(249,110,180,0.4)" stroke-width="1"/>';
                 }
-                if (sides.right) {
-                    var rpPx = Math.max(12, (pocketInches / (wFt * 12)) * bw);
-                    svg += '<rect x="' + (bx + bw - rpPx) + '" y="' + by + '" width="' + rpPx + '" height="' + bh + '" fill="url(#bcPocketHash)" stroke="rgba(249,110,180,0.4)" stroke-width="1"/>';
+                if (ppSides.right) {
+                    svg += '<rect x="' + (bx + bw) + '" y="' + by + '" width="' + pocketPxRight + '" height="' + bh + '" fill="url(#bcPocketHash)" stroke="rgba(249,110,180,0.4)" stroke-width="1"/>';
                 }
             }
 
@@ -1135,11 +1131,11 @@
             }
 
             // Dimension labels — Width on TOP, Height on RIGHT.
-            var arrowY = by - 12;
+            var arrowY = by - pocketPxTop - 12;
             svg += '<line x1="' + bx + '" y1="' + arrowY + '" x2="' + (bx + bw) + '" y2="' + arrowY + '" stroke="#8892A0" stroke-width="1"/>';
             svg += '<text x="' + (bx + bw/2) + '" y="' + (arrowY - 6) + '" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#555E6E" font-weight="600">' + wDisp + abbr + '</text>';
 
-            var arrowX = bx + bw + 14;
+            var arrowX = bx + bw + pocketPxRight + 14;
             svg += '<line x1="' + arrowX + '" y1="' + by + '" x2="' + arrowX + '" y2="' + (by + bh) + '" stroke="#8892A0" stroke-width="1"/>';
             svg += '<text x="' + arrowX + '" y="' + (by + bh/2 + 3) + '" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#555E6E" font-weight="600" transform="rotate(90,' + arrowX + ',' + (by + bh/2) + ')">' + hDisp + abbr + '</text>';
 
