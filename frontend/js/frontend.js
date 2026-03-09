@@ -952,8 +952,6 @@
             var hDisp = (hM / factor).toFixed(1);
 
             // Update size label.
-            var catSlug = (this.config.categorySlug || '').toLowerCase();
-            var isCircle = catSlug.indexOf('sticker') !== -1 && (state.selectedPreset || '').toLowerCase().indexOf('circle') !== -1;
             $('#bannercalc-preview-size').text(wDisp + abbr + ' × ' + hDisp + abbr);
 
             var attrs = state.selectedAttributes;
