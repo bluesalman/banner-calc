@@ -1480,6 +1480,15 @@ form.cart .single_add_to_cart_button:active {
 .bannercalc-design-mode-pills {
     gap: 8px !important;
 }
+.bannercalc-design-mode-pills .bannercalc-pill {
+    flex-direction: row !important;
+    gap: 5px !important;
+    white-space: nowrap !important;
+}
+.bannercalc-design-mode-pills .bannercalc-pill-price {
+    display: inline !important;
+    margin-top: 0 !important;
+}
 .bannercalc-design-pill.active {
     border-color: var(--bp-cyan) !important;
     background: linear-gradient(135deg, var(--bp-cyan), var(--bp-cyan-dark)) !important;
