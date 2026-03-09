@@ -1,0 +1,2638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="robots" content="noindex, nofollow">
+    <title>Banner Printing — Complete Brand Guide</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ================================================================
+           BANNER PRINTING BRAND TOKENS
+        ================================================================ */
+        :root {
+            /* — Primary — */
+            --bp-black: #1A1A1A;
+            --bp-ink: #2D2D2D;
+            --bp-cyan: #00AEEF;
+            --bp-magenta: #EC008C;
+            --bp-yellow: #FFF200;
+            --bp-key: #1A1A1A;
+            
+            /* — Extended — */
+            --bp-cyan-dark: #0090C9;
+            --bp-cyan-light: #5CC8F5;
+            --bp-magenta-dark: #C70076;
+            --bp-magenta-light: #F266B7;
+            --bp-orange: #F26522;
+            --bp-green: #39B54A;
+            
+            /* — Neutrals — */
+            --bp-white: #FFFFFF;
+            --bp-off-white: #F8F8F9;
+            --bp-light-gray: #EDEFF2;
+            --bp-mid-gray: #BFC4CE;
+            --bp-muted: #8892A0;
+            --bp-dark-gray: #555E6E;
+            
+            /* — Functional — */
+            --bp-success: #39B54A;
+            --bp-warning: #F7941D;
+            --bp-error: #ED1C24;
+            --bp-info: #00AEEF;
+            
+            /* — Gradients — */
+            --bp-gradient-cmyk: linear-gradient(135deg, #00AEEF 0%, #EC008C 50%, #FFF200 100%);
+            --bp-gradient-print: linear-gradient(135deg, #00AEEF 0%, #EC008C 100%);
+            --bp-gradient-dark: linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 100%);
+            
+            /* — Text — */
+            --bp-text-primary: #1A1A1A;
+            --bp-text-secondary: #555E6E;
+            --bp-text-muted: #8892A0;
+            --bp-text-inverse: #FFFFFF;
+            
+            /* — Typography — */
+            --bp-font-display: 'Outfit', -apple-system, sans-serif;
+            --bp-font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            --bp-font-mono: 'IBM Plex Mono', 'SF Mono', monospace;
+            
+            /* — Spacing — */
+            --bp-space-xs: 4px;
+            --bp-space-sm: 8px;
+            --bp-space-md: 16px;
+            --bp-space-lg: 32px;
+            --bp-space-xl: 64px;
+            --bp-space-2xl: 100px;
+            
+            /* — Radius — */
+            --bp-radius-sm: 8px;
+            --bp-radius-md: 14px;
+            --bp-radius-lg: 24px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        
+        body {
+            font-family: var(--bp-font-body);
+            background: var(--bp-white);
+            color: var(--bp-text-primary);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* ================================================================
+           NAVIGATION
+        ================================================================ */
+        .guide-nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(26, 26, 26, 0.96);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 0 48px;
+            display: flex;
+            align-items: center;
+            gap: 32px;
+            border-bottom: 1px solid rgba(0,174,239,0.15);
+        }
+        .guide-nav .nav-logo {
+            height: 28px;
+            margin-right: 20px;
+            padding: 16px 0;
+            box-sizing: content-box;
+        }
+        .guide-nav a {
+            font-family: var(--bp-font-display);
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--bp-muted);
+            text-decoration: none;
+            padding: 20px 0;
+            white-space: nowrap;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+        .guide-nav a:hover {
+            color: var(--bp-white);
+            border-bottom-color: var(--bp-cyan);
+        }
+
+        /* ================================================================
+           SECTION FRAMEWORK
+        ================================================================ */
+        .section {
+            padding: var(--bp-space-2xl) 60px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .section-full {
+            padding: var(--bp-space-2xl) 60px;
+            max-width: 100%;
+        }
+        .section-dark {
+            background: var(--bp-black);
+            color: var(--bp-text-inverse);
+        }
+        .section-gray { background: var(--bp-off-white); }
+
+        .sec-overline {
+            font-family: var(--bp-font-mono);
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--bp-cyan);
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .sec-overline::before {
+            content: '';
+            width: 20px;
+            height: 3px;
+            background: var(--bp-gradient-print);
+            display: inline-block;
+            border-radius: 2px;
+        }
+        .sec-title {
+            font-family: var(--bp-font-display);
+            font-weight: 800;
+            font-size: clamp(30px, 4.5vw, 50px);
+            letter-spacing: -0.5px;
+            line-height: 1.1;
+            margin-bottom: 16px;
+        }
+        .sec-desc {
+            font-size: 16px;
+            font-weight: 400;
+            color: var(--bp-text-secondary);
+            max-width: 700px;
+            line-height: 1.8;
+            margin-bottom: 60px;
+        }
+        .section-dark .sec-desc { color: var(--bp-muted); }
+
+        /* ================================================================
+           HERO / COVER
+        ================================================================ */
+        .hero {
+            min-height: 82vh;
+            background: var(--bp-black);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 80px 40px;
+            position: relative;
+            overflow: hidden;
+        }
+        /* CMYK inspired background */
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -30%;
+            left: -15%;
+            width: 700px;
+            height: 700px;
+            background: radial-gradient(circle, rgba(0,174,239,0.10) 0%, transparent 55%);
+            border-radius: 50%;
+            animation: heroPulse 10s ease-in-out infinite alternate;
+        }
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: -25%;
+            right: -10%;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(236,0,140,0.08) 0%, transparent 55%);
+            border-radius: 50%;
+            animation: heroPulse 12s ease-in-out infinite alternate-reverse;
+        }
+        .hero-yellow-glow {
+            position: absolute;
+            top: 10%;
+            right: 20%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(255,242,0,0.04) 0%, transparent 50%);
+            border-radius: 50%;
+        }
+        @keyframes heroPulse {
+            0% { opacity: 0.6; transform: scale(1); }
+            100% { opacity: 1; transform: scale(1.15); }
+        }
+        
+        /* Halftone-inspired dot pattern */
+        .hero-dots {
+            position: absolute;
+            inset: 0;
+            background-image: radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        
+        .hero-logo {
+            height: 54px;
+            margin-bottom: 44px;
+            position: relative;
+            z-index: 1;
+        }
+        .hero-divider {
+            width: 80px;
+            height: 4px;
+            background: var(--bp-gradient-cmyk);
+            margin: 0 0 32px 0;
+            position: relative;
+            z-index: 1;
+            border-radius: 2px;
+        }
+        .hero h1 {
+            font-family: var(--bp-font-display);
+            font-weight: 900;
+            font-size: clamp(42px, 6.5vw, 76px);
+            color: var(--bp-white);
+            letter-spacing: -1.5px;
+            line-height: 1.05;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+        }
+        .hero h1 .brand-word {
+            display: inline;
+        }
+        .hero h1 .cyan { color: var(--bp-cyan); }
+        .hero h1 .magenta { color: var(--bp-magenta); }
+        .hero h1 .yellow { color: var(--bp-yellow); }
+        .hero p {
+            font-family: var(--bp-font-mono);
+            font-size: 13px;
+            font-weight: 400;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: var(--bp-muted);
+            position: relative;
+            z-index: 1;
+        }
+        .hero-version {
+            font-family: var(--bp-font-mono);
+            font-size: 11px;
+            letter-spacing: 2px;
+            color: var(--bp-muted);
+            margin-top: 48px;
+            opacity: 0.35;
+            position: relative;
+            z-index: 1;
+        }
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 22px;
+            border: 1px solid rgba(0,174,239,0.2);
+            border-radius: 100px;
+            font-family: var(--bp-font-mono);
+            font-size: 11px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--bp-cyan-light);
+            margin-bottom: 28px;
+            position: relative;
+            z-index: 1;
+            background: rgba(0,174,239,0.05);
+        }
+        .hero-badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--bp-cyan);
+            animation: dot-pulse 2s ease-in-out infinite;
+        }
+        @keyframes dot-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.25; }
+        }
+
+        /* CMYK stripe at bottom of hero */
+        .hero-cmyk-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            display: flex;
+            z-index: 2;
+        }
+        .hero-cmyk-bar span {
+            flex: 1;
+        }
+
+        /* ================================================================
+           1. LOGO SECTION
+        ================================================================ */
+        .logo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 60px;
+        }
+        .logo-card {
+            border: 1px solid var(--bp-light-gray);
+            border-radius: var(--bp-radius-md);
+            padding: 60px 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 260px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        .logo-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 36px rgba(0,0,0,0.06);
+        }
+        .logo-card img { max-height: 44px; max-width: 260px; }
+        .logo-card-label {
+            position: absolute;
+            top: 16px; left: 20px;
+            font-family: var(--bp-font-mono);
+            font-size: 10px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--bp-muted);
+        }
+        .logo-card.dark {
+            background: var(--bp-black);
+            border-color: rgba(255,255,255,0.06);
+        }
+        .logo-card.dark .logo-card-label { color: rgba(255,255,255,0.3); }
+        .logo-card.cyan-bg {
+            background: var(--bp-cyan);
+            border-color: var(--bp-cyan-dark);
+        }
+        .logo-card.cyan-bg .logo-card-label { color: rgba(255,255,255,0.6); }
+        .logo-card.gradient-bg {
+            background: linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 60%);
+            border-color: rgba(0,174,239,0.15);
+            overflow: hidden;
+        }
+        .logo-card.gradient-bg::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--bp-gradient-cmyk);
+        }
+        .logo-card.gradient-bg .logo-card-label { color: rgba(255,255,255,0.35); }
+        
+        .logo-rules {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-top: 48px;
+        }
+        .logo-rule {
+            padding: 32px;
+            border: 1px solid var(--bp-light-gray);
+            border-radius: var(--bp-radius-md);
+            background: white;
+            transition: all 0.2s ease;
+        }
+        .logo-rule:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.04); }
+        .logo-rule h4 {
+            font-family: var(--bp-font-display);
+            font-size: 17px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        .logo-rule p { font-size: 14px; color: var(--bp-text-secondary); line-height: 1.7; }
+        .logo-rule .do { color: var(--bp-success); font-weight: 700; }
+        .logo-rule .dont { color: var(--bp-error); font-weight: 700; }
+
+        /* ================================================================
+           2. COLOR PALETTE
+        ================================================================ */
+        .palette-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(195px, 1fr));
+            gap: 18px;
+            margin-bottom: 40px;
+        }
+        .pal-card {
+            border: 1px solid var(--bp-light-gray);
+            border-radius: var(--bp-radius-md);
+            overflow: hidden;
+            background: white;
+            transition: all 0.25s ease;
+        }
+        .pal-card:hover { transform: translateY(-4px); box-shadow: 0 14px 36px rgba(0,0,0,0.08); }
+        .pal-swatch {
+            height: 110px;
+            display: flex;
+            align-items: flex-end;
+            padding: 14px 18px;
+            font-family: var(--bp-font-mono);
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+        .pal-info { padding: 16px 18px; }
+        .pal-info h4 { font-family: var(--bp-font-display); font-size: 15px; font-weight: 700; margin-bottom: 5px; }
+        .pal-info code {
+            font-family: var(--bp-font-mono);
+            font-size: 12px;
+            color: var(--bp-text-muted);
+            background: var(--bp-off-white);
+            padding: 3px 10px;
+            border-radius: 5px;
+            display: inline-block;
+            margin-bottom: 7px;
+        }
+        .pal-info p { font-size: 13px; color: var(--bp-text-secondary); line-height: 1.5; }
+        
+        .palette-combos {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 18px;
+            margin-top: 50px;
+        }
+        .combo-card {
+            height: 165px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+            text-align: center;
+            border-radius: var(--bp-radius-md);
+            position: relative;
+            overflow: hidden;
+        }
+        .combo-card h4 {
+            font-family: var(--bp-font-display);
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+        .combo-card p {
+            font-family: var(--bp-font-mono);
+            font-size: 11px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            opacity: 0.7;
+        }
+
+        /* ================================================================
+           3. TYPOGRAPHY
+        ================================================================ */
+        .type-demo-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 28px;
+            margin-bottom: 60px;
+        }
+        .type-demo-card {
+            padding: 48px;
+            border: 1px solid var(--bp-light-gray);
+            border-radius: var(--bp-radius-md);
+            background: white;
+            position: relative;
+            overflow: hidden;
+        }
+        .type-demo-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--bp-gradient-cmyk);
+        }
+        .type-demo-card .label {
+            font-family: var(--bp-font-mono);
+            font-size: 10px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--bp-cyan);
+            margin-bottom: 24px;
+            margin-top: 4px;
+        }
+        
+        .type-scale {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .type-scale td {
+            padding: 20px 16px;
+            border-bottom: 1px solid var(--bp-light-gray);
+            vertical-align: baseline;
+        }
+        .type-scale .ts-label {
+            width: 160px;
+            font-family: var(--bp-font-mono);
+            font-size: 11px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--bp-cyan);
+            font-weight: 500;
+        }
+        .type-scale .ts-spec {
+            width: 200px;
+            font-family: var(--bp-font-mono);
+            font-size: 11px;
+            color: var(--bp-text-muted);
+            line-height: 1.6;
+        }
+
+        /* ================================================================
+           4. BRAND VOICE
+        ================================================================ */
+        .voice-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 22px;
+        }
+        .voice-card {
+            padding: 36px;
+            border: 1px solid var(--bp-light-gray);
+            border-radius: var(--bp-radius-md);
+            background: white;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.2s ease;
+        }
+        .voice-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.05); transform: translateY(-2px); }
+        .voice-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+        }
+        .voice-card:nth-child(1)::before { background: var(--bp-cyan); }
+        .voice-card:nth-child(2)::before { background: var(--bp-magenta); }
+        .voice-card:nth-child(3)::before { background: var(--bp-yellow); }
+        .voice-card:nth-child(4)::before { background: var(--bp-black); }
+        .voice-card:nth-child(5)::before { background: var(--bp-orange); }
+        .voice-card:nth-child(6)::before { background: var(--bp-green); }
+        .voice-card h4 {
+            font-family: var(--bp-font-display);
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            margin-top: 6px;
+        }
+        .voice-card p {
+            font-size: 14px;
+            color: var(--bp-text-secondary);
+            line-height: 1.8;
+        }
+        .voice-card .voice-icon {
+            font-size: 26px;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        /* ================================================================
+           5. SOCIAL MEDIA TEMPLATES
+        ================================================================ */
+        .templates-intro {
+            background: var(--bp-off-white);
+            padding: 26px 30px;
+            border-left: 4px solid;
+            border-image: var(--bp-gradient-cmyk) 1;
+            border-radius: 0 var(--bp-radius-sm) var(--bp-radius-sm) 0;
+            margin-bottom: 50px;
+            font-size: 14px;
+            line-height: 1.8;
+            color: var(--bp-text-secondary);
+        }
+        .templates-intro strong { color: var(--bp-text-primary); }
+
+        .template-row {
+            margin-bottom: 80px;
+        }
+        .template-row h3 {
+            font-family: var(--bp-font-display);
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .template-row .t-size {
+            font-family: var(--bp-font-mono);
+            font-size: 12px;
+            color: var(--bp-text-muted);
+            letter-spacing: 1px;
+            margin-bottom: 30px;
+        }
+        
+        .template-samples {
+            display: flex;
+            gap: 24px;
+            overflow-x: auto;
+            padding-bottom: 20px;
+        }
+
+        .tmpl {
+            flex-shrink: 0;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            border-radius: var(--bp-radius-md);
+        }
+        .tmpl-label {
+            position: absolute;
+            top: 10px; right: 12px;
+            font-family: var(--bp-font-mono);
+            font-size: 9px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            opacity: 0.5;
+            z-index: 2;
+        }
+
+        /* CMYK stripe reusable */
+        .cmyk-bar {
+            display: flex;
+            height: 4px;
+            width: 100%;
+        }
+        .cmyk-bar span { flex: 1; }
+
+        /* ================================================================
+           6. PROCEDURE / CHECKLIST
+        ================================================================ */
+        .procedure-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+        }
+        .proc-card {
+            background: white;
+            border: 1px solid var(--bp-light-gray);
+            border-radius: var(--bp-radius-md);
+            padding: 40px;
+            position: relative;
+        }
+        .proc-card::before {
+            content: attr(data-step);
+            position: absolute;
+            top: -16px;
+            left: 24px;
+            background: var(--bp-gradient-print);
+            color: white;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--bp-font-display);
+            font-size: 14px;
+            font-weight: 800;
+        }
+        .proc-card h4 {
+            font-family: var(--bp-font-display);
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+        .proc-card p {
+            font-size: 14px;
+            color: var(--bp-text-secondary);
+            line-height: 1.8;
+        }
+        .proc-card ul { margin-top: 12px; padding-left: 18px; }
+        .proc-card li { font-size: 13px; color: var(--bp-text-secondary); line-height: 1.8; }
+
+        /* ================================================================
+           7. CSS TOKENS CODE BLOCK
+        ================================================================ */
+        .code-block {
+            background: #0F1114;
+            color: #C9D1D9;
+            padding: 32px;
+            border-radius: var(--bp-radius-md);
+            overflow-x: auto;
+            font-family: var(--bp-font-mono);
+            font-size: 13px;
+            line-height: 1.9;
+            margin: 30px 0;
+            border: 1px solid rgba(0,174,239,0.1);
+            position: relative;
+        }
+        .code-block::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--bp-gradient-cmyk);
+            border-radius: var(--bp-radius-md) var(--bp-radius-md) 0 0;
+        }
+        .code-block .cm { color: #6E7681; }
+        .code-block .prop { color: #79C0FF; }
+        .code-block .val { color: #A5D6FF; }
+        .code-block .cyan-val { color: var(--bp-cyan); }
+        .code-block .mag-val { color: var(--bp-magenta); }
+
+        /* ================================================================
+           FOOTER
+        ================================================================ */
+        .guide-footer {
+            background: var(--bp-black);
+            padding: 60px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .guide-footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--bp-gradient-cmyk);
+        }
+        .guide-footer img {
+            height: 32px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+        .guide-footer p {
+            font-family: var(--bp-font-mono);
+            font-size: 11px;
+            color: var(--bp-muted);
+            letter-spacing: 2px;
+        }
+
+        /* ================================================================
+           RESPONSIVE
+        ================================================================ */
+        @media (max-width: 900px) {
+            .section { padding: 60px 24px; }
+            .section-full { padding: 60px 24px; }
+            .type-demo-grid, .logo-rules { grid-template-columns: 1fr; }
+            .template-samples { flex-direction: column; align-items: center; }
+            .guide-nav { padding: 0 20px; gap: 16px; overflow-x: auto; }
+        }
+        /* ================================================================
+           BRAND STORY PAGE
+        ================================================================ */
+        .story-page {
+            min-height: 100vh;
+            background: var(--bp-white);
+        }
+
+        /* Story Top Bar */
+        .story-topbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(26, 26, 26, 0.96);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 0 48px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            border-bottom: 1px solid rgba(0,174,239,0.15);
+        }
+        .story-topbar-title {
+            font-family: var(--bp-font-mono);
+            font-size: 11px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--bp-muted);
+            flex: 1;
+        }
+        .story-close-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: none;
+            border: 1px solid rgba(0,174,239,0.25);
+            color: var(--bp-cyan-light);
+            font-family: var(--bp-font-display);
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 8px 18px;
+            border-radius: 100px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+        .story-close-btn:hover {
+            background: var(--bp-cyan);
+            color: white;
+            border-color: var(--bp-cyan);
+        }
+
+        /* Story Hero */
+        .story-hero {
+            min-height: 50vh;
+            background: var(--bp-black);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 80px 40px;
+            position: relative;
+            overflow: hidden;
+        }
+        .story-hero-dots {
+            position: absolute;
+            inset: 0;
+            background-image: radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        .story-hero-glow {
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+        }
+        .story-hero-glow--cyan {
+            top: -20%;
+            left: -10%;
+            background: radial-gradient(circle, rgba(0,174,239,0.08) 0%, transparent 55%);
+        }
+        .story-hero-glow--magenta {
+            bottom: -20%;
+            right: -10%;
+            background: radial-gradient(circle, rgba(236,0,140,0.06) 0%, transparent 55%);
+        }
+        .story-hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 22px;
+            border: 1px solid rgba(0,174,239,0.2);
+            border-radius: 100px;
+            font-family: var(--bp-font-mono);
+            font-size: 11px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--bp-cyan-light);
+            margin-bottom: 28px;
+            position: relative;
+            z-index: 1;
+            background: rgba(0,174,239,0.05);
+        }
+        .story-hero-title {
+            font-family: var(--bp-font-display);
+            font-weight: 900;
+            font-size: clamp(36px, 5.5vw, 64px);
+            color: var(--bp-white);
+            letter-spacing: -1.5px;
+            line-height: 1.05;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+        }
+        .story-hero-sub {
+            font-family: var(--bp-font-mono);
+            font-size: 13px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: var(--bp-muted);
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Story Sections */
+        .story-section {
+            padding: var(--bp-space-2xl) 60px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .story-section--gray {
+            background: var(--bp-off-white);
+            max-width: 100%;
+            padding-left: 60px;
+            padding-right: 60px;
+        }
+        .story-section--gray > * {
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .story-section--dark {
+            background: var(--bp-black);
+            color: var(--bp-white);
+            max-width: 100%;
+            padding-left: 60px;
+            padding-right: 60px;
+        }
+        .story-section--dark > * {
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Story Lead Text */
+        .story-lead {
+            font-size: 19px;
+            line-height: 1.85;
+            color: var(--bp-text-secondary);
+            max-width: 860px;
+            margin-top: -20px;
+        }
+
+        /* Story Prose */
+        .story-prose {
+            max-width: 800px;
+        }
+        .story-prose p {
+            font-size: 16px;
+            line-height: 1.9;
+            color: var(--bp-text-secondary);
+            margin-bottom: 20px;
+        }
+        .story-prose p:first-child {
+            font-size: 18px;
+            color: var(--bp-text-primary);
+        }
+
+        /* Pillars Grid */
+        .story-pillars-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+        }
+        .story-pillar {
+            padding: 40px;
+            border: 1px solid var(--bp-light-gray);
+            border-radius: var(--bp-radius-md);
+            background: white;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.25s ease;
+        }
+        .story-pillar:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 36px rgba(0,0,0,0.06);
+        }
+        .story-pillar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+        }
+        .story-pillar[data-accent="cyan"]::before { background: var(--bp-cyan); }
+        .story-pillar[data-accent="magenta"]::before { background: var(--bp-magenta); }
+        .story-pillar[data-accent="yellow"]::before { background: var(--bp-yellow); }
+        .story-pillar[data-accent="key"]::before { background: var(--bp-black); }
+        .story-pillar-num {
+            font-family: var(--bp-font-mono);
+            font-size: 11px;
+            letter-spacing: 2px;
+            color: var(--bp-cyan);
+            display: block;
+            margin-bottom: 12px;
+        }
+        .story-pillar h3 {
+            font-family: var(--bp-font-display);
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+        .story-pillar p {
+            font-size: 14px;
+            color: var(--bp-text-secondary);
+            line-height: 1.8;
+        }
+
+        /* Audience Grid */
+        .story-audience-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+        .story-audience-card {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: var(--bp-radius-md);
+            padding: 36px;
+        }
+        .story-audience-tag {
+            font-family: var(--bp-font-mono);
+            font-size: 10px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--bp-cyan);
+            margin-bottom: 14px;
+        }
+        .story-audience-card h4 {
+            font-family: var(--bp-font-display);
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--bp-white);
+            margin-bottom: 12px;
+        }
+        .story-audience-card p {
+            font-size: 14px;
+            color: var(--bp-muted);
+            line-height: 1.8;
+        }
+
+        /* Voice Table */
+        .story-voice-table {
+            border: 1px solid var(--bp-light-gray);
+            border-radius: var(--bp-radius-md);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+        .story-voice-row {
+            display: grid;
+            grid-template-columns: 140px 1fr 1fr;
+            border-bottom: 1px solid var(--bp-light-gray);
+        }
+        .story-voice-row:last-child { border-bottom: none; }
+        .story-voice-row > div {
+            padding: 18px 24px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .story-voice-row--header {
+            background: var(--bp-off-white);
+            font-family: var(--bp-font-mono);
+            font-size: 10px !important;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--bp-text-muted);
+        }
+        .story-voice-row--header > div {
+            font-size: 10px;
+            font-family: var(--bp-font-mono);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--bp-text-muted);
+            font-weight: 500;
+        }
+        .story-voice-attr {
+            font-family: var(--bp-font-display);
+            font-weight: 600;
+            color: var(--bp-text-primary);
+            background: var(--bp-off-white);
+        }
+        .story-voice-do {
+            color: var(--bp-text-secondary);
+            font-style: italic;
+        }
+        .story-voice-dont {
+            color: var(--bp-text-muted);
+            font-style: italic;
+            background: rgba(237, 28, 36, 0.02);
+        }
+        .story-voice-note {
+            padding: 24px 30px;
+            background: var(--bp-off-white);
+            border-left: 4px solid var(--bp-cyan);
+            border-radius: 0 var(--bp-radius-sm) var(--bp-radius-sm) 0;
+            font-size: 14px;
+            line-height: 1.8;
+            color: var(--bp-text-secondary);
+        }
+        .story-voice-note strong { color: var(--bp-text-primary); }
+
+        /* Content Pillars Grid */
+        .story-content-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+        }
+        .story-content-card {
+            padding: 36px;
+            border: 1px solid var(--bp-light-gray);
+            border-radius: var(--bp-radius-md);
+            background: white;
+        }
+        .story-content-pct {
+            font-family: var(--bp-font-display);
+            font-size: 36px;
+            font-weight: 900;
+            color: var(--bp-cyan);
+            margin-bottom: 4px;
+        }
+        .story-content-card h4 {
+            font-family: var(--bp-font-display);
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        .story-content-card p {
+            font-size: 14px;
+            color: var(--bp-text-secondary);
+            line-height: 1.8;
+            margin-bottom: 16px;
+        }
+        .story-content-examples {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .story-content-examples span {
+            font-family: var(--bp-font-mono);
+            font-size: 12px;
+            color: var(--bp-text-muted);
+            font-style: italic;
+            padding: 8px 14px;
+            background: var(--bp-off-white);
+            border-radius: 6px;
+        }
+
+        /* Product Table */
+        .story-product-table-wrap {
+            overflow-x: auto;
+        }
+        .story-product-table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 1px solid var(--bp-light-gray);
+            border-radius: var(--bp-radius-md);
+            overflow: hidden;
+        }
+        .story-product-table thead {
+            background: var(--bp-off-white);
+        }
+        .story-product-table th {
+            font-family: var(--bp-font-mono);
+            font-size: 10px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--bp-text-muted);
+            padding: 16px 20px;
+            text-align: left;
+            font-weight: 500;
+        }
+        .story-product-table td {
+            padding: 16px 20px;
+            font-size: 14px;
+            color: var(--bp-text-secondary);
+            border-bottom: 1px solid var(--bp-light-gray);
+        }
+        .story-product-table tbody tr:last-child td { border-bottom: none; }
+        .story-product-table tbody tr:hover { background: rgba(0,174,239,0.02); }
+        .story-product-table strong { color: var(--bp-cyan); font-weight: 600; }
+
+        /* Specs Grid */
+        .story-specs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2px;
+            background: rgba(255,255,255,0.06);
+            border-radius: var(--bp-radius-md);
+            overflow: hidden;
+        }
+        .story-spec-item {
+            background: var(--bp-black);
+            padding: 22px 28px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .story-spec-label {
+            font-family: var(--bp-font-mono);
+            font-size: 10px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--bp-cyan);
+        }
+        .story-spec-value {
+            font-size: 14px;
+            color: var(--bp-muted);
+            line-height: 1.5;
+        }
+
+        /* Social Grid */
+        .story-social-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+        }
+        .story-social-card {
+            padding: 36px;
+            border: 1px solid var(--bp-light-gray);
+            border-radius: var(--bp-radius-md);
+            background: white;
+        }
+        .story-social-icon {
+            font-size: 28px;
+            margin-bottom: 8px;
+            display: block;
+        }
+        .story-social-card h4 {
+            font-family: var(--bp-font-display);
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .story-social-badge {
+            font-family: var(--bp-font-mono);
+            font-size: 9px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--bp-cyan);
+            background: rgba(0,174,239,0.08);
+            padding: 3px 10px;
+            border-radius: 100px;
+        }
+        .story-social-card ul {
+            list-style: none;
+            padding: 0;
+        }
+        .story-social-card li {
+            font-size: 13px;
+            color: var(--bp-text-secondary);
+            line-height: 1.7;
+            padding: 6px 0;
+            border-bottom: 1px solid var(--bp-light-gray);
+        }
+        .story-social-card li:last-child { border-bottom: none; }
+
+        /* Do's and Don'ts */
+        .story-dos-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+        }
+        .story-dos-card {
+            padding: 36px;
+            border-radius: var(--bp-radius-md);
+            position: relative;
+            overflow: hidden;
+        }
+        .story-dos-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+        }
+        .story-dos-card--do {
+            background: rgba(57, 181, 74, 0.04);
+            border: 1px solid rgba(57, 181, 74, 0.15);
+        }
+        .story-dos-card--do::before { background: var(--bp-success); }
+        .story-dos-card--dont {
+            background: rgba(237, 28, 36, 0.03);
+            border: 1px solid rgba(237, 28, 36, 0.12);
+        }
+        .story-dos-card--dont::before { background: var(--bp-error); }
+        .story-dos-card h4 {
+            font-family: var(--bp-font-display);
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            margin-top: 6px;
+        }
+        .story-dos-card ul {
+            list-style: none;
+            padding: 0;
+        }
+        .story-dos-card li {
+            font-size: 13px;
+            color: var(--bp-text-secondary);
+            line-height: 1.8;
+            padding: 5px 0 5px 20px;
+            position: relative;
+        }
+        .story-dos-card--do li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--bp-success);
+            font-weight: 700;
+        }
+        .story-dos-card--dont li::before {
+            content: '✗';
+            position: absolute;
+            left: 0;
+            color: var(--bp-error);
+            font-weight: 700;
+        }
+
+        /* Responsive for Story */
+        @media (max-width: 900px) {
+            .story-topbar { padding: 0 20px; }
+            .story-topbar-title { display: none; }
+            .story-section, .story-section--gray, .story-section--dark { padding: 60px 24px; }
+            .story-pillars-grid,
+            .story-content-grid,
+            .story-audience-grid,
+            .story-social-grid,
+            .story-dos-grid { grid-template-columns: 1fr; }
+            .story-voice-row { grid-template-columns: 1fr; }
+            .story-voice-row--header { display: none; }
+            .story-voice-attr { 
+                font-size: 12px;
+                padding-bottom: 4px !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ================================================================
+     NAVIGATION
+================================================================ -->
+<nav class="guide-nav">
+    <img class="nav-logo" src="https://bannerprintingltd.co.uk/wp-content/uploads/2026/02/banner-printing-logo-w.png" alt="Banner Printing">
+    <a href="#logo">Logo</a>
+    <a href="#colors">Colors</a>
+    <a href="#typography">Type</a>
+    <a href="#voice">Voice</a>
+    <a href="#templates">Templates</a>
+    <a href="#procedure">Procedure</a>
+    <a href="#tokens">CSS Tokens</a>
+    <a href="#" id="nav-story" onclick="showStory(); return false;" style="color: var(--bp-cyan-light); border-bottom-color: var(--bp-cyan);">Brand Story</a>
+</nav>
+
+<div id="guide-content">
+<!-- ================================================================
+     HERO
+================================================================ -->
+<header class="hero">
+    <div class="hero-dots"></div>
+    <div class="hero-yellow-glow"></div>
+    <div class="hero-badge">Brand Guide v1.0</div>
+    <img class="hero-logo" src="https://bannerprintingltd.co.uk/wp-content/uploads/2026/02/banner-printing-logo-w.png" alt="Banner Printing">
+    <div class="hero-divider"></div>
+    <h1><span class="brand-word">Brand</span> <span class="cyan">Guide</span></h1>
+    <p>Identity System & Design Standards</p>
+    <span class="hero-version">February 2026 — Banner Printing Ltd</span>
+    
+    <div class="hero-cmyk-bar">
+        <span style="background: var(--bp-cyan);"></span>
+        <span style="background: var(--bp-magenta);"></span>
+        <span style="background: var(--bp-yellow);"></span>
+        <span style="background: var(--bp-black);"></span>
+    </div>
+</header>
+
+
+<!-- ================================================================
+     1. LOGO
+================================================================ -->
+<section class="section" id="logo">
+    <p class="sec-overline">01 — Identity</p>
+    <h2 class="sec-title">Logo</h2>
+    <p class="sec-desc">The Banner Printing logo features a transparent background with "BANNER" set in bold black and supplementary text in printing industry colors (cyan, magenta, and accent tones). Two variants exist: the standard logo for light backgrounds and the white logo for dark backgrounds.</p>
+
+    <div class="logo-grid">
+        <!-- White Background — Primary -->
+        <div class="logo-card">
+            <span class="logo-card-label">Primary — White BG</span>
+            <img src="https://bannerprintingltd.co.uk/wp-content/uploads/2023/12/banner-printing-logo-554150.png" alt="Banner Printing Logo">
+        </div>
+        
+        <!-- Off-White Background -->
+        <div class="logo-card" style="background: var(--bp-off-white); border-color: var(--bp-light-gray);">
+            <span class="logo-card-label">On Off-White</span>
+            <img src="https://bannerprintingltd.co.uk/wp-content/uploads/2023/12/banner-printing-logo-554150.png" alt="Banner Printing Logo">
+        </div>
+        
+        <!-- Dark Background -->
+        <div class="logo-card dark">
+            <span class="logo-card-label">White Variant — Dark BG</span>
+            <img src="https://bannerprintingltd.co.uk/wp-content/uploads/2026/02/banner-printing-logo-w.png" alt="Banner Printing Logo">
+        </div>
+        
+        <!-- Gradient/Print-themed -->
+        <div class="logo-card gradient-bg">
+            <span class="logo-card-label">On Branded Gradient</span>
+            <img src="https://bannerprintingltd.co.uk/wp-content/uploads/2026/02/banner-printing-logo-w.png" alt="Banner Printing Logo">
+        </div>
+    </div>
+
+    <!-- Clear Space & Rules -->
+    <div class="logo-rules">
+        <div class="logo-rule">
+            <h4>Clear Space</h4>
+            <p>Maintain clear space around the logo equal to the cap-height of the "B" in BANNER on all sides. No text, icons, or graphic elements should intrude into this zone.</p>
+        </div>
+        <div class="logo-rule">
+            <h4>Minimum Size</h4>
+            <p>Digital: 140px wide minimum for full lockup. Print: 35mm wide minimum. The multi-color elements lose legibility below these thresholds.</p>
+        </div>
+        <div class="logo-rule">
+            <h4 class="do">✓ Do</h4>
+            <p>Use provided logo files only. Place standard logo on white or light backgrounds. Use the white variant (banner-printing-logo-w.png) on dark backgrounds. Maintain original color relationships. Pair with the CMYK accent bar for added brand recognition. Keep proportions locked.</p>
+        </div>
+        <div class="logo-rule">
+            <h4 class="dont">✗ Don't</h4>
+            <p>Never recreate the logo in a typeface. Never change the BANNER text color from black (standard) or white (dark variant). Never place the standard logo on dark backgrounds — use the white variant instead. Never stretch, rotate, or add effects (drop shadow, glow, bevel).</p>
+        </div>
+    </div>
+</section>
+
+
+<!-- ================================================================
+     2. COLOR PALETTE
+================================================================ -->
+<section class="section-full section-gray" id="colors" style="padding-left: 60px; padding-right: 60px;">
+    <div style="max-width: 1400px; margin: 0 auto;">
+        <p class="sec-overline">02 — Palette</p>
+        <h2 class="sec-title">Color System</h2>
+        <p class="sec-desc">Built on the CMYK printing spectrum — the colors of the trade. Cyan is the lead brand accent. The palette is vibrant and bold, reflecting the energy of large-format print while staying professional and trustworthy.</p>
+
+        <!-- CMYK Primary -->
+        <h3 style="font-family: var(--bp-font-mono); font-size: 12px; letter-spacing: 3px; text-transform: uppercase; color: var(--bp-text-muted); margin-bottom: 20px;">CMYK Primary</h3>
+        <div class="palette-row">
+            <div class="pal-card">
+                <div class="pal-swatch" style="background: #00AEEF; color: white;">Cyan</div>
+                <div class="pal-info">
+                    <h4>Process Cyan</h4>
+                    <code>#00AEEF</code>
+                    <p>Lead brand accent. CTAs, links, highlights, overlines, and interactive elements.</p>
+                </div>
+            </div>
+            <div class="pal-card">
+                <div class="pal-swatch" style="background: #EC008C; color: white;">Magenta</div>
+                <div class="pal-info">
+                    <h4>Process Magenta</h4>
+                    <code>#EC008C</code>
+                    <p>Secondary accent. Sale badges, promotions, urgency cues, gradient partner with Cyan.</p>
+                </div>
+            </div>
+            <div class="pal-card">
+                <div class="pal-swatch" style="background: #FFF200; color: #1A1A1A;">Yellow</div>
+                <div class="pal-info">
+                    <h4>Process Yellow</h4>
+                    <code>#FFF200</code>
+                    <p>Tertiary accent. Highlights, sale tags, attention-grabbing callouts. Use sparingly.</p>
+                </div>
+            </div>
+            <div class="pal-card">
+                <div class="pal-swatch" style="background: #1A1A1A; color: white;">Key (Black)</div>
+                <div class="pal-info">
+                    <h4>Key Black</h4>
+                    <code>#1A1A1A</code>
+                    <p>Headlines, body text, the "BANNER" wordmark, primary dark surfaces.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Extended / Supporting -->
+        <h3 style="font-family: var(--bp-font-mono); font-size: 12px; letter-spacing: 3px; text-transform: uppercase; color: var(--bp-text-muted); margin-bottom: 20px; margin-top: 40px;">Extended Palette</h3>
+        <div class="palette-row">
+            <div class="pal-card">
+                <div class="pal-swatch" style="background: #0090C9; color: white;">Cyan Dark</div>
+                <div class="pal-info">
+                    <h4>Cyan Dark</h4>
+                    <code>#0090C9</code>
+                    <p>Hover/active states for Cyan. Pressed buttons, focused inputs, deep accents.</p>
+                </div>
+            </div>
+            <div class="pal-card">
+                <div class="pal-swatch" style="background: #F26522; color: white;">Print Orange</div>
+                <div class="pal-info">
+                    <h4>Print Orange</h4>
+                    <code>#F26522</code>
+                    <p>Warm accent. Urgency, fast dispatch badges, "24hr" delivery indicators.</p>
+                </div>
+            </div>
+            <div class="pal-card">
+                <div class="pal-swatch" style="background: #39B54A; color: white;">Eco Green</div>
+                <div class="pal-info">
+                    <h4>Eco Green</h4>
+                    <code>#39B54A</code>
+                    <p>Sustainability messaging, success states, eco-friendly product badges.</p>
+                </div>
+            </div>
+            <div class="pal-card">
+                <div class="pal-swatch" style="background: #ED1C24; color: white;">Alert Red</div>
+                <div class="pal-info">
+                    <h4>Alert Red</h4>
+                    <code>#ED1C24</code>
+                    <p>Error states, out-of-stock labels, clearance sales, form validation.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Neutrals -->
+        <h3 style="font-family: var(--bp-font-mono); font-size: 12px; letter-spacing: 3px; text-transform: uppercase; color: var(--bp-text-muted); margin-bottom: 20px; margin-top: 40px;">Neutrals</h3>
+        <div class="palette-row">
+            <div class="pal-card">
+                <div class="pal-swatch" style="background: #FFFFFF; color: #1A1A1A; border-bottom: 1px solid #eee;">White</div>
+                <div class="pal-info">
+                    <h4>White</h4>
+                    <code>#FFFFFF</code>
+                    <p>Primary background. Clean canvas for product displays and content.</p>
+                </div>
+            </div>
+            <div class="pal-card">
+                <div class="pal-swatch" style="background: #F8F8F9; color: #1A1A1A; border-bottom: 1px solid #eee;">Off-White</div>
+                <div class="pal-info">
+                    <h4>Off-White</h4>
+                    <code>#F8F8F9</code>
+                    <p>Alternating sections, card backgrounds, form fields, subtle depth.</p>
+                </div>
+            </div>
+            <div class="pal-card">
+                <div class="pal-swatch" style="background: #EDEFF2; color: #1A1A1A;">Light Gray</div>
+                <div class="pal-info">
+                    <h4>Light Gray</h4>
+                    <code>#EDEFF2</code>
+                    <p>Borders, dividers, table lines, card outlines.</p>
+                </div>
+            </div>
+            <div class="pal-card">
+                <div class="pal-swatch" style="background: #8892A0; color: white;">Muted</div>
+                <div class="pal-info">
+                    <h4>Muted</h4>
+                    <code>#8892A0</code>
+                    <p>Captions, placeholders, disabled states, meta info.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Combinations -->
+        <h3 style="font-family: var(--bp-font-mono); font-size: 12px; letter-spacing: 3px; text-transform: uppercase; color: var(--bp-text-muted); margin-bottom: 20px; margin-top: 50px;">Approved Combinations</h3>
+        <div class="palette-combos">
+            <div class="combo-card" style="background: #FFFFFF; border: 1px solid #EDEFF2;">
+                <h4 style="color: #1A1A1A;">Print Bold</h4>
+                <p style="color: #00AEEF;">Standard — White + Black + Cyan</p>
+            </div>
+            <div class="combo-card" style="background: #1A1A1A;">
+                <h4 style="color: #FFFFFF;">Night Print</h4>
+                <p style="color: #00AEEF;">Dark — Black + White + Cyan</p>
+            </div>
+            <div class="combo-card" style="background: linear-gradient(135deg, #00AEEF 0%, #EC008C 100%);">
+                <h4 style="color: #FFFFFF;">Full Spectrum</h4>
+                <p style="color: rgba(255,255,255,0.8);">Campaign — Cyan→Magenta + White</p>
+            </div>
+            <div class="combo-card" style="background: #FFF200;">
+                <h4 style="color: #1A1A1A;">Flash Sale</h4>
+                <p style="color: #1A1A1A;">Promo — Yellow + Black</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ================================================================
+     3. TYPOGRAPHY
+================================================================ -->
+<section class="section" id="typography">
+    <p class="sec-overline">03 — Typography</p>
+    <h2 class="sec-title">Type System</h2>
+    <p class="sec-desc">Outfit provides bold, industrial headlines with geometric character. Plus Jakarta Sans handles readable body copy. IBM Plex Mono for technical specs, product dimensions, and labels.</p>
+
+    <div class="type-demo-grid">
+        <div class="type-demo-card">
+            <div class="label">Display — Outfit</div>
+            <div style="font-family: var(--bp-font-display); font-size: 44px; font-weight: 900; line-height: 1.05; margin-bottom: 20px; letter-spacing: -1px;">
+                Print It.<br>Hang It.<br>Own It.
+            </div>
+            <p style="font-family: var(--bp-font-mono); font-size: 11px; color: var(--bp-text-muted); line-height: 1.7;">
+                Outfit 900 · Headlines, hero text, product category titles. Bold, industrial, commanding.
+            </p>
+        </div>
+        
+        <div class="type-demo-card">
+            <div class="label">Body — Plus Jakarta Sans</div>
+            <div style="font-family: var(--bp-font-body); font-size: 16px; font-weight: 400; line-height: 1.8; color: var(--bp-text-secondary); margin-bottom: 20px;">
+                From weatherproof vinyl banners to lightweight roller displays, Banner Printing Ltd produces everything in-house at our UK facility. Fast dispatch, free tracked shipping, and eco-conscious materials — trusted by businesses, event planners, and creatives nationwide.
+            </div>
+            <p style="font-family: var(--bp-font-mono); font-size: 11px; color: var(--bp-text-muted); line-height: 1.7;">
+                Plus Jakarta Sans 400 · Descriptions, product info, UI text. Clean, warm, legible.
+            </p>
+        </div>
+    </div>
+
+    <!-- Type Scale -->
+    <table class="type-scale">
+        <tr>
+            <td class="ts-label">Display XL</td>
+            <td style="font-family: var(--bp-font-display); font-size: 56px; font-weight: 900; letter-spacing: -1.5px; line-height: 1.05;">Big Print Energy</td>
+            <td class="ts-spec">Outfit 900<br>56px / -1.5px tracking</td>
+        </tr>
+        <tr>
+            <td class="ts-label">Heading 1</td>
+            <td style="font-family: var(--bp-font-display); font-size: 40px; font-weight: 800; letter-spacing: -0.5px; line-height: 1.1;">Custom Vinyl Banners</td>
+            <td class="ts-spec">Outfit 800<br>40px / -0.5px tracking</td>
+        </tr>
+        <tr>
+            <td class="ts-label">Heading 2</td>
+            <td style="font-family: var(--bp-font-display); font-size: 30px; font-weight: 700; line-height: 1.2;">Roller Banners</td>
+            <td class="ts-spec">Outfit 700<br>30px</td>
+        </tr>
+        <tr>
+            <td class="ts-label">Heading 3</td>
+            <td style="font-family: var(--bp-font-display); font-size: 22px; font-weight: 600; line-height: 1.3;">Mesh & Fence Banners</td>
+            <td class="ts-spec">Outfit 600<br>22px</td>
+        </tr>
+        <tr>
+            <td class="ts-label">Body</td>
+            <td style="font-family: var(--bp-font-body); font-size: 16px; font-weight: 400; line-height: 1.7; color: var(--bp-text-secondary);">Premium PVC, UV-resistant inks, and reinforced eyelets for banners that last through every season.</td>
+            <td class="ts-spec">Plus Jakarta Sans 400<br>16px / 1.7 line-height</td>
+        </tr>
+        <tr>
+            <td class="ts-label">Overline</td>
+            <td style="font-family: var(--bp-font-mono); font-size: 11px; font-weight: 500; letter-spacing: 3px; text-transform: uppercase; color: var(--bp-cyan);">— Best Sellers</td>
+            <td class="ts-spec">IBM Plex Mono 500<br>11px / 3px tracking / Uppercase</td>
+        </tr>
+        <tr>
+            <td class="ts-label">Button / CTA</td>
+            <td>
+                <span style="display: inline-block; padding: 13px 30px; background: var(--bp-cyan); color: white; font-family: var(--bp-font-display); font-size: 13px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; border-radius: var(--bp-radius-sm);">Order Now</span>
+                <span style="display: inline-block; padding: 13px 30px; background: var(--bp-black); color: white; font-family: var(--bp-font-display); font-size: 13px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; border-radius: var(--bp-radius-sm); margin-left: 10px;">Get a Quote</span>
+            </td>
+            <td class="ts-spec">Outfit 700<br>13px / 1px tracking / Uppercase</td>
+        </tr>
+        <tr>
+            <td class="ts-label">Product Spec</td>
+            <td style="font-family: var(--bp-font-mono); font-size: 14px; color: var(--bp-text-secondary);">510gsm PVC · 1440dpi UV Print · Hemmed + Eyelets</td>
+            <td class="ts-spec">IBM Plex Mono 400<br>14px</td>
+        </tr>
+    </table>
+</section>
+
+
+<!-- ================================================================
+     4. BRAND VOICE
+================================================================ -->
+<section class="section-full section-gray" id="voice" style="padding-left: 60px; padding-right: 60px;">
+    <div style="max-width: 1400px; margin: 0 auto;">
+        <p class="sec-overline">04 — Brand Voice</p>
+        <h2 class="sec-title">Tone & Messaging</h2>
+        <p class="sec-desc">Banner Printing speaks like the expert maker next door — knowledgeable, efficient, and genuinely helpful. We're a UK-based production house, not a faceless factory. Every message should feel fast, friendly, and straight-up reliable.</p>
+
+        <div class="voice-grid">
+            <div class="voice-card">
+                <span class="voice-icon">🏭</span>
+                <h4>Maker's Pride</h4>
+                <p>We produce everything in-house. That's a huge differentiator — lean into it. "Printed, packed, and shipped from our UK facility." Craftsmanship language builds trust.</p>
+            </div>
+            <div class="voice-card">
+                <span class="voice-icon">⚡</span>
+                <h4>Fast & No-Fuss</h4>
+                <p>Speed is core to the brand. "24–48 hour dispatch." "Next-day delivery." Keep sentences punchy. Active voice. Short paragraphs. Eliminate waffle — customers are busy.</p>
+            </div>
+            <div class="voice-card">
+                <span class="voice-icon">💬</span>
+                <h4>Friendly Expert</h4>
+                <p>Not corporate stiff, not overly casual. Think helpful shopkeeper who really knows print. Use "we" and "you." Offer guidance without jargon: "hemmed edges" not "heat-welded perimeter reinforcement."</p>
+            </div>
+            <div class="voice-card">
+                <span class="voice-icon">💷</span>
+                <h4>Transparent on Price</h4>
+                <p>"No hidden fees" is a brand promise. Always be upfront about costs, delivery, and what's included. Free shipping messaging should be prominent but not shouty.</p>
+            </div>
+            <div class="voice-card">
+                <span class="voice-icon">🌱</span>
+                <h4>Eco-Conscious</h4>
+                <p>Sustainability is genuine, not greenwashing. Mention recycled materials, PVC-free options, and greener packaging when relevant. Factual, not preachy.</p>
+            </div>
+            <div class="voice-card">
+                <span class="voice-icon">🇬🇧</span>
+                <h4>Proudly British</h4>
+                <p>"Made in the UK" carries weight. Use British English consistently (colour, customise, centre). Reference UK locations and delivery coverage. Appeal to local trust while serving globally.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ================================================================
+     5. SOCIAL MEDIA TEMPLATES
+================================================================ -->
+<section class="section-full section-dark" id="templates" style="padding-left: 60px; padding-right: 60px;">
+    <div style="max-width: 1400px; margin: 0 auto;">
+        <p class="sec-overline" style="color: var(--bp-cyan-light);">05 — Templates</p>
+        <h2 class="sec-title" style="color: var(--bp-white);">Social Media & Marketing</h2>
+        <p class="sec-desc">Proportional mockups for every platform. These skeleton templates show layout structure, color usage, and type hierarchy. Replace placeholder content with live copy and product photography.</p>
+
+        <div class="templates-intro" style="background: rgba(0,174,239,0.05); border-color: var(--bp-cyan);">
+            <strong style="color: var(--bp-white);">Key Rule:</strong> <span style="color: var(--bp-muted);">Every asset must include the CMYK accent bar (4-colour stripe) somewhere in the design — top, bottom, or as a divider. This is the single most recognisable brand element beyond the logo. Cyan (#00AEEF) should lead as the primary accent in every design.</span>
+        </div>
+
+
+        <!-- ==================== INSTAGRAM / FACEBOOK FEED 1:1 ==================== -->
+        <div class="template-row">
+            <h3 style="color: var(--bp-white);">Instagram / Facebook Feed Post</h3>
+            <p class="t-size">1080 × 1080px (1:1) — Scale shown: 340px</p>
+
+            <div class="template-samples">
+                <!-- Product showcase — White -->
+                <div class="tmpl" style="width: 340px; height: 340px; background: #FFFFFF; border: 1px solid var(--bp-light-gray);">
+                    <span class="tmpl-label" style="color: var(--bp-muted);">Product</span>
+                    <!-- CMYK bar top -->
+                    <div class="cmyk-bar" style="position: absolute; top: 0; left: 0; right: 0;">
+                        <span style="background: var(--bp-cyan);"></span>
+                        <span style="background: var(--bp-magenta);"></span>
+                        <span style="background: var(--bp-yellow);"></span>
+                        <span style="background: var(--bp-black);"></span>
+                    </div>
+                    <!-- Product image placeholder -->
+                    <div style="flex: 1; display: flex; align-items: center; justify-content: center; padding-top: 16px;">
+                        <div style="width: 200px; height: 160px; border: 2px dashed var(--bp-light-gray); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-family: var(--bp-font-mono); font-size: 10px; color: var(--bp-muted); text-align: center;">Product<br>Photo</div>
+                    </div>
+                    <!-- Bottom content -->
+                    <div style="padding: 24px 28px;">
+                        <div style="font-family: var(--bp-font-mono); font-size: 9px; letter-spacing: 3px; text-transform: uppercase; color: var(--bp-cyan); margin-bottom: 6px;">Best Seller</div>
+                        <div style="font-family: var(--bp-font-display); font-size: 20px; font-weight: 800; color: var(--bp-black); line-height: 1.2; margin-bottom: 6px;">Premium Vinyl Banner</div>
+                        <div style="font-size: 12px; color: var(--bp-text-secondary); margin-bottom: 12px;">UV-resistant · Weatherproof · Free UK Shipping</div>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="display: inline-block; padding: 8px 20px; background: var(--bp-cyan); color: white; font-family: var(--bp-font-display); font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; border-radius: 6px;">Shop Now</span>
+                            <img src="https://bannerprintingltd.co.uk/wp-content/uploads/2023/12/banner-printing-logo-554150.png" style="height: 14px; opacity: 0.4;" alt="BP">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dark / promotional -->
+                <div class="tmpl" style="width: 340px; height: 340px; background: #1A1A1A;">
+                    <span class="tmpl-label" style="color: rgba(255,255,255,0.3);">Promo</span>
+                    <!-- Halftone dots decoration -->
+                    <div style="position: absolute; inset: 0; background-image: radial-gradient(rgba(255,255,255,0.025) 1px, transparent 1px); background-size: 16px 16px;"></div>
+                    <div style="position: relative; z-index: 1; display: flex; flex-direction: column; justify-content: flex-end; height: 100%; padding: 28px;">
+                        <img src="https://bannerprintingltd.co.uk/wp-content/uploads/2026/02/banner-printing-logo-w.png" style="height: 18px; margin-bottom: 20px; align-self: flex-start;" alt="BP">
+                        <div style="font-family: var(--bp-font-mono); font-size: 9px; letter-spacing: 3px; text-transform: uppercase; color: var(--bp-magenta); margin-bottom: 8px;">Limited Offer</div>
+                        <div style="font-family: var(--bp-font-display); font-size: 26px; font-weight: 900; color: white; line-height: 1.1; margin-bottom: 8px;">Free Delivery<br>On All Orders</div>
+                        <div style="font-size: 12px; color: var(--bp-muted); margin-bottom: 16px;">No minimum spend. No hidden fees. UK-wide.</div>
+                        <span style="display: inline-block; padding: 10px 22px; background: var(--bp-cyan); color: white; font-family: var(--bp-font-display); font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; border-radius: 6px; align-self: flex-start;">Order Now</span>
+                    </div>
+                    <!-- CMYK bar bottom -->
+                    <div class="cmyk-bar" style="position: absolute; bottom: 0; left: 0; right: 0;">
+                        <span style="background: var(--bp-cyan);"></span>
+                        <span style="background: var(--bp-magenta);"></span>
+                        <span style="background: var(--bp-yellow);"></span>
+                        <span style="background: var(--bp-black);"></span>
+                    </div>
+                </div>
+
+                <!-- Eco / sustainability -->
+                <div class="tmpl" style="width: 340px; height: 340px; background: #F8F8F9; border: 1px solid var(--bp-light-gray);">
+                    <span class="tmpl-label" style="color: var(--bp-muted);">Eco</span>
+                    <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; padding: 32px; text-align: center;">
+                        <div style="width: 56px; height: 56px; border: 2px solid var(--bp-green); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 16px;">🌱</div>
+                        <div style="font-family: var(--bp-font-mono); font-size: 9px; letter-spacing: 3px; text-transform: uppercase; color: var(--bp-green); margin-bottom: 10px;">Eco-Conscious Printing</div>
+                        <div style="font-family: var(--bp-font-display); font-size: 22px; font-weight: 800; color: var(--bp-black); line-height: 1.2; margin-bottom: 10px;">Greener Banners.<br>Same Quality.</div>
+                        <div style="font-size: 12px; color: var(--bp-text-secondary); line-height: 1.5; margin-bottom: 18px;">Recycled paper options, PVC-free alternatives, and sustainable packaging.</div>
+                        <img src="https://bannerprintingltd.co.uk/wp-content/uploads/2023/12/banner-printing-logo-554150.png" style="height: 14px; opacity: 0.35;" alt="BP">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- ==================== INSTAGRAM STORY 9:16 ==================== -->
+        <div class="template-row">
+            <h3 style="color: var(--bp-white);">Instagram / Facebook Story</h3>
+            <p class="t-size">1080 × 1920px (9:16) — Scale shown: 220×391px</p>
+            
+            <div class="template-samples">
+                <!-- Product story -->
+                <div class="tmpl" style="width: 220px; height: 391px; background: #FFFFFF; border: 1px solid var(--bp-light-gray);">
+                    <span class="tmpl-label" style="color: var(--bp-muted); font-size: 8px;">Product</span>
+                    <!-- CMYK bar top -->
+                    <div class="cmyk-bar" style="position: absolute; top: 0; left: 0; right: 0;">
+                        <span style="background: var(--bp-cyan);"></span>
+                        <span style="background: var(--bp-magenta);"></span>
+                        <span style="background: var(--bp-yellow);"></span>
+                        <span style="background: var(--bp-black);"></span>
+                    </div>
+                    <div style="padding: 20px; text-align: center; margin-top: 4px;">
+                        <img src="https://bannerprintingltd.co.uk/wp-content/uploads/2023/12/banner-printing-logo-554150.png" style="height: 16px;" alt="BP">
+                    </div>
+                    <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
+                        <div style="width: 140px; height: 180px; border: 2px dashed var(--bp-light-gray); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-family: var(--bp-font-mono); font-size: 9px; color: var(--bp-muted); text-align: center;">Product<br>Photo</div>
+                    </div>
+                    <div style="padding: 24px; text-align: center;">
+                        <div style="font-family: var(--bp-font-mono); font-size: 8px; letter-spacing: 3px; text-transform: uppercase; color: var(--bp-cyan); margin-bottom: 6px;">New In</div>
+                        <div style="font-family: var(--bp-font-display); font-size: 16px; font-weight: 800; color: var(--bp-black); margin-bottom: 4px;">Outdoor Mesh Banner</div>
+                        <div style="font-size: 11px; color: var(--bp-text-secondary); margin-bottom: 12px;">Wind-resistant · From £12.99</div>
+                        <div style="font-family: var(--bp-font-mono); font-size: 8px; letter-spacing: 2px; text-transform: uppercase; color: var(--bp-cyan);">Swipe Up to Order →</div>
+                    </div>
+                </div>
+
+                <!-- Flash sale story -->
+                <div class="tmpl" style="width: 220px; height: 391px; background: #FFF200;">
+                    <span class="tmpl-label" style="color: rgba(0,0,0,0.3); font-size: 8px;">Flash Sale</span>
+                    <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 0 24px;">
+                        <div style="font-family: var(--bp-font-mono); font-size: 8px; letter-spacing: 3px; text-transform: uppercase; color: var(--bp-black); margin-bottom: 12px; opacity: 0.6;">⚡ Flash Sale</div>
+                        <div style="font-family: var(--bp-font-display); font-size: 42px; font-weight: 900; color: var(--bp-black); line-height: 0.95; margin-bottom: 8px;">20%<br>OFF</div>
+                        <div style="font-size: 11px; color: rgba(0,0,0,0.7); margin-bottom: 16px; line-height: 1.4;">All vinyl banners this week only</div>
+                        <span style="display: inline-block; padding: 8px 18px; font-family: var(--bp-font-display); font-size: 9px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; background: var(--bp-black); color: var(--bp-yellow); border-radius: 5px;">Shop Sale</span>
+                    </div>
+                    <div style="padding: 20px; text-align: center;">
+                        <img src="https://bannerprintingltd.co.uk/wp-content/uploads/2023/12/banner-printing-logo-554150.png" style="height: 14px; opacity: 0.3;" alt="BP">
+                    </div>
+                    <!-- CMYK bar bottom -->
+                    <div class="cmyk-bar" style="position: absolute; bottom: 0; left: 0; right: 0;">
+                        <span style="background: var(--bp-cyan);"></span>
+                        <span style="background: var(--bp-magenta);"></span>
+                        <span style="background: var(--bp-yellow);"></span>
+                        <span style="background: var(--bp-black);"></span>
+                    </div>
+                </div>
+
+                <!-- Trust / testimonial story -->
+                <div class="tmpl" style="width: 220px; height: 391px; background: #1A1A1A;">
+                    <span class="tmpl-label" style="color: rgba(255,255,255,0.3); font-size: 8px;">Trust</span>
+                    <div style="padding: 20px; text-align: center;">
+                        <img src="https://bannerprintingltd.co.uk/wp-content/uploads/2026/02/banner-printing-logo-w.png" style="height: 14px;" alt="BP">
+                    </div>
+                    <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 0 22px;">
+                        <div style="font-size: 28px; margin-bottom: 12px;">⭐⭐⭐⭐⭐</div>
+                        <div style="font-family: var(--bp-font-body); font-size: 14px; font-weight: 400; font-style: italic; color: white; line-height: 1.5; margin-bottom: 14px;">
+                            "Incredible quality and they arrived next day. Will definitely order again."
+                        </div>
+                        <div style="font-family: var(--bp-font-mono); font-size: 9px; color: var(--bp-cyan); letter-spacing: 1px;">— Verified Customer</div>
+                    </div>
+                    <div style="padding: 20px; text-align: center;">
+                        <div style="font-family: var(--bp-font-mono); font-size: 8px; letter-spacing: 2px; color: var(--bp-muted); text-transform: uppercase;">bannerprintingltd.co.uk</div>
+                    </div>
+                    <!-- CMYK bar bottom -->
+                    <div class="cmyk-bar" style="position: absolute; bottom: 0; left: 0; right: 0;">
+                        <span style="background: var(--bp-cyan);"></span>
+                        <span style="background: var(--bp-magenta);"></span>
+                        <span style="background: var(--bp-yellow);"></span>
+                        <span style="background: var(--bp-black);"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- ==================== FACEBOOK COVER ==================== -->
+        <div class="template-row">
+            <h3 style="color: var(--bp-white);">Facebook Cover / Website Hero</h3>
+            <p class="t-size">820 × 312px — Scale shown: 620×236px</p>
+
+            <div class="template-samples">
+                <div class="tmpl" style="width: 620px; height: 236px; background: #FFFFFF; border: 1px solid var(--bp-light-gray); flex-direction: row;">
+                    <!-- CMYK bar top -->
+                    <div class="cmyk-bar" style="position: absolute; top: 0; left: 0; right: 0;">
+                        <span style="background: var(--bp-cyan);"></span>
+                        <span style="background: var(--bp-magenta);"></span>
+                        <span style="background: var(--bp-yellow);"></span>
+                        <span style="background: var(--bp-black);"></span>
+                    </div>
+                    <!-- Left content -->
+                    <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 30px 36px; padding-top: 36px;">
+                        <img src="https://bannerprintingltd.co.uk/wp-content/uploads/2023/12/banner-printing-logo-554150.png" style="height: 20px; margin-bottom: 16px; align-self: flex-start;" alt="BP">
+                        <div style="font-family: var(--bp-font-display); font-size: 24px; font-weight: 800; color: var(--bp-black); line-height: 1.15; margin-bottom: 8px;">Custom Banners.<br>Printed & Shipped Fast.</div>
+                        <div style="font-size: 12px; color: var(--bp-text-secondary); margin-bottom: 14px;">Premium quality. Free UK delivery. Eco-friendly options.</div>
+                        <span style="display: inline-block; padding: 8px 20px; background: var(--bp-cyan); color: white; font-family: var(--bp-font-display); font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; border-radius: 6px; align-self: flex-start;">Shop All Products</span>
+                    </div>
+                    <!-- Right image zone -->
+                    <div style="width: 220px; background: var(--bp-off-white); display: flex; align-items: center; justify-content: center;">
+                        <div style="width: 120px; height: 160px; border: 2px dashed var(--bp-light-gray); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-family: var(--bp-font-mono); font-size: 9px; color: var(--bp-muted); text-align: center;">Hero<br>Image</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- ==================== EMAIL HEADER ==================== -->
+        <div class="template-row">
+            <h3 style="color: var(--bp-white);">Email Header</h3>
+            <p class="t-size">600 × 200px — Scale shown: 500×167px</p>
+
+            <div class="template-samples">
+                <div class="tmpl" style="width: 500px; height: 167px; background: white; border: 1px solid var(--bp-light-gray); flex-direction: column; border-radius: 0;">
+                    <!-- CMYK bar top -->
+                    <div class="cmyk-bar" style="position: absolute; top: 0; left: 0; right: 0;">
+                        <span style="background: var(--bp-cyan);"></span>
+                        <span style="background: var(--bp-magenta);"></span>
+                        <span style="background: var(--bp-yellow);"></span>
+                        <span style="background: var(--bp-black);"></span>
+                    </div>
+                    <div style="flex: 1; display: flex; flex-direction: row;">
+                        <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 24px 32px; padding-top: 28px;">
+                            <img src="https://bannerprintingltd.co.uk/wp-content/uploads/2023/12/banner-printing-logo-554150.png" style="height: 18px; margin-bottom: 12px; align-self: flex-start;" alt="BP">
+                            <div style="font-family: var(--bp-font-display); font-size: 18px; font-weight: 800; color: var(--bp-black); line-height: 1.2; margin-bottom: 4px;">Your Order Confirmation</div>
+                            <div style="font-size: 12px; color: var(--bp-text-secondary);">Thanks for choosing Banner Printing — we're on it!</div>
+                        </div>
+                        <div style="width: 130px; background: var(--bp-cyan); display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                            <div style="font-family: var(--bp-font-display); font-size: 32px; font-weight: 900; color: white;">24h</div>
+                            <div style="font-family: var(--bp-font-mono); font-size: 8px; color: rgba(255,255,255,0.75); letter-spacing: 2px; text-transform: uppercase;">Dispatch</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+
+<!-- ================================================================
+     6. DESIGN PROCEDURE
+================================================================ -->
+<section class="section" id="procedure">
+    <p class="sec-overline">06 — Procedure</p>
+    <h2 class="sec-title">How to Create Any Asset</h2>
+    <p class="sec-desc">Follow these steps for every piece of content — social posts, website sections, email templates, packaging inserts, signage, and print materials — to ensure brand consistency everywhere.</p>
+
+    <div class="procedure-grid">
+        <div class="proc-card" data-step="1">
+            <h4>Choose Your Canvas</h4>
+            <p>Select the correct dimensions for the platform:</p>
+            <ul>
+                <li><strong>Instagram / Facebook Feed:</strong> 1080×1080 (1:1) or 1080×1350 (4:5)</li>
+                <li><strong>Instagram / FB Story:</strong> 1080×1920 (9:16)</li>
+                <li><strong>Facebook Cover:</strong> 820×312</li>
+                <li><strong>Website Hero:</strong> 1920×700</li>
+                <li><strong>Email Header:</strong> 600×200</li>
+                <li><strong>Product Card:</strong> 800×800 (1:1)</li>
+                <li><strong>Packaging Insert:</strong> A5 landscape (210×148mm)</li>
+            </ul>
+        </div>
+        
+        <div class="proc-card" data-step="2">
+            <h4>Set Background</h4>
+            <p>Pick one of the approved backgrounds:</p>
+            <ul>
+                <li><strong>White (#FFFFFF)</strong> — Default for most content and product displays</li>
+                <li><strong>Off-White (#F8F8F9)</strong> — Alternating sections, softer feel</li>
+                <li><strong>Key Black (#1A1A1A)</strong> — Hero sections, promotions, dark templates</li>
+                <li><strong>Yellow (#FFF200)</strong> — Flash sales and urgent promotions only</li>
+                <li><strong>Cyan (#00AEEF)</strong> — CTA-focused, delivery/dispatch highlights</li>
+            </ul>
+        </div>
+        
+        <div class="proc-card" data-step="3">
+            <h4>Place the CMYK Bar</h4>
+            <p>The 4-colour CMYK stripe is a mandatory brand element:</p>
+            <ul>
+                <li>Always Cyan → Magenta → Yellow → Black, equal widths</li>
+                <li>Position: top or bottom edge of every asset</li>
+                <li>Height: 4–6px on social, 8–12px on large formats</li>
+                <li>Full width of the canvas — never truncated</li>
+                <li>This is the brand's most recognisable visual marker</li>
+            </ul>
+        </div>
+        
+        <div class="proc-card" data-step="4">
+            <h4>Place the Logo</h4>
+            <p>Use the correct logo variant for your background:</p>
+            <ul>
+                <li><strong>White/light backgrounds:</strong> Standard logo (banner-printing-logo-554150.png)</li>
+                <li><strong>Dark backgrounds:</strong> White logo variant (banner-printing-logo-w.png)</li>
+                <li>Position: top-left for layouts, top-center for stories, bottom-right for cards</li>
+                <li>Minimum 140px wide (digital) / 35mm (print)</li>
+            </ul>
+        </div>
+        
+        <div class="proc-card" data-step="5">
+            <h4>Apply Typography</h4>
+            <p>Follow the type hierarchy strictly:</p>
+            <ul>
+                <li><strong>Overline:</strong> IBM Plex Mono 500, 11px, uppercase, 3px tracking, Cyan colour</li>
+                <li><strong>Headline:</strong> Outfit 800–900, 22–56px depending on format</li>
+                <li><strong>Body:</strong> Plus Jakarta Sans 400, 14–16px, secondary text colour</li>
+                <li><strong>CTA Button:</strong> Outfit 700, 11–13px, uppercase, 1px tracking</li>
+                <li><strong>Product Spec:</strong> IBM Plex Mono 400, 13–14px</li>
+            </ul>
+        </div>
+        
+        <div class="proc-card" data-step="6">
+            <h4>Final Checklist</h4>
+            <p>Before publishing, verify:</p>
+            <ul>
+                <li>☐ CMYK bar present (Cyan → Magenta → Yellow → Black)</li>
+                <li>☐ Logo is legible on chosen background</li>
+                <li>☐ Colours are exact hex values — not approximations</li>
+                <li>☐ Outfit for headlines, Plus Jakarta Sans for body</li>
+                <li>☐ Cyan (#00AEEF) is the leading accent colour</li>
+                <li>☐ Sufficient whitespace — don't overcrowd</li>
+                <li>☐ British English spelling throughout</li>
+                <li>☐ Copy tone is friendly, fast, and expert</li>
+                <li>☐ Exported at correct dimensions for platform</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+
+<!-- ================================================================
+     7. CSS TOKENS (Copy-Paste Ready)
+================================================================ -->
+<section class="section-full section-gray" id="tokens" style="padding-left: 60px; padding-right: 60px;">
+    <div style="max-width: 1400px; margin: 0 auto;">
+        <p class="sec-overline">07 — Developer Reference</p>
+        <h2 class="sec-title">CSS Design Tokens</h2>
+        <p class="sec-desc">Copy this CSS variable block into any project to instantly apply the Banner Printing brand system. Use these exact variable names for consistency across web, email, and marketing materials.</p>
+
+        <div class="code-block">
+<span class="cm">/* ================================================
+   Banner Printing Ltd — Brand Tokens
+   Copy to any CSS project
+================================================ */</span>
+:root {
+    <span class="cm">/* CMYK Primary */</span>
+    <span class="prop">--bp-cyan</span>: <span class="cyan-val">#00AEEF</span>;
+    <span class="prop">--bp-magenta</span>: <span class="mag-val">#EC008C</span>;
+    <span class="prop">--bp-yellow</span>: <span class="val">#FFF200</span>;
+    <span class="prop">--bp-key</span>: <span class="val">#1A1A1A</span>;
+
+    <span class="cm">/* Extended */</span>
+    <span class="prop">--bp-cyan-dark</span>: <span class="val">#0090C9</span>;
+    <span class="prop">--bp-cyan-light</span>: <span class="val">#5CC8F5</span>;
+    <span class="prop">--bp-orange</span>: <span class="val">#F26522</span>;
+    <span class="prop">--bp-green</span>: <span class="val">#39B54A</span>;
+    <span class="prop">--bp-red</span>: <span class="val">#ED1C24</span>;
+
+    <span class="cm">/* Neutrals */</span>
+    <span class="prop">--bp-white</span>: <span class="val">#FFFFFF</span>;
+    <span class="prop">--bp-off-white</span>: <span class="val">#F8F8F9</span>;
+    <span class="prop">--bp-light-gray</span>: <span class="val">#EDEFF2</span>;
+    <span class="prop">--bp-mid-gray</span>: <span class="val">#BFC4CE</span>;
+    <span class="prop">--bp-muted</span>: <span class="val">#8892A0</span>;
+
+    <span class="cm">/* Gradients */</span>
+    <span class="prop">--bp-gradient-cmyk</span>: <span class="val">linear-gradient(135deg, #00AEEF 0%, #EC008C 50%, #FFF200 100%)</span>;
+    <span class="prop">--bp-gradient-print</span>: <span class="val">linear-gradient(135deg, #00AEEF 0%, #EC008C 100%)</span>;
+
+    <span class="cm">/* Text */</span>
+    <span class="prop">--bp-text-primary</span>: <span class="val">#1A1A1A</span>;
+    <span class="prop">--bp-text-secondary</span>: <span class="val">#555E6E</span>;
+    <span class="prop">--bp-text-muted</span>: <span class="val">#8892A0</span>;
+
+    <span class="cm">/* Typography */</span>
+    <span class="prop">--bp-font-display</span>: <span class="val">'Outfit', -apple-system, sans-serif</span>;
+    <span class="prop">--bp-font-body</span>: <span class="val">'Plus Jakarta Sans', -apple-system, sans-serif</span>;
+    <span class="prop">--bp-font-mono</span>: <span class="val">'IBM Plex Mono', monospace</span>;
+
+    <span class="cm">/* Border Radius */</span>
+    <span class="prop">--bp-radius-sm</span>: <span class="val">8px</span>;
+    <span class="prop">--bp-radius-md</span>: <span class="val">14px</span>;
+    <span class="prop">--bp-radius-lg</span>: <span class="val">24px</span>;
+}
+
+<span class="cm">/* Google Fonts import */</span>
+@import url('<span class="val">https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap</span>');
+
+<span class="cm">/* CMYK Bar — add to any element */</span>
+.<span class="prop">cmyk-bar</span> {
+    <span class="prop">display</span>: <span class="val">flex</span>;
+    <span class="prop">height</span>: <span class="val">4px</span>;
+    <span class="prop">width</span>: <span class="val">100%</span>;
+}
+.<span class="prop">cmyk-bar span:nth-child(1)</span> { <span class="prop">flex</span>: <span class="val">1</span>; <span class="prop">background</span>: <span class="cyan-val">#00AEEF</span>; }
+.<span class="prop">cmyk-bar span:nth-child(2)</span> { <span class="prop">flex</span>: <span class="val">1</span>; <span class="prop">background</span>: <span class="mag-val">#EC008C</span>; }
+.<span class="prop">cmyk-bar span:nth-child(3)</span> { <span class="prop">flex</span>: <span class="val">1</span>; <span class="prop">background</span>: <span class="val">#FFF200</span>; }
+.<span class="prop">cmyk-bar span:nth-child(4)</span> { <span class="prop">flex</span>: <span class="val">1</span>; <span class="prop">background</span>: <span class="val">#1A1A1A</span>; }
+        </div>
+
+        <!-- Logo File Path -->
+        <h3 style="font-family: var(--bp-font-mono); font-size: 12px; letter-spacing: 3px; text-transform: uppercase; color: var(--bp-text-muted); margin-top: 50px; margin-bottom: 20px;">Logo File Path</h3>
+        <div class="code-block">
+<span class="cm">/* Primary Logo — Transparent PNG (works on white/light backgrounds) */</span>
+<span class="val">https://bannerprintingltd.co.uk/wp-content/uploads/2023/12/banner-printing-logo-554150.png</span>
+
+<span class="cm">/* White Logo — For dark backgrounds (nav, hero, footer, dark cards) */</span>
+<span class="val">https://bannerprintingltd.co.uk/wp-content/uploads/2026/02/banner-printing-logo-w.png</span>
+
+<span class="cm">/* Website */</span>
+<span class="val">https://bannerprintingltd.co.uk</span>
+        </div>
+
+    </div>
+</section>
+
+
+<!-- ================================================================
+     FOOTER
+================================================================ -->
+<footer class="guide-footer">
+    <img src="https://bannerprintingltd.co.uk/wp-content/uploads/2026/02/banner-printing-logo-w.png" alt="Banner Printing">
+    <p>Brand Guide v1.0 — February 2026 — Banner Printing Ltd</p>
+</footer>
+</div><!-- end #guide-content -->
+
+<!-- ================================================================
+     BRAND STORY PAGE (Overlay)
+================================================================ -->
+<div id="story-page" class="story-page" style="display: none;">
+    
+    <!-- Story Navigation Bar -->
+    <div class="story-topbar">
+        <img src="https://bannerprintingltd.co.uk/wp-content/uploads/2026/02/banner-printing-logo-w.png" alt="Banner Printing" style="height: 24px;">
+        <span class="story-topbar-title">Brand Story & Content Strategy</span>
+        <button class="story-close-btn" onclick="hideStory()">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M15 5L5 15M5 5l10 10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            <span>Back to Guide</span>
+        </button>
+    </div>
+
+    <!-- Story Hero -->
+    <div class="story-hero">
+        <div class="story-hero-dots"></div>
+        <div class="story-hero-glow story-hero-glow--cyan"></div>
+        <div class="story-hero-glow story-hero-glow--magenta"></div>
+        <div class="story-hero-badge">Document v1.0 — 2025</div>
+        <h1 class="story-hero-title">Brand Story<br><span class="cyan">&</span> Content Strategy</h1>
+        <p class="story-hero-sub">Banner Printing UK · Denton, Manchester</p>
+        <div class="hero-cmyk-bar" style="position: absolute; bottom: 0; left: 0; right: 0;">
+            <span style="background: var(--bp-cyan);"></span>
+            <span style="background: var(--bp-magenta);"></span>
+            <span style="background: var(--bp-yellow);"></span>
+            <span style="background: var(--bp-black);"></span>
+        </div>
+    </div>
+
+    <!-- Brand Essence -->
+    <div class="story-section">
+        <p class="sec-overline">01 — Essence</p>
+        <h2 class="sec-title">Fast. Vibrant. UK-Made.</h2>
+        <p class="story-lead">Banner Printing UK is a Manchester-based custom print company producing high-impact vinyl banners, mesh banners, roller standees, backdrops, and exhibition displays — delivered across the UK within 24 to 48 hours. Every job is produced in-house at our Denton facility: no outsourcing, no delays, no compromises.</p>
+    </div>
+
+    <!-- Brand Story -->
+    <div class="story-section story-section--gray">
+        <p class="sec-overline">02 — Our Story</p>
+        <h2 class="sec-title">The Origin</h2>
+        <div class="story-prose">
+            <p>Banner Printing UK was founded on a single conviction: every business — from a first-time market trader to a national event company — deserves professional, high-impact print without inflated costs or unreliable timelines.</p>
+            <p>Operating from our production facility in Denton, Manchester, we print, pack, and dispatch everything in-house. No overseas supply chains. No middlemen. Just clean, vibrant, weather-ready print — delivered across the UK, usually within 24 to 48 hours of ordering.</p>
+            <p>We have fulfilled over 2,000 custom orders and carry a 4.9-star rating — not because it is a goal, but because it is what naturally follows when you take lead times seriously, answer questions honestly, and care about the quality of what you ship.</p>
+            <p>Whether it is a single roll-up standee for a pop-up shop or a 10-metre backdrop for a trade show, the standard stays the same: premium material, sharp colour, on time.</p>
+        </div>
+    </div>
+
+    <!-- Brand Pillars -->
+    <div class="story-section">
+        <p class="sec-overline">03 — Pillars</p>
+        <h2 class="sec-title">Brand Pillars</h2>
+        <p class="sec-desc">The four foundational principles that drive everything we produce.</p>
+        <div class="story-pillars-grid">
+            <div class="story-pillar" data-accent="cyan">
+                <span class="story-pillar-num">01</span>
+                <h3>Speed Without Compromise</h3>
+                <p>24 to 48-hour turnaround is our standard, not our exception. Order before 12pm and your job ships same day. Quality and speed are both non-negotiable — we have never used one as an excuse for the other.</p>
+            </div>
+            <div class="story-pillar" data-accent="magenta">
+                <span class="story-pillar-num">02</span>
+                <h3>Colour That Commands</h3>
+                <p>UV-resistant, weatherproof inks on premium substrates. Our colours stay true season after season, festival after festival. When your banner is up, it needs to be seen. Ours are.</p>
+            </div>
+            <div class="story-pillar" data-accent="yellow">
+                <span class="story-pillar-num">03</span>
+                <h3>Built for Every Budget</h3>
+                <p>From a single banner at £1.60 to a bulk campaign of thousands — competitive pricing at every scale, with special volume rates available on request. Premium print should not require a premium budget.</p>
+            </div>
+            <div class="story-pillar" data-accent="key">
+                <span class="story-pillar-num">04</span>
+                <h3>Proudly UK-Made</h3>
+                <p>Every job produced in Manchester. Faster lead times, lower delivery costs, and more sustainable choices by default. When you order from us, you are supporting a local UK business, not a distant factory.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Target Audience -->
+    <div class="story-section story-section--dark">
+        <p class="sec-overline" style="color: var(--bp-cyan-light);">04 — Audience</p>
+        <h2 class="sec-title" style="color: var(--bp-white);">Target Audience</h2>
+        <div class="story-audience-grid">
+            <div class="story-audience-card">
+                <div class="story-audience-tag">Primary</div>
+                <h4>UK Businesses & Event Organisers</h4>
+                <p>UK businesses, sole traders, event organisers, and marketing teams who need custom banners and displays on short notice. Sectors include retail, hospitality, events, construction, charity, sport, and education.</p>
+            </div>
+            <div class="story-audience-card">
+                <div class="story-audience-tag" style="color: var(--bp-magenta);">Psychographic</div>
+                <h4>Quality-First Buyers</h4>
+                <p>They value professionalism and reliability over lowest-possible price. They have been let down by slow overseas printers or poor-quality local suppliers before. They want a UK partner who answers questions, turns jobs around fast, and gets the print right first time.</p>
+            </div>
+            <div class="story-audience-card">
+                <div class="story-audience-tag" style="color: var(--bp-yellow);">Secondary</div>
+                <h4>Designers & Agencies</h4>
+                <p>Designers, print resellers, and agencies placing orders on behalf of their clients, who need a trade-level supplier with clean artwork handling and reliable dispatch.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Brand Voice -->
+    <div class="story-section">
+        <p class="sec-overline">05 — Voice</p>
+        <h2 class="sec-title">Brand Voice</h2>
+        <p class="sec-desc">How we speak — and how we don't.</p>
+        <div class="story-voice-table">
+            <div class="story-voice-row story-voice-row--header">
+                <div>Attribute</div>
+                <div>What It Sounds Like</div>
+                <div>What It Doesn't Sound Like</div>
+            </div>
+            <div class="story-voice-row">
+                <div class="story-voice-attr">Confident</div>
+                <div class="story-voice-do">"510gsm. Weatherproof. Ready in 24 hours."</div>
+                <div class="story-voice-dont">"We think you'll really like this quality!"</div>
+            </div>
+            <div class="story-voice-row">
+                <div class="story-voice-attr">Direct</div>
+                <div class="story-voice-do">"Order before 12pm. Dispatched same day."</div>
+                <div class="story-voice-dont">"We try our best to get it out as soon as possible!"</div>
+            </div>
+            <div class="story-voice-row">
+                <div class="story-voice-attr">Knowledgeable</div>
+                <div class="story-voice-do">"UV solvent ink on 510gsm PVC. Lasts 5+ years outdoors."</div>
+                <div class="story-voice-dont">"Super durable and weatherproof — perfect for outside!"</div>
+            </div>
+            <div class="story-voice-row">
+                <div class="story-voice-attr">Warm</div>
+                <div class="story-voice-do">"Thousands of UK businesses trust us — here's why."</div>
+                <div class="story-voice-dont">"BEST PRICES IN THE UK!!! ORDER NOW!!!"</div>
+            </div>
+            <div class="story-voice-row">
+                <div class="story-voice-attr">Specific</div>
+                <div class="story-voice-do">"From £1.60 per banner. Free tracked delivery."</div>
+                <div class="story-voice-dont">"Very affordable — great for any budget!"</div>
+            </div>
+        </div>
+        <div class="story-voice-note">
+            <strong>Tone:</strong> Speak like a trusted trade expert who knows printing inside out and wants every job to come out perfectly — not like a bargain discount site, not like a luxury house. Direct, warm, and assured.
+        </div>
+    </div>
+
+    <!-- Content Pillars -->
+    <div class="story-section story-section--gray">
+        <p class="sec-overline">06 — Content</p>
+        <h2 class="sec-title">Content Pillars</h2>
+        <p class="sec-desc">The four content categories that drive all social and website content.</p>
+        <div class="story-content-grid">
+            <div class="story-content-card">
+                <div class="story-content-pct">40%</div>
+                <h4>Product Showcase</h4>
+                <p>High-quality product photography, close-up material shots, before/after installs, size comparisons. Show the weight of the vinyl, the sharpness of the print, the quality of the eyelets.</p>
+                <div class="story-content-examples">
+                    <span>"510gsm weatherproof vinyl. Built for outdoor endurance."</span>
+                    <span>"Reinforced steel eyelets. Because corners matter."</span>
+                </div>
+            </div>
+            <div class="story-content-card">
+                <div class="story-content-pct" style="color: var(--bp-magenta);">30%</div>
+                <h4>Customer Stories</h4>
+                <p>Real customer installs, reviews, testimonials, and case studies. Markets, festivals, storefronts, exhibitions. Show banners in the wild — in use, in context, working.</p>
+                <div class="story-content-examples">
+                    <span>"Ordered Thursday. On the wall by Friday."</span>
+                    <span>"4.9 stars. 2,000+ orders. Here's what they said."</span>
+                </div>
+            </div>
+            <div class="story-content-card">
+                <div class="story-content-pct" style="color: var(--bp-yellow);">20%</div>
+                <h4>Behind the Print</h4>
+                <p>Factory footage, machines in action, packing process, team at work, quality checks. Build trust by showing the production behind the product.</p>
+                <div class="story-content-examples">
+                    <span>"Made in Manchester. Every single one."</span>
+                    <span>"Watch it being printed, packed, and sent."</span>
+                </div>
+            </div>
+            <div class="story-content-card">
+                <div class="story-content-pct" style="color: var(--bp-green);">10%</div>
+                <h4>Tips & Education</h4>
+                <p>Artwork setup guides, size comparison charts, material explainers, printing terminology. Position Banner Printing UK as the go-to authority for custom print.</p>
+                <div class="story-content-examples">
+                    <span>"How to set up your artwork file for print — the right way."</span>
+                    <span>"CMYK vs RGB: why it matters before you send your file."</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Range -->
+    <div class="story-section">
+        <p class="sec-overline">07 — Products</p>
+        <h2 class="sec-title">Product Range Overview</h2>
+        <p class="sec-desc">Core product categories with starting prices and key specifications.</p>
+        <div class="story-product-table-wrap">
+            <table class="story-product-table">
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Products</th>
+                        <th>From</th>
+                        <th>Key Feature</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Vinyl Banners</td>
+                        <td>Outdoor, indoor, PVC banners</td>
+                        <td><strong>£1.60</strong></td>
+                        <td>510gsm UV-resistant PVC</td>
+                    </tr>
+                    <tr>
+                        <td>Mesh Banners</td>
+                        <td>Perforated wind-through banners</td>
+                        <td><strong>£1.60</strong></td>
+                        <td>270gsm — 30% wind pass-through</td>
+                    </tr>
+                    <tr>
+                        <td>Roller Banners</td>
+                        <td>Pull-up / roll-up standees</td>
+                        <td><strong>£32.99</strong></td>
+                        <td>170mic polypropylene, 3 sizes</td>
+                    </tr>
+                    <tr>
+                        <td>Backdrops</td>
+                        <td>Fabric & vinyl display backdrops</td>
+                        <td><strong>£89.99</strong></td>
+                        <td>110gsm fabric or PVC options</td>
+                    </tr>
+                    <tr>
+                        <td>Banner Stands</td>
+                        <td>Weighted & telescopic stands</td>
+                        <td><strong>£44.99</strong></td>
+                        <td>12 configurations available</td>
+                    </tr>
+                    <tr>
+                        <td>Pop-Up Displays</td>
+                        <td>Tool-free exhibition systems</td>
+                        <td><strong>£129.99</strong></td>
+                        <td>7 configurations, up to 3m wide</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Print Specifications -->
+    <div class="story-section story-section--dark">
+        <p class="sec-overline" style="color: var(--bp-cyan-light);">08 — Specifications</p>
+        <h2 class="sec-title" style="color: var(--bp-white);">Print Specifications</h2>
+        <p class="sec-desc" style="color: var(--bp-muted);">Technical requirements for artwork submission.</p>
+        <div class="story-specs-grid">
+            <div class="story-spec-item">
+                <div class="story-spec-label">Colour Mode</div>
+                <div class="story-spec-value">CMYK only — convert from RGB before sending</div>
+            </div>
+            <div class="story-spec-item">
+                <div class="story-spec-label">Resolution</div>
+                <div class="story-spec-value">150 DPI at final print size (300 DPI for formats under 1m)</div>
+            </div>
+            <div class="story-spec-item">
+                <div class="story-spec-label">Bleed</div>
+                <div class="story-spec-value">25mm on all four sides</div>
+            </div>
+            <div class="story-spec-item">
+                <div class="story-spec-label">Safe Zone</div>
+                <div class="story-spec-value">50mm from the finished edge — keep all critical content inside</div>
+            </div>
+            <div class="story-spec-item">
+                <div class="story-spec-label">Eyelet Clear Zone</div>
+                <div class="story-spec-value">75mm from eyelet centre positions</div>
+            </div>
+            <div class="story-spec-item">
+                <div class="story-spec-label">Accepted Formats</div>
+                <div class="story-spec-value">PDF (preferred) · AI · EPS · PSD · PNG</div>
+            </div>
+            <div class="story-spec-item">
+                <div class="story-spec-label">Rich Black</div>
+                <div class="story-spec-value">C60 M40 Y40 K100</div>
+            </div>
+            <div class="story-spec-item">
+                <div class="story-spec-label">Pure Black</div>
+                <div class="story-spec-value">K100 only — never composite black for body text</div>
+            </div>
+            <div class="story-spec-item">
+                <div class="story-spec-label">Max Ink Density</div>
+                <div class="story-spec-value">280% total on vinyl substrates</div>
+            </div>
+            <div class="story-spec-item">
+                <div class="story-spec-label">Fonts</div>
+                <div class="story-spec-value">Outline or embed all fonts before saving</div>
+            </div>
+            <div class="story-spec-item">
+                <div class="story-spec-label">Max File Size</div>
+                <div class="story-spec-value">500MB per upload</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Social Media Strategy -->
+    <div class="story-section">
+        <p class="sec-overline">09 — Social Strategy</p>
+        <h2 class="sec-title">Platform Strategy</h2>
+        <p class="sec-desc">Channel-specific guidance for content creation and publishing.</p>
+        <div class="story-social-grid">
+            <div class="story-social-card">
+                <div class="story-social-icon">📸</div>
+                <h4>Instagram <span class="story-social-badge">Primary</span></h4>
+                <ul>
+                    <li><strong>Grid:</strong> Alternating product shots and real customer installs</li>
+                    <li><strong>Stories:</strong> Behind-the-scenes factory content, quick artwork tips</li>
+                    <li><strong>Reels:</strong> Time-lapse print runs, unboxings, install videos</li>
+                    <li><strong>Feed ratios:</strong> 1:1 (1080×1080) and 4:5 (1080×1350)</li>
+                    <li><strong>Captions:</strong> Short, confident, specific — max 150 chars + 5–8 hashtags</li>
+                </ul>
+            </div>
+            <div class="story-social-card">
+                <div class="story-social-icon">👍</div>
+                <h4>Facebook</h4>
+                <ul>
+                    <li>Product range announcements and seasonal campaigns</li>
+                    <li>Customer review posts with install photography</li>
+                    <li>Ad creatives at 1200×628px for reach campaigns</li>
+                    <li>Link posts to blog content and size guides</li>
+                    <li>Posting cadence: 4–5 times per week</li>
+                </ul>
+            </div>
+            <div class="story-social-card">
+                <div class="story-social-icon">🎵</div>
+                <h4>TikTok</h4>
+                <ul>
+                    <li>Print production videos: machines running, vinyl cutting</li>
+                    <li>"Before and after" — blank space to branded display</li>
+                    <li>Artwork setup tutorials</li>
+                    <li>Customer reveal videos: opening parcels, putting up banners</li>
+                    <li>Format: 1080×1920 (9:16), 15–60 seconds</li>
+                </ul>
+            </div>
+            <div class="story-social-card">
+                <div class="story-social-icon">🌐</div>
+                <h4>Website & Blog</h4>
+                <ul>
+                    <li>Long-form guides: banner size selection, material comparisons</li>
+                    <li>SEO targets: "custom banner printing UK", "vinyl banner Manchester"</li>
+                    <li>Product pages with spec tables and size guides</li>
+                    <li>Customer case studies from brief to final install</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Standard Banner Sizes -->
+    <div class="story-section story-section--gray">
+        <p class="sec-overline">10 — Sizes</p>
+        <h2 class="sec-title">Standard Banner Sizes</h2>
+        <p class="sec-desc">All measurements are finished/trimmed dimensions. Always add 25mm bleed on every edge.</p>
+        <div class="story-product-table-wrap">
+            <table class="story-product-table story-sizes-table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Finished Size</th>
+                        <th>Canvas + Bleed</th>
+                        <th>Material</th>
+                        <th>Min DPI</th>
+                        <th>Best Use</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Vinyl Banner</td>
+                        <td>610 × 1220mm</td>
+                        <td>660 × 1270mm</td>
+                        <td>510gsm PVC</td>
+                        <td>150</td>
+                        <td>Pop-up shops, windows</td>
+                    </tr>
+                    <tr>
+                        <td>Vinyl Banner ⭐</td>
+                        <td>915 × 1830mm</td>
+                        <td>965 × 1880mm</td>
+                        <td>510gsm PVC</td>
+                        <td>150</td>
+                        <td>Storefronts, exhibitions</td>
+                    </tr>
+                    <tr>
+                        <td>Vinyl Banner</td>
+                        <td>1220 × 2440mm</td>
+                        <td>1270 × 2490mm</td>
+                        <td>510gsm PVC</td>
+                        <td>100</td>
+                        <td>Large outdoor signage</td>
+                    </tr>
+                    <tr>
+                        <td>Mesh Banner</td>
+                        <td>915 × 2440mm</td>
+                        <td>965 × 2490mm</td>
+                        <td>270gsm mesh</td>
+                        <td>75</td>
+                        <td>Construction sites, fencing</td>
+                    </tr>
+                    <tr>
+                        <td>Roll-Up (Std) ⭐</td>
+                        <td>800 × 2000mm</td>
+                        <td>850 × 2050mm</td>
+                        <td>170mic poly</td>
+                        <td>150</td>
+                        <td>Trade shows, retail</td>
+                    </tr>
+                    <tr>
+                        <td>Roll-Up (Wide)</td>
+                        <td>1000 × 2000mm</td>
+                        <td>1050 × 2050mm</td>
+                        <td>170mic poly</td>
+                        <td>150</td>
+                        <td>High-impact retail displays</td>
+                    </tr>
+                    <tr>
+                        <td>Backdrop</td>
+                        <td>2000 × 2000mm</td>
+                        <td>2050 × 2050mm</td>
+                        <td>110gsm fabric</td>
+                        <td>100</td>
+                        <td>Photo backdrops, exhibitions</td>
+                    </tr>
+                    <tr>
+                        <td>Backdrop</td>
+                        <td>3000 × 2500mm</td>
+                        <td>3050 × 2550mm</td>
+                        <td>110gsm fabric</td>
+                        <td>75</td>
+                        <td>Stage backdrops, brand walls</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Do's and Don'ts -->
+    <div class="story-section">
+        <p class="sec-overline">11 — Guidelines</p>
+        <h2 class="sec-title">Do's & Don'ts</h2>
+        <div class="story-dos-grid">
+            <div class="story-dos-card story-dos-card--do">
+                <h4 style="color: var(--bp-success);">✓ Do</h4>
+                <ul>
+                    <li>Use clean, high-resolution product photography on neutral or solid-colour backgrounds</li>
+                    <li>Keep layouts bold and uncluttered — let print quality and colour do the talking</li>
+                    <li>Be specific with every claim: gsm, DPI, lead time, price</li>
+                    <li>Use the Ink Black / Hot Pink / Electric Yellow palette consistently</li>
+                    <li>Write concise, confident copy — every word should earn its place</li>
+                    <li>Show real customer installs at markets, festivals, storefronts</li>
+                    <li>Confirm artwork specs with the customer before going to print on large orders</li>
+                    <li>Use the full logo mark (icon + wordmark) together at all times</li>
+                </ul>
+            </div>
+            <div class="story-dos-card story-dos-card--dont">
+                <h4 style="color: var(--bp-error);">✗ Don't</h4>
+                <ul>
+                    <li>Use excessive emojis, all-caps hype language, or "SALE SALE SALE" energy</li>
+                    <li>Clutter designs with competing typefaces, gradients, or off-brand colours</li>
+                    <li>Use RGB colour mode in artwork files — always convert to CMYK</li>
+                    <li>Separate the icon from the wordmark — they must always appear together</li>
+                    <li>Use vague claims like "affordable" or "great quality" — back every claim with a number</li>
+                    <li>Recreate the logo in type or modify its proportions</li>
+                    <li>Post content featuring competitor branding or clip art</li>
+                    <li>Ignore bleed and safe zone requirements</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Story Footer -->
+    <footer class="guide-footer">
+        <img src="https://bannerprintingltd.co.uk/wp-content/uploads/2026/02/banner-printing-logo-w.png" alt="Banner Printing">
+        <p>Brand Story v1.0 — 2025 — Banner Printing UK</p>
+        <p style="margin-top: 8px; opacity: 0.5;">Unit 4, Palatine Street, Denton, Manchester M34 3LY · 075 39 064 448</p>
+    </footer>
+</div>
+
+<script>
+    const guideContent = document.getElementById('guide-content');
+    const storyPage = document.getElementById('story-page');
+    const guideNav = document.querySelector('.guide-nav');
+    
+    function showStory() {
+        guideContent.style.display = 'none';
+        storyPage.style.display = 'block';
+        window.scrollTo(0, 0);
+        guideNav.style.display = 'none';
+    }
+    
+    function hideStory() {
+        storyPage.style.display = 'none';
+        guideContent.style.display = 'block';
+        guideNav.style.display = 'flex';
+        window.scrollTo(0, 0);
+    }
+</script>
+
+</body>
+</html>

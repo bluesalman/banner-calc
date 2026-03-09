@@ -284,9 +284,9 @@
                 self.updatePriceDisplay();
             });
 
-            // Service type pills.
-            this.el.on('click', '.bannercalc-service-pill', function() {
-                self.el.find('.bannercalc-service-pill').removeClass('active');
+            // Service type pills (outside #bannercalc-configurator — use form scope).
+            this.el.closest('form').on('click', '.bannercalc-service-pill', function() {
+                $('.bannercalc-service-pill').removeClass('active');
                 $(this).addClass('active');
                 self.state.serviceType = $(this).data('service');
                 $('#bannercalc-input-service-type').val(self.state.serviceType);
@@ -502,6 +502,8 @@
             if (BannerCalcPreview.initialized) {
                 BannerCalcPreview.checkVisibility();
                 BannerCalcPreview.render();
+                // Auto-switch to Your Banner tab when state changes.
+                BannerCalcPreview.switchToPreview();
             }
         },
 
@@ -691,25 +693,24 @@
          */
         checkVisibility: function() {
             if (!this.initialized) return;
+            // Tabs are always visible by default now — no need to hide/show.
+        },
 
-            var attrs = BannerCalc.state.selectedAttributes;
-            var hasVisual = false;
+        /**
+         * Auto-switch to the 'Your Banner' preview tab.
+         */
+        switchToPreview: function() {
+            if (!this.initialized) return;
+            // Only switch if dimensions are available.
+            if (!BannerCalc.state.widthMetres || !BannerCalc.state.heightMetres) return;
 
-            var visualAttrs = ['pa_eyelets', 'pa_pole-pockets', 'pa_hemming', 'pa_cable-ties'];
-            var noneValues  = ['none', 'no', ''];
-
-            for (var i = 0; i < visualAttrs.length; i++) {
-                var val = attrs[visualAttrs[i]] || '';
-                if (val && noneValues.indexOf(val) === -1) {
-                    hasVisual = true;
-                    break;
-                }
+            var $activeTab = this.tabsEl.find('.bannercalc-preview-tab.active');
+            if ($activeTab.data('tab') !== 'preview') {
+                this.tabsEl.find('.bannercalc-preview-tab').removeClass('active');
+                this.tabsEl.find('[data-tab="preview"]').addClass('active');
+                this.panelEl.show();
+                this.galleryEl.hide();
             }
-
-            if (hasVisual) {
-                this.tabsEl.fadeIn(200);
-            }
-            // Once shown, keep tabs visible (don't auto-hide).
         },
 
         /**
@@ -792,7 +793,7 @@
             svg += '<stop offset="100%" stop-color="white" stop-opacity="0"/>';
             svg += '</linearGradient>';
             svg += '<pattern id="bcPocketHash" patternUnits="userSpaceOnUse" width="6" height="6" patternTransform="rotate(45)">';
-            svg += '<line x1="0" y1="0" x2="0" y2="6" stroke="rgba(236,0,140,0.25)" stroke-width="1.5"/>';
+            svg += '<line x1="0" y1="0" x2="0" y2="6" stroke="rgba(249,110,180,0.25)" stroke-width="1.5"/>';
             svg += '</pattern>';
             svg += '<filter id="bcShadow" x="-5%" y="-5%" width="110%" height="115%">';
             svg += '<feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="rgba(0,0,0,0.12)"/>';
@@ -812,8 +813,8 @@
             }
 
             // Placeholder text.
-            svg += '<text x="' + (bx + bw/2) + '" y="' + (by + bh/2 - 8) + '" text-anchor="middle" font-family="Outfit, sans-serif" font-size="14" font-weight="700" fill="#ccc" letter-spacing="1">YOUR DESIGN</text>';
-            svg += '<text x="' + (bx + bw/2) + '" y="' + (by + bh/2 + 10) + '" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#d5d5d5" letter-spacing="0.5">' + wDisp + abbr + ' × ' + hDisp + abbr + '</text>';
+            svg += '<text x="' + (bx + bw/2) + '" y="' + (by + bh/2 - 10) + '" text-anchor="middle" font-family="Outfit, sans-serif" font-size="18" font-weight="700" fill="#a0a0a0" letter-spacing="2">YOUR DESIGN</text>';
+            svg += '<text x="' + (bx + bw/2) + '" y="' + (by + bh/2 + 14) + '" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#b0b0b0" font-weight="500" letter-spacing="0.5">' + wDisp + abbr + ' × ' + hDisp + abbr + '</text>';
 
             // HEMMING.
             var hemming = attrs['pa_hemming'] || '';
@@ -826,9 +827,13 @@
             // POLE POCKETS.
             var pp = attrs['pa_pole-pockets'] || '';
             if (pp && noneVals.indexOf(pp) === -1) {
-                // Parse pocket depth from slug.
+                // Parse pocket depth from slug — matches "3 inches", "3-inches", "4 Inches", "4\"" etc.
                 var pocketInches = 3; // default
-                var depthMatch = pp.match(/(\d+(?:\.\d+)?)\s*(?:inch|inches|")/i);
+                var depthMatch = pp.match(/(\d+(?:\.\d+)?)\s*[-\s]*(?:inch|inches|")/i);
+                if (!depthMatch) {
+                    // Also try matching a bare leading number (e.g. slug "3-inches" → after replace: "3 inches").
+                    depthMatch = pp.replace(/-/g, ' ').match(/(\d+(?:\.\d+)?)\s*(?:inch|inches|")/i);
+                }
                 if (depthMatch) pocketInches = parseFloat(depthMatch[1]);
 
                 // Which sides?
@@ -856,20 +861,20 @@
                 var pLabel = pocketInches + '\u2033 pocket';
 
                 if (sides.top) {
-                    svg += '<rect x="' + bx + '" y="' + by + '" width="' + bw + '" height="' + pocketPx + '" fill="url(#bcPocketHash)" stroke="rgba(236,0,140,0.4)" stroke-width="1"/>';
-                    svg += '<text x="' + (bx + bw/2) + '" y="' + (by + pocketPx/2 + 3) + '" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="7" fill="rgba(236,0,140,0.6)">' + pLabel + '</text>';
+                    svg += '<rect x="' + bx + '" y="' + by + '" width="' + bw + '" height="' + pocketPx + '" fill="url(#bcPocketHash)" stroke="rgba(249,110,180,0.4)" stroke-width="1"/>';
+                    svg += '<text x="' + (bx + bw/2) + '" y="' + (by + pocketPx/2 + 3) + '" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="rgba(249,110,180,0.7)" font-weight="500">' + pLabel + '</text>';
                 }
                 if (sides.bottom) {
-                    svg += '<rect x="' + bx + '" y="' + (by + bh - pocketPx) + '" width="' + bw + '" height="' + pocketPx + '" fill="url(#bcPocketHash)" stroke="rgba(236,0,140,0.4)" stroke-width="1"/>';
-                    svg += '<text x="' + (bx + bw/2) + '" y="' + (by + bh - pocketPx/2 + 3) + '" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="7" fill="rgba(236,0,140,0.6)">' + pLabel + '</text>';
+                    svg += '<rect x="' + bx + '" y="' + (by + bh - pocketPx) + '" width="' + bw + '" height="' + pocketPx + '" fill="url(#bcPocketHash)" stroke="rgba(249,110,180,0.4)" stroke-width="1"/>';
+                    svg += '<text x="' + (bx + bw/2) + '" y="' + (by + bh - pocketPx/2 + 3) + '" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="rgba(249,110,180,0.7)" font-weight="500">' + pLabel + '</text>';
                 }
                 if (sides.left) {
                     var lpPx = Math.max(12, (pocketInches / (wFt * 12)) * bw);
-                    svg += '<rect x="' + bx + '" y="' + by + '" width="' + lpPx + '" height="' + bh + '" fill="url(#bcPocketHash)" stroke="rgba(236,0,140,0.4)" stroke-width="1"/>';
+                    svg += '<rect x="' + bx + '" y="' + by + '" width="' + lpPx + '" height="' + bh + '" fill="url(#bcPocketHash)" stroke="rgba(249,110,180,0.4)" stroke-width="1"/>';
                 }
                 if (sides.right) {
                     var rpPx = Math.max(12, (pocketInches / (wFt * 12)) * bw);
-                    svg += '<rect x="' + (bx + bw - rpPx) + '" y="' + by + '" width="' + rpPx + '" height="' + bh + '" fill="url(#bcPocketHash)" stroke="rgba(236,0,140,0.4)" stroke-width="1"/>';
+                    svg += '<rect x="' + (bx + bw - rpPx) + '" y="' + by + '" width="' + rpPx + '" height="' + bh + '" fill="url(#bcPocketHash)" stroke="rgba(249,110,180,0.4)" stroke-width="1"/>';
                 }
             }
 
@@ -881,8 +886,8 @@
 
                 var addEyelet = function(cx, cy) {
                     eyeletPositions.push({ cx: cx, cy: cy });
-                    svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="#00AEEF" stroke-width="1.8" opacity="0.85"/>';
-                    svg += '<circle cx="' + cx + '" cy="' + cy + '" r="1.5" fill="#00AEEF" opacity="0.5"/>';
+                    svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="#3da6f9" stroke-width="1.8" opacity="0.85"/>';
+                    svg += '<circle cx="' + cx + '" cy="' + cy + '" r="1.5" fill="#3da6f9" opacity="0.5"/>';
                 };
 
                 var eLower = eyelets.toLowerCase().replace(/-/g, ' ');
@@ -1005,12 +1010,12 @@
 
             // Dimension labels.
             var arrowY = by + bh + 18;
-            svg += '<line x1="' + bx + '" y1="' + arrowY + '" x2="' + (bx + bw) + '" y2="' + arrowY + '" stroke="#BFC4CE" stroke-width="1"/>';
-            svg += '<text x="' + (bx + bw/2) + '" y="' + (arrowY + 14) + '" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#8892A0" font-weight="500">' + wDisp + abbr + '</text>';
+            svg += '<line x1="' + bx + '" y1="' + arrowY + '" x2="' + (bx + bw) + '" y2="' + arrowY + '" stroke="#8892A0" stroke-width="1"/>';
+            svg += '<text x="' + (bx + bw/2) + '" y="' + (arrowY + 16) + '" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#555E6E" font-weight="600">' + wDisp + abbr + '</text>';
 
-            var arrowX = bx - 14;
-            svg += '<line x1="' + arrowX + '" y1="' + by + '" x2="' + arrowX + '" y2="' + (by + bh) + '" stroke="#BFC4CE" stroke-width="1"/>';
-            svg += '<text x="' + arrowX + '" y="' + (by + bh/2 + 3) + '" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#8892A0" font-weight="500" transform="rotate(-90,' + arrowX + ',' + (by + bh/2) + ')">' + hDisp + abbr + '</text>';
+            var arrowX = bx - 16;
+            svg += '<line x1="' + arrowX + '" y1="' + by + '" x2="' + arrowX + '" y2="' + (by + bh) + '" stroke="#8892A0" stroke-width="1"/>';
+            svg += '<text x="' + arrowX + '" y="' + (by + bh/2 + 3) + '" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#555E6E" font-weight="600" transform="rotate(-90,' + arrowX + ',' + (by + bh/2) + ')">' + hDisp + abbr + '</text>';
 
             svg += '</svg>';
 

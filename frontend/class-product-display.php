@@ -177,6 +177,11 @@ class ProductDisplay {
 
         echo '</div>'; // .bannercalc-design-mode-section
 
+        echo '</div>'; // .bannercalc-card--extras (design card ends here)
+
+        // Card 4: Delivery Speed + Pricing — separate card.
+        echo '<div class="bannercalc-card bannercalc-card--delivery">';
+
         // Service type selector.
         if ( ! empty( $service_types ) && count( $service_types ) > 1 ) {
             echo '<div class="bannercalc-section bannercalc-service-section">';
@@ -224,8 +229,8 @@ class ProductDisplay {
             return;
         }
         ?>
-        <!-- BannerCalc Preview Tabs (hidden until visual attribute is selected) -->
-        <div class="bannercalc-preview-tabs" id="bannercalc-preview-tabs" style="display:none;">
+        <!-- BannerCalc Preview Tabs (shown by default) -->
+        <div class="bannercalc-preview-tabs" id="bannercalc-preview-tabs">
             <button type="button" class="bannercalc-preview-tab active" data-tab="gallery"><?php esc_html_e( 'Product Image', 'bannercalc' ); ?></button>
             <button type="button" class="bannercalc-preview-tab" data-tab="preview"><?php esc_html_e( 'Your Banner', 'bannercalc' ); ?></button>
         </div>
@@ -291,7 +296,7 @@ class ProductDisplay {
         }
 
         echo '</div><!-- .bannercalc-quantity-row -->';
-        echo '</div><!-- .bannercalc-card--extras -->';
+        echo '</div><!-- .bannercalc-card--delivery -->';
     }
 
     /**
