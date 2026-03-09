@@ -1030,30 +1030,64 @@
             svg += '<filter id="bcShadow" x="-5%" y="-5%" width="110%" height="115%">';
             svg += '<feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="rgba(0,0,0,0.12)"/>';
             svg += '</filter>';
-            svg += '<clipPath id="bcBannerClip"><rect x="' + (padLeft + pocketPxLeft) + '" y="' + (padTop + pocketPxTop) + '" width="' + bw + '" height="' + bh + '" rx="3"/></clipPath>';
+            svg += '<clipPath id="bcBannerClip">';
+            if (isCircle) {
+                var cxClip = padLeft + pocketPxLeft + bw / 2;
+                var cyClip = padTop + pocketPxTop + bh / 2;
+                var rClip = Math.min(bw, bh) / 2;
+                svg += '<circle cx="' + cxClip + '" cy="' + cyClip + '" r="' + rClip + '"/>';
+            } else {
+                svg += '<rect x="' + (padLeft + pocketPxLeft) + '" y="' + (padTop + pocketPxTop) + '" width="' + bw + '" height="' + bh + '" rx="3"/>';
+            }
+            svg += '</clipPath>';
             svg += '</defs>';
 
             var bx = padLeft + pocketPxLeft, by = padTop + pocketPxTop;
+            var cx = bx + bw / 2, cy = by + bh / 2;
+            var radius = Math.min(bw, bh) / 2;
 
             // Banner body.
-            svg += '<rect x="' + bx + '" y="' + by + '" width="' + bw + '" height="' + bh + '" rx="3" fill="#f0f0f0" filter="url(#bcShadow)" stroke="#d0d0d0" stroke-width="0.5"/>';
-            svg += '<rect x="' + bx + '" y="' + by + '" width="' + bw + '" height="' + bh + '" rx="3" fill="white"/>';
+            if (isCircle) {
+                svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + radius + '" fill="#f0f0f0" filter="url(#bcShadow)" stroke="#d0d0d0" stroke-width="0.5"/>';
+                svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + radius + '" fill="white"/>';
+                // Dashed circle guide.
+                svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + (radius - 3) + '" fill="none" stroke="rgba(61,166,249,0.25)" stroke-width="1" stroke-dasharray="6 4"/>';
+            } else {
+                svg += '<rect x="' + bx + '" y="' + by + '" width="' + bw + '" height="' + bh + '" rx="3" fill="#f0f0f0" filter="url(#bcShadow)" stroke="#d0d0d0" stroke-width="0.5"/>';
+                svg += '<rect x="' + bx + '" y="' + by + '" width="' + bw + '" height="' + bh + '" rx="3" fill="white"/>';
+            }
 
             // Gloss finish overlay.
             var finish = attrs['pa_finish'] || '';
             if (finish === 'gloss') {
-                svg += '<rect x="' + bx + '" y="' + by + '" width="' + bw + '" height="' + bh + '" rx="3" fill="url(#bcGloss)"/>';
+                if (isCircle) {
+                    svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + radius + '" fill="url(#bcGloss)"/>';
+                } else {
+                    svg += '<rect x="' + bx + '" y="' + by + '" width="' + bw + '" height="' + bh + '" rx="3" fill="url(#bcGloss)"/>';
+                }
             }
 
             // User-uploaded image or placeholder text.
             if (this.uploadedImageUrl) {
                 svg += '<image href="' + this.uploadedImageUrl.replace(/&/g, '&amp;').replace(/"/g, '&quot;') + '" x="' + bx + '" y="' + by + '" width="' + bw + '" height="' + bh + '" preserveAspectRatio="xMidYMid slice" clip-path="url(#bcBannerClip)"/>';
                 // Subtle dimension overlay at bottom.
-                svg += '<rect x="' + bx + '" y="' + (by + bh - 28) + '" width="' + bw + '" height="28" fill="rgba(0,0,0,0.45)" rx="0"/>';
-                svg += '<text x="' + (bx + bw/2) + '" y="' + (by + bh - 9) + '" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#ffffff" font-weight="600" letter-spacing="0.5">' + wDisp + abbr + ' × ' + hDisp + abbr + '</text>';
+                if (isCircle) {
+                    var overlayH = 24;
+                    var overlayY = cy + radius - overlayH;
+                    svg += '<rect x="' + (cx - radius) + '" y="' + overlayY + '" width="' + (radius * 2) + '" height="' + overlayH + '" fill="rgba(0,0,0,0.45)" clip-path="url(#bcBannerClip)"/>';
+                    svg += '<text x="' + cx + '" y="' + (overlayY + overlayH - 7) + '" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#ffffff" font-weight="600" letter-spacing="0.5">' + wDisp + abbr + ' \u2300</text>';
+                } else {
+                    svg += '<rect x="' + bx + '" y="' + (by + bh - 28) + '" width="' + bw + '" height="28" fill="rgba(0,0,0,0.45)" rx="0"/>';
+                    svg += '<text x="' + (bx + bw/2) + '" y="' + (by + bh - 9) + '" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#ffffff" font-weight="600" letter-spacing="0.5">' + wDisp + abbr + ' × ' + hDisp + abbr + '</text>';
+                }
             } else {
-                svg += '<text x="' + (bx + bw/2) + '" y="' + (by + bh/2 - 10) + '" text-anchor="middle" font-family="Outfit, sans-serif" font-size="18" font-weight="700" fill="#a0a0a0" letter-spacing="2">YOUR DESIGN</text>';
-                svg += '<text x="' + (bx + bw/2) + '" y="' + (by + bh/2 + 14) + '" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#b0b0b0" font-weight="500" letter-spacing="0.5">' + wDisp + abbr + ' × ' + hDisp + abbr + '</text>';
+                if (isCircle) {
+                    svg += '<text x="' + cx + '" y="' + (cy - 10) + '" text-anchor="middle" font-family="Outfit, sans-serif" font-size="18" font-weight="700" fill="#a0a0a0" letter-spacing="2">YOUR DESIGN</text>';
+                    svg += '<text x="' + cx + '" y="' + (cy + 14) + '" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#b0b0b0" font-weight="500" letter-spacing="0.5">' + wDisp + abbr + ' \u2300</text>';
+                } else {
+                    svg += '<text x="' + (bx + bw/2) + '" y="' + (by + bh/2 - 10) + '" text-anchor="middle" font-family="Outfit, sans-serif" font-size="18" font-weight="700" fill="#a0a0a0" letter-spacing="2">YOUR DESIGN</text>';
+                    svg += '<text x="' + (bx + bw/2) + '" y="' + (by + bh/2 + 14) + '" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#b0b0b0" font-weight="500" letter-spacing="0.5">' + wDisp + abbr + ' × ' + hDisp + abbr + '</text>';
+                }
             }
 
             // HEMMING.
@@ -1214,14 +1248,21 @@
                 }
             }
 
-            // Dimension labels — Width on TOP, Height on RIGHT.
-            var arrowY = by - pocketPxTop - 12;
-            svg += '<line x1="' + bx + '" y1="' + arrowY + '" x2="' + (bx + bw) + '" y2="' + arrowY + '" stroke="#8892A0" stroke-width="1"/>';
-            svg += '<text x="' + (bx + bw/2) + '" y="' + (arrowY - 6) + '" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#555E6E" font-weight="600">' + wDisp + abbr + '</text>';
+            // Dimension labels — Width on TOP, Height on RIGHT (or diameter for circles).
+            if (isCircle) {
+                // Single diameter label on top.
+                var arrowY = by - pocketPxTop - 12;
+                svg += '<line x1="' + bx + '" y1="' + arrowY + '" x2="' + (bx + bw) + '" y2="' + arrowY + '" stroke="#8892A0" stroke-width="1"/>';
+                svg += '<text x="' + (bx + bw/2) + '" y="' + (arrowY - 6) + '" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#555E6E" font-weight="600">\u2300 ' + wDisp + abbr + '</text>';
+            } else {
+                var arrowY = by - pocketPxTop - 12;
+                svg += '<line x1="' + bx + '" y1="' + arrowY + '" x2="' + (bx + bw) + '" y2="' + arrowY + '" stroke="#8892A0" stroke-width="1"/>';
+                svg += '<text x="' + (bx + bw/2) + '" y="' + (arrowY - 6) + '" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#555E6E" font-weight="600">' + wDisp + abbr + '</text>';
 
-            var arrowX = bx + bw + pocketPxRight + 14;
-            svg += '<line x1="' + arrowX + '" y1="' + by + '" x2="' + arrowX + '" y2="' + (by + bh) + '" stroke="#8892A0" stroke-width="1"/>';
-            svg += '<text x="' + arrowX + '" y="' + (by + bh/2 + 3) + '" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#555E6E" font-weight="600" transform="rotate(90,' + arrowX + ',' + (by + bh/2) + ')">' + hDisp + abbr + '</text>';
+                var arrowX = bx + bw + pocketPxRight + 14;
+                svg += '<line x1="' + arrowX + '" y1="' + by + '" x2="' + arrowX + '" y2="' + (by + bh) + '" stroke="#8892A0" stroke-width="1"/>';
+                svg += '<text x="' + arrowX + '" y="' + (by + bh/2 + 3) + '" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#555E6E" font-weight="600" transform="rotate(90,' + arrowX + ',' + (by + bh/2) + ')">' + hDisp + abbr + '</text>';
+            }
 
             svg += '</svg>';
 
