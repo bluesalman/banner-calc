@@ -61,6 +61,22 @@ class ProductDisplay {
         $settings = \BannerCalc\Plugin::get_settings();
         $attr_mgr = $plugin->attributes;
 
+        // Resolve the root product category slug for frontend logic.
+        $category_slug = '';
+        $category_ids  = $product->get_category_ids();
+        foreach ( $category_ids as $cat_id ) {
+            $root_id   = $cat_id;
+            $ancestors = get_ancestors( $cat_id, 'product_cat', 'taxonomy' );
+            if ( ! empty( $ancestors ) ) {
+                $root_id = end( $ancestors );
+            }
+            $term = get_term( $root_id, 'product_cat' );
+            if ( $term && ! is_wp_error( $term ) ) {
+                $category_slug = $term->slug;
+                break;
+            }
+        }
+
         // Prepare data for templates.
         $sizing_mode      = $config['sizing_mode'] ?? 'preset_and_custom';
         $default_unit     = $config['default_unit'] ?? $settings['default_unit'];
@@ -73,6 +89,7 @@ class ProductDisplay {
         // Output the config as a data attribute for JavaScript.
         $js_config = wp_json_encode( [
             'productId'       => $product->get_id(),
+            'categorySlug'    => $category_slug,
             'sizingMode'      => $sizing_mode,
             'defaultUnit'     => $default_unit,
             'availableUnits'  => $available_units,
