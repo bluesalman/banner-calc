@@ -700,6 +700,26 @@
             $(document).on('dnd_upload_complete dndUploadFinished', function() {
                 setTimeout(function() { self.detectUploadedImage(); }, 500);
             });
+
+            // Listen for drop events on the upload zone to capture dragged files via FileReader.
+            var $dropZone = $('.wc-dnd-file-upload, .codedropz-upload-handler, #bannercalc-design-upload');
+            if ($dropZone.length) {
+                $dropZone[0].addEventListener('drop', function(e) {
+                    var dt = e.dataTransfer;
+                    if (dt && dt.files && dt.files.length > 0) {
+                        var file = dt.files[0];
+                        if (file.type && file.type.indexOf('image/') === 0) {
+                            var reader = new FileReader();
+                            reader.onload = function(ev) {
+                                self.uploadedImageUrl = ev.target.result;
+                                self.render();
+                                self.switchToPreview();
+                            };
+                            reader.readAsDataURL(file);
+                        }
+                    }
+                }, false);
+            }
         },
 
         /**
@@ -716,7 +736,7 @@
                 var $thumbs = $('.dnd-upload-image img, .dnd-upload-details .dnd-upload-image img, .wc-dnd-file-upload .dnd-upload-image img');
                 if ($thumbs.length) {
                     var src = $thumbs.first().attr('src') || '';
-                    if (src && src.indexOf('blob:') !== 0) {
+                    if (src) {
                         newUrl = src;
                     }
                 }
