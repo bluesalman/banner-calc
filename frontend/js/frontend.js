@@ -801,6 +801,79 @@
                     self.galleryEl.show();
                 }
             });
+
+            // Fullscreen preview.
+            $(document).on('click', '#bannercalc-fullscreen-btn', function() {
+                self.openFullscreen();
+            });
+            $(document).on('click', '#bannercalc-fullscreen-close', function() {
+                self.closeFullscreen();
+            });
+            // Close on backdrop click.
+            $(document).on('click', '#bannercalc-fullscreen-overlay', function(e) {
+                if ($(e.target).is('#bannercalc-fullscreen-overlay') || $(e.target).is('.bannercalc-fullscreen-canvas')) {
+                    self.closeFullscreen();
+                }
+            });
+            // ESC key.
+            $(document).on('keydown', function(e) {
+                if (e.key === 'Escape' && $('#bannercalc-fullscreen-overlay').is(':visible')) {
+                    self.closeFullscreen();
+                }
+            });
+        },
+
+        /**
+         * Open the fullscreen preview overlay.
+         */
+        openFullscreen: function() {
+            var $overlay = $('#bannercalc-fullscreen-overlay');
+            $overlay.show();
+            document.body.style.overflow = 'hidden';
+            this.renderFullscreen();
+        },
+
+        /**
+         * Close the fullscreen preview overlay.
+         */
+        closeFullscreen: function() {
+            $('#bannercalc-fullscreen-overlay').hide();
+            document.body.style.overflow = '';
+        },
+
+        /**
+         * Render SVG preview at fullscreen viewport dimensions.
+         */
+        renderFullscreen: function() {
+            var $canvas = $('#bannercalc-fullscreen-canvas');
+            if (!$canvas.length) return;
+
+            var state = BannerCalc.state;
+            var wM = state.widthMetres;
+            var hM = state.heightMetres;
+            if (!wM || !hM) {
+                $canvas.html('<p style="color:rgba(255,255,255,0.5);font-size:15px;text-align:center;">Select a size to see preview</p>');
+                return;
+            }
+
+            // Clone SVG from the inline preview (viewBox handles scaling).
+            var svgEl = this.canvasEl.find('svg');
+            if (svgEl.length) {
+                var clone = svgEl[0].cloneNode(true);
+                // Let CSS handle sizing in the fullscreen container.
+                clone.removeAttribute('width');
+                clone.setAttribute('width', '100%');
+                clone.setAttribute('height', '100%');
+                $canvas.empty().append(clone);
+            }
+
+            // Update size label.
+            var unit = state.selectedUnit || 'ft';
+            var factor = TO_METRES[unit] || 0.3048;
+            var abbr = UNIT_ABBR[unit] || 'ft';
+            var wDisp = (wM / factor).toFixed(1);
+            var hDisp = (hM / factor).toFixed(1);
+            $('#bannercalc-fullscreen-size').text(wDisp + abbr + ' × ' + hDisp + abbr);
         },
 
         /**
@@ -882,6 +955,9 @@
             // Update size label.
             $('#bannercalc-preview-size').text(wDisp + abbr + ' × ' + hDisp + abbr);
 
+            var attrs = state.selectedAttributes;
+            var noneVals = ['none', 'no', ''];
+
             // Determine pole pocket extra space needed outside the banner.
             var pp = attrs['pa_pole-pockets'] || '';
             var ppSides = { top: false, bottom: false, left: false, right: false };
@@ -925,9 +1001,6 @@
 
             var svgW = padLeft + pocketPxLeft + bw + pocketPxRight + padRight;
             var svgH = padTop + pocketPxTop + bh + pocketPxBot + padBottom;
-
-            var attrs = state.selectedAttributes;
-            var noneVals = ['none', 'no', ''];
 
             var svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + svgW + ' ' + svgH + '" width="100%" preserveAspectRatio="xMidYMid meet">';
 
@@ -1143,6 +1216,11 @@
 
             this.canvasEl.html(svg);
             this.updateLegend();
+
+            // Update fullscreen overlay if open.
+            if ($('#bannercalc-fullscreen-overlay').is(':visible')) {
+                this.renderFullscreen();
+            }
         }
     };
 

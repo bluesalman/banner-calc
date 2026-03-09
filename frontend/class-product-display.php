@@ -237,7 +237,12 @@ class ProductDisplay {
         <div class="bannercalc-preview-panel" id="bannercalc-preview-panel" style="display:none;">
             <div class="bannercalc-preview-header">
                 <span class="bannercalc-preview-title"><?php esc_html_e( 'Live Preview', 'bannercalc' ); ?></span>
-                <span class="bannercalc-preview-size-label" id="bannercalc-preview-size">—</span>
+                <div class="bannercalc-preview-header-actions">
+                    <span class="bannercalc-preview-size-label" id="bannercalc-preview-size">&mdash;</span>
+                    <button type="button" class="bannercalc-fullscreen-btn" id="bannercalc-fullscreen-btn" title="<?php esc_attr_e( 'Fullscreen preview', 'bannercalc' ); ?>">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+                    </button>
+                </div>
             </div>
             <div class="bannercalc-preview-canvas" id="bannercalc-preview-canvas">
                 <!-- SVG rendered by JavaScript -->
@@ -256,6 +261,17 @@ class ProductDisplay {
                     <span class="bannercalc-legend-dot bannercalc-legend-dot--cable-ties"></span> <?php esc_html_e( 'Cable Ties', 'bannercalc' ); ?>
                 </div>
             </div>
+        </div>
+        <!-- Fullscreen Preview Overlay -->
+        <div class="bannercalc-fullscreen-overlay" id="bannercalc-fullscreen-overlay" style="display:none;">
+            <div class="bannercalc-fullscreen-topbar">
+                <span class="bannercalc-fullscreen-title"><?php esc_html_e( 'Banner Preview', 'bannercalc' ); ?></span>
+                <span class="bannercalc-fullscreen-size" id="bannercalc-fullscreen-size"></span>
+                <button type="button" class="bannercalc-fullscreen-close" id="bannercalc-fullscreen-close" title="<?php esc_attr_e( 'Close', 'bannercalc' ); ?>">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <div class="bannercalc-fullscreen-canvas" id="bannercalc-fullscreen-canvas"></div>
         </div>
         <?php
     }
