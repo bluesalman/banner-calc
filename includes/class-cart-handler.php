@@ -41,6 +41,15 @@ class CartHandler {
 
         // Display config in order emails and order detail.
         add_action( 'woocommerce_order_item_meta_end', [ $this, 'display_order_item_meta' ], 10, 4 );
+
+        // Force WooCommerce shipping selection based on delivery speed.
+        add_filter( 'woocommerce_package_rates', [ $this, 'filter_shipping_rates' ], 100, 2 );
+
+        // Enforce minimum quantity on add-to-cart.
+        add_filter( 'woocommerce_add_to_cart_validation', [ $this, 'validate_min_quantity' ], 10, 3 );
+
+        // Set default quantity on product page.
+        add_filter( 'woocommerce_quantity_input_args', [ $this, 'set_quantity_defaults' ], 10, 2 );
     }
 
     /**
@@ -106,6 +115,15 @@ class CartHandler {
         // Server-side price calculation (prevents client manipulation).
         $result = $this->pricing->calculate( $config, $width_m, $height_m, $attrs, $preset, $service_type, $design_service );
 
+        // Determine if this service type maps to a WC shipping method.
+        // If so, we strip the service markup from the product price — WC shipping handles the cost.
+        $settings          = Plugin::get_settings();
+        $shipping_map      = $settings['shipping_method_map'] ?? [];
+        $has_shipping_map  = ! empty( $shipping_map[ $service_type ] );
+        $price_for_cart    = $has_shipping_map
+            ? round( $result['base_price'] + $result['addons_total'], 2 )  // Without service markup.
+            : $result['calculated_price'];                                  // With markup (legacy fallback).
+
         // Build human-readable size label.
         $unit_abbr  = [ 'mm' => 'mm', 'cm' => 'cm', 'inch' => 'in', 'ft' => 'ft', 'm' => 'm' ];
         $abbr       = $unit_abbr[ $unit ] ?? $unit;
@@ -133,7 +151,9 @@ class CartHandler {
             'service_type'         => $result['service_type'],
             'service_markup_pct'   => $result['service_markup_pct'],
             'service_markup_amt'   => $result['service_markup_amt'],
-            'calculated_price'     => $result['calculated_price'],
+            'calculated_price'     => $price_for_cart,
+            'full_price_with_markup' => $result['calculated_price'],
+            'shipping_method'      => $shipping_map[ $service_type ] ?? '',
         ];
 
         return $cart_item_data;
@@ -295,5 +315,124 @@ class CartHandler {
 
             echo '</div>';
         }
+    }
+
+    /**
+     * Filter WooCommerce shipping rates based on selected delivery speed.
+     *
+     * If any BannerCalc cart item has a mapped shipping_method, only show that
+     * method (and hide the others) so the customer gets the correct shipping rate.
+     *
+     * @param array $rates  Available shipping rates.
+     * @param array $package Shipping package.
+     * @return array
+     */
+    public function filter_shipping_rates( array $rates, array $package ): array {
+        if ( is_admin() && ! wp_doing_ajax() ) {
+            return $rates;
+        }
+
+        $cart = WC()->cart;
+        if ( ! $cart ) {
+            return $rates;
+        }
+
+        // Find the most urgent (highest priority) shipping method requested by BannerCalc items.
+        $settings      = Plugin::get_settings();
+        $service_types = $settings['service_types'] ?? [];
+        $shipping_map  = $settings['shipping_method_map'] ?? [];
+
+        $required_method = '';
+        $highest_urgency = -1;
+
+        foreach ( $cart->get_cart() as $cart_item ) {
+            if ( empty( $cart_item['bannercalc']['service_type'] ) ) {
+                continue;
+            }
+
+            $service_slug   = $cart_item['bannercalc']['service_type'];
+            $mapped_method  = $shipping_map[ $service_slug ] ?? '';
+
+            if ( empty( $mapped_method ) ) {
+                continue;
+            }
+
+            // Urgency = index in service_types (higher index = more urgent).
+            $urgency = 0;
+            foreach ( $service_types as $idx => $st ) {
+                if ( ( $st['slug'] ?? '' ) === $service_slug ) {
+                    $urgency = $idx;
+                    break;
+                }
+            }
+
+            if ( $urgency > $highest_urgency ) {
+                $highest_urgency = $urgency;
+                $required_method = $mapped_method;
+            }
+        }
+
+        // If we have a required shipping method, filter rates to only show it.
+        if ( ! empty( $required_method ) && isset( $rates[ $required_method ] ) ) {
+            return [ $required_method => $rates[ $required_method ] ];
+        }
+
+        return $rates;
+    }
+
+    /**
+     * Validate minimum quantity on add-to-cart.
+     *
+     * @param bool $passed  Whether validation passed so far.
+     * @param int  $product_id
+     * @param int  $quantity
+     * @return bool
+     */
+    public function validate_min_quantity( bool $passed, int $product_id, int $quantity ): bool {
+        $plugin = Plugin::instance();
+
+        if ( ! $plugin->is_enabled_for_product( $product_id ) ) {
+            return $passed;
+        }
+
+        $config       = $plugin->get_product_config( $product_id );
+        $min_quantity = (int) ( $config['min_quantity'] ?? 0 );
+
+        if ( $min_quantity > 0 && $quantity < $min_quantity ) {
+            wc_add_notice(
+                sprintf(
+                    __( 'The minimum order quantity for this product is %d.', 'bannercalc' ),
+                    $min_quantity
+                ),
+                'error'
+            );
+            return false;
+        }
+
+        return $passed;
+    }
+
+    /**
+     * Set default / minimum quantity for BannerCalc products on the product page.
+     *
+     * @param array       $args    Quantity input arguments.
+     * @param \WC_Product $product
+     * @return array
+     */
+    public function set_quantity_defaults( array $args, \WC_Product $product ): array {
+        $plugin = Plugin::instance();
+
+        if ( ! $plugin->is_enabled_for_product( $product->get_id() ) ) {
+            return $args;
+        }
+
+        $config       = $plugin->get_product_config( $product->get_id() );
+        $min_quantity = max( 1, (int) ( $config['min_quantity'] ?? 0 ) );
+        $default_qty  = max( $min_quantity, (int) ( $config['default_quantity'] ?? 1 ) );
+
+        $args['min_value']   = $min_quantity;
+        $args['input_value'] = $default_qty;
+
+        return $args;
     }
 }

@@ -44,6 +44,23 @@
     const BannerCalcAdmin = {
         init: function() {
             this.bindEvents();
+            this.initQuantityToggle();
+        },
+
+        /**
+         * Show/hide bundle fields based on quantity mode.
+         */
+        initQuantityToggle: function() {
+            var $select = $('#bannercalc-quantity-mode');
+            if (!$select.length) return;
+
+            function toggle() {
+                var mode = $select.val();
+                $('#bannercalc-bundles-row').toggle(mode === 'bundles');
+            }
+
+            $select.on('change', toggle);
+            toggle();
         },
 
         bindEvents: function() {

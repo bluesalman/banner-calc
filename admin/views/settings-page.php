@@ -114,14 +114,36 @@ $all_units = \BannerCalc\UnitConverter::get_unit_labels();
         <div class="bannercalc-section-block">
             <h2 class="bannercalc-section-heading"><?php esc_html_e( 'Service Types / Delivery Speed', 'bannercalc' ); ?></h2>
             <p class="bannercalc-field-hint" style="margin-bottom:12px;">
-                <?php esc_html_e( 'Configure delivery speed tiers. The markup percentage is applied to the calculated price (base + add-ons).', 'bannercalc' ); ?>
+                <?php esc_html_e( 'Configure delivery speed tiers. Each tier maps to a WooCommerce shipping method. When a customer selects a delivery speed, the corresponding WC shipping method is applied in the cart.', 'bannercalc' ); ?>
             </p>
             <?php
             $service_types = $settings['service_types'] ?? [
-                [ 'slug' => 'standard',  'label' => 'Standard Delivery',    'markup' => 0,  'default' => true ],
-                [ 'slug' => 'urgent-48', 'label' => 'Urgent — 48 Hours', 'markup' => 15, 'default' => false ],
-                [ 'slug' => 'urgent-24', 'label' => 'Urgent — 24 Hours', 'markup' => 25, 'default' => false ],
+                [ 'slug' => 'standard',  'label' => 'Standard Delivery',    'markup' => 0,  'default' => true,  'shipping_method' => '' ],
+                [ 'slug' => 'urgent-48', 'label' => 'Urgent — 48 Hours', 'markup' => 15, 'default' => false, 'shipping_method' => '' ],
+                [ 'slug' => 'urgent-24', 'label' => 'Urgent — 24 Hours', 'markup' => 25, 'default' => false, 'shipping_method' => '' ],
             ];
+
+            // Get available WC shipping methods for mapping dropdown.
+            $wc_shipping_methods = [];
+            if ( class_exists( 'WC_Shipping_Zones' ) ) {
+                $zones = \WC_Shipping_Zones::get_zones();
+                // Also include zone 0 (rest of the world).
+                $zone_zero = new \WC_Shipping_Zone( 0 );
+                $zones[0]  = [
+                    'zone_id'         => 0,
+                    'zone_name'       => $zone_zero->get_zone_name(),
+                    'shipping_methods' => $zone_zero->get_shipping_methods(),
+                ];
+                foreach ( $zones as $zone ) {
+                    $zone_name = $zone['zone_name'] ?? 'Zone';
+                    $methods   = $zone['shipping_methods'] ?? [];
+                    foreach ( $methods as $method ) {
+                        $instance_id = $method->get_instance_id();
+                        $method_id   = $method->id . ':' . $instance_id;
+                        $wc_shipping_methods[ $method_id ] = $zone_name . ' — ' . $method->get_title();
+                    }
+                }
+            }
             $default_slug = 'standard';
             foreach ( $service_types as $st ) {
                 if ( ! empty( $st['default'] ) ) {
@@ -159,6 +181,18 @@ $all_units = \BannerCalc\UnitConverter::get_unit_labels();
                                        name="bannercalc_settings[service_types][<?php echo $si; ?>][markup]"
                                        value="<?php echo esc_attr( $st['markup'] ); ?>"
                                        step="0.1" min="0" max="100" class="small-text" style="width:70px;" />
+                            </label>
+                            <label style="font-size:12px;">
+                                <?php esc_html_e( 'WC Shipping Method:', 'bannercalc' ); ?>
+                                <select name="bannercalc_settings[service_types][<?php echo $si; ?>][shipping_method]" style="min-width:200px;">
+                                    <option value=""><?php esc_html_e( '— None (use markup only) —', 'bannercalc' ); ?></option>
+                                    <?php foreach ( $wc_shipping_methods as $method_id => $method_label ) : ?>
+                                        <option value="<?php echo esc_attr( $method_id ); ?>"
+                                                <?php selected( $st['shipping_method'] ?? '', $method_id ); ?>>
+                                            <?php echo esc_html( $method_label ); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
                             </label>
                         </div>
                     </td>

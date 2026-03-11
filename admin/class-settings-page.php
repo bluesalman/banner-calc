@@ -119,10 +119,11 @@ class SettingsPage {
         if ( is_array( $raw_st ) ) {
             foreach ( $raw_st as $st ) {
                 $service_types[] = [
-                    'slug'    => sanitize_text_field( $st['slug'] ?? '' ),
-                    'label'   => sanitize_text_field( $st['label'] ?? '' ),
-                    'markup'  => max( 0, (float) ( $st['markup'] ?? 0 ) ),
-                    'default' => ! empty( $st['default'] ),
+                    'slug'            => sanitize_text_field( $st['slug'] ?? '' ),
+                    'label'           => sanitize_text_field( $st['label'] ?? '' ),
+                    'markup'          => max( 0, (float) ( $st['markup'] ?? 0 ) ),
+                    'default'         => ! empty( $st['default'] ),
+                    'shipping_method' => sanitize_text_field( $st['shipping_method'] ?? '' ),
                 ];
             }
         }
@@ -134,6 +135,15 @@ class SettingsPage {
             }
             unset( $st_item );
             $sanitized['service_types'] = $service_types;
+
+            // Build shipping method map for frontend/cart use: { service_slug => wc_shipping_method_id }.
+            $shipping_map = [];
+            foreach ( $service_types as $st_item ) {
+                if ( ! empty( $st_item['shipping_method'] ) ) {
+                    $shipping_map[ $st_item['slug'] ] = $st_item['shipping_method'];
+                }
+            }
+            $sanitized['shipping_method_map'] = $shipping_map;
         }
 
         // Design service.

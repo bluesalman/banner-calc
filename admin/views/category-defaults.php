@@ -144,6 +144,87 @@ $attributes = $attr_mgr->get_all_attributes();
     </td>
 </tr>
 
+<!-- Quantity Mode -->
+<tr class="form-field">
+    <th scope="row">
+        <label><?php esc_html_e( 'Quantity Mode', 'bannercalc' ); ?></label>
+    </th>
+    <td>
+        <select name="bannercalc_category[quantity_mode]" id="bannercalc-quantity-mode">
+            <option value="standard" <?php selected( $config['quantity_mode'] ?? 'standard', 'standard' ); ?>>
+                <?php esc_html_e( 'Standard (free quantity input)', 'bannercalc' ); ?>
+            </option>
+            <option value="bundles" <?php selected( $config['quantity_mode'] ?? 'standard', 'bundles' ); ?>>
+                <?php esc_html_e( 'Bundle Quantities (predefined tiers)', 'bannercalc' ); ?>
+            </option>
+        </select>
+        <p class="description">
+            <?php esc_html_e( 'Bundle mode replaces the standard qty input with predefined quantity tiers (e.g. 100, 250, 500, 1000 for business cards).', 'bannercalc' ); ?>
+        </p>
+    </td>
+</tr>
+
+<!-- Minimum Order Quantity -->
+<tr class="form-field">
+    <th scope="row">
+        <label><?php esc_html_e( 'Minimum Order Quantity', 'bannercalc' ); ?></label>
+    </th>
+    <td>
+        <input type="number"
+               name="bannercalc_category[min_quantity]"
+               value="<?php echo esc_attr( $config['min_quantity'] ?? '' ); ?>"
+               step="1"
+               min="0"
+               class="small-text" />
+        <p class="description">
+            <?php esc_html_e( 'Minimum quantity per order. Leave 0 or empty to allow any quantity.', 'bannercalc' ); ?>
+        </p>
+    </td>
+</tr>
+
+<!-- Default Quantity -->
+<tr class="form-field">
+    <th scope="row">
+        <label><?php esc_html_e( 'Default Quantity', 'bannercalc' ); ?></label>
+    </th>
+    <td>
+        <input type="number"
+               name="bannercalc_category[default_quantity]"
+               value="<?php echo esc_attr( $config['default_quantity'] ?? 1 ); ?>"
+               step="1"
+               min="1"
+               class="small-text" />
+        <p class="description">
+            <?php esc_html_e( 'Default quantity pre-filled in the quantity input.', 'bannercalc' ); ?>
+        </p>
+    </td>
+</tr>
+
+<!-- Bundle Quantities -->
+<tr class="form-field" id="bannercalc-bundles-row" style="<?php echo ( $config['quantity_mode'] ?? 'standard' ) !== 'bundles' ? 'display:none;' : ''; ?>">
+    <th scope="row">
+        <label><?php esc_html_e( 'Bundle Quantities', 'bannercalc' ); ?></label>
+    </th>
+    <td>
+        <div id="bannercalc-bundles-list">
+            <?php
+            $bundles = $config['quantity_bundles'] ?? [];
+            if ( empty( $bundles ) ) {
+                $bundles = [ [ 'qty' => 100, 'label' => '100 pcs' ], [ 'qty' => 250, 'label' => '250 pcs' ], [ 'qty' => 500, 'label' => '500 pcs' ], [ 'qty' => 1000, 'label' => '1000 pcs' ] ];
+            }
+            foreach ( $bundles as $i => $bundle ) : ?>
+                <p>
+                    <input type="number" name="bannercalc_category[quantity_bundles][<?php echo $i; ?>][qty]" value="<?php echo esc_attr( $bundle['qty'] ); ?>" min="1" class="small-text" placeholder="Qty" />
+                    <input type="text" name="bannercalc_category[quantity_bundles][<?php echo $i; ?>][label]" value="<?php echo esc_attr( $bundle['label'] ); ?>" class="regular-text" placeholder="Label (e.g. 500 pieces)" />
+                </p>
+            <?php endforeach; ?>
+        </div>
+        <p class="description">
+            <?php esc_html_e( 'Define quantity tiers. Price shown is per-unit price × bundle quantity.', 'bannercalc' ); ?>
+        </p>
+    </td>
+</tr>
+
 <!-- Enabled attributes -->
 <tr class="form-field">
     <th scope="row">

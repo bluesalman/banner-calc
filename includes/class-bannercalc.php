@@ -189,22 +189,25 @@ class Plugin {
             'price_display_decimals' => 2,
             'service_types'          => [
                 [
-                    'slug'    => 'standard',
-                    'label'   => 'Standard Delivery',
-                    'markup'  => 0,
-                    'default' => true,
+                    'slug'            => 'standard',
+                    'label'           => 'Standard Delivery',
+                    'markup'          => 0,
+                    'default'         => true,
+                    'shipping_method' => '',
                 ],
                 [
-                    'slug'    => 'urgent-48',
-                    'label'   => 'Urgent — 48 Hours',
-                    'markup'  => 15,
-                    'default' => false,
+                    'slug'            => 'urgent-48',
+                    'label'           => 'Urgent — 48 Hours',
+                    'markup'          => 15,
+                    'default'         => false,
+                    'shipping_method' => '',
                 ],
                 [
-                    'slug'    => 'urgent-24',
-                    'label'   => 'Urgent — 24 Hours',
-                    'markup'  => 25,
-                    'default' => false,
+                    'slug'            => 'urgent-24',
+                    'label'           => 'Urgent — 24 Hours',
+                    'markup'          => 25,
+                    'default'         => false,
+                    'shipping_method' => '',
                 ],
             ],
             'design_service'         => [
@@ -213,6 +216,7 @@ class Plugin {
                 'price'       => 14.99,
                 'description' => 'Our team will create a professional design for your banner',
             ],
+            'shipping_method_map'    => [],
         ];
 
         $settings = get_option( 'bannercalc_settings', [] );
@@ -241,6 +245,9 @@ class Plugin {
             'max_width_m',
             'max_height_m',
             'minimum_charge',
+            'quantity_mode',
+            'min_quantity',
+            'default_quantity',
         ];
 
         foreach ( $scalar_keys as $key ) {
@@ -288,6 +295,11 @@ class Plugin {
         // Handle preset sizes override.
         if ( isset( $override['preset_sizes'] ) ) {
             $merged['preset_sizes'] = $override['preset_sizes'];
+        }
+
+        // Handle quantity bundles override.
+        if ( isset( $override['quantity_bundles'] ) ) {
+            $merged['quantity_bundles'] = $override['quantity_bundles'];
         }
 
         return $merged;

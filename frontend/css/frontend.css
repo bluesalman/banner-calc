@@ -1821,3 +1821,85 @@ form.cart .single_add_to_cart_button:active {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.4; }
 }
+
+/* ================================================================
+   BUNDLE SELECTOR
+================================================================ */
+.bannercalc-bundle-selector {
+    margin-top: 8px;
+}
+.bannercalc-bundle-label {
+    display: block;
+    font-family: var(--bp-font-body);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--bp-text-secondary);
+    margin-bottom: 6px;
+    letter-spacing: 0.3px;
+}
+.bannercalc-bundle-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+.bannercalc-bundle-pill {
+    font-family: var(--bp-font-body) !important;
+    font-size: 12.5px !important;
+    font-weight: 500 !important;
+    padding: 7px 16px !important;
+    border-radius: var(--bp-radius-sm) !important;
+    border: 1.5px solid var(--bp-light-gray) !important;
+    background: var(--bp-white) !important;
+    color: var(--bp-text-secondary) !important;
+    cursor: pointer;
+    transition: all 0.18s ease !important;
+}
+.bannercalc-bundle-pill:hover {
+    border-color: var(--bp-cyan-light) !important;
+    color: var(--bp-cyan-dark) !important;
+    background: var(--bp-cyan-ghost) !important;
+}
+.bannercalc-bundle-pill.active {
+    border-color: var(--bp-cyan) !important;
+    background: var(--bp-cyan-ghost) !important;
+    color: var(--bp-cyan-dark) !important;
+    font-weight: 600 !important;
+    box-shadow: var(--bp-shadow-cyan) !important;
+}
+
+/* ================================================================
+   PRICE QUANTITY ROW
+================================================================ */
+.bannercalc-price-qty {
+    border-top: 1px dashed var(--bp-light-gray);
+    padding-top: 6px;
+    margin-top: 4px;
+}
+.bannercalc-price-value--muted {
+    color: var(--bp-text-muted) !important;
+    font-size: 12px !important;
+}
+
+/* ================================================================
+   PRICE RANGE (single product + archive)
+================================================================ */
+.bannercalc-price-range {
+    font-family: var(--bp-font-body);
+    font-weight: 700;
+    font-size: 1.25em;
+    color: var(--bp-ink);
+}
+.bannercalc-popular-price {
+    display: block;
+    font-family: var(--bp-font-body);
+    font-size: 0.78em;
+    font-weight: 400;
+    color: var(--bp-text-muted);
+    margin-top: 2px;
+}
+.bannercalc-archive-popular {
+    display: block;
+    font-size: 0.8em;
+    color: var(--bp-text-muted);
+    font-weight: 400;
+}

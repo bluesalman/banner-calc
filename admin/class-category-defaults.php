@@ -102,6 +102,30 @@ class CategoryDefaults {
         $config['attribute_pricing']   = $raw['attribute_pricing'] ?? [];  // TODO: deep sanitize in Phase C.
         $config['preset_sizes']        = $raw['preset_sizes'] ?? [];      // TODO: deep sanitize in Phase C.
 
+        // Quantity mode: 'standard' (default WC qty) or 'bundles' (predefined tiers).
+        $config['quantity_mode'] = sanitize_text_field( $raw['quantity_mode'] ?? 'standard' );
+
+        // Bundle quantities: array of { qty: int, label: string }.
+        $bundles = [];
+        if ( ! empty( $raw['quantity_bundles'] ) && is_array( $raw['quantity_bundles'] ) ) {
+            foreach ( $raw['quantity_bundles'] as $bundle ) {
+                $qty = absint( $bundle['qty'] ?? 0 );
+                if ( $qty > 0 ) {
+                    $bundles[] = [
+                        'qty'   => $qty,
+                        'label' => sanitize_text_field( $bundle['label'] ?? $qty . ' pcs' ),
+                    ];
+                }
+            }
+        }
+        $config['quantity_bundles'] = $bundles;
+
+        // Minimum order quantity (0 = no minimum).
+        $config['min_quantity'] = absint( $raw['min_quantity'] ?? 0 );
+
+        // Default quantity for the qty input.
+        $config['default_quantity'] = absint( $raw['default_quantity'] ?? 1 );
+
         return $config;
     }
 }

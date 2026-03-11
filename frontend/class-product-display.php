@@ -89,6 +89,10 @@ class ProductDisplay {
             'decimals'        => (int) $settings['price_display_decimals'],
             'serviceTypes'    => $settings['service_types'] ?? [],
             'designService'   => $settings['design_service'] ?? [],
+            'quantityMode'    => $config['quantity_mode'] ?? 'standard',
+            'quantityBundles' => $config['quantity_bundles'] ?? [],
+            'minQuantity'     => (int) ( $config['min_quantity'] ?? 0 ),
+            'defaultQuantity' => max( 1, (int) ( $config['default_quantity'] ?? 1 ) ),
         ] );
 
         echo '<div id="bannercalc-configurator" class="bannercalc-configurator" data-config="' . esc_attr( $js_config ) . '">';
@@ -378,6 +382,8 @@ class ProductDisplay {
      * Replace the default WC price HTML with a "Calculated at checkout" hint
      * for BannerCalc-enabled products on the single product page.
      *
+     * On archive pages, show a price range based on preset sizes.
+     *
      * @param string      $price_html
      * @param \WC_Product $product
      * @return string
@@ -389,17 +395,67 @@ class ProductDisplay {
             return $price_html;
         }
 
-        $config = $plugin->get_product_config( $product->get_id() );
+        $config   = $plugin->get_product_config( $product->get_id() );
         $settings = \BannerCalc\Plugin::get_settings();
         $currency = $settings['currency_symbol'] ?? '£';
-        $min_charge = (float) ( $config['minimum_charge'] ?? 0 );
 
         if ( is_product() ) {
-            // Single product page: CMYK stripe instead of price.
+            // Single product page: CMYK stripe — JS will replace with dynamic range.
             return '<span class="bannercalc-cmyk-bar bannercalc-cmyk-bar--price"><span></span><span></span><span></span><span></span></span>';
         }
 
-        // Archive / shop pages: show "From £X.XX".
+        // Archive / shop pages: compute price range from preset sizes.
+        $presets     = $config['preset_sizes'] ?? [];
+        $rate        = (float) ( $config['area_rate_sqft'] ?? 0 );
+        $min_charge  = (float) ( $config['minimum_charge'] ?? 0 );
+        $prices      = [];
+        $popular_price = null;
+
+        if ( ! empty( $presets ) ) {
+            $units = new \BannerCalc\UnitConverter();
+            foreach ( $presets as $preset ) {
+                if ( isset( $preset['price'] ) && $preset['price'] !== null && $preset['price'] !== '' ) {
+                    $price = (float) $preset['price'];
+                } else {
+                    $w   = (float) ( $preset['width_m'] ?? 0 );
+                    $h   = (float) ( $preset['height_m'] ?? 0 );
+                    $sqft = $units->area_sqft( $w, $h );
+                    $price = $sqft * $rate;
+                    if ( $price < $min_charge ) {
+                        $price = $min_charge;
+                    }
+                }
+                $prices[] = $price;
+
+                // Track most popular.
+                $pop = (int) ( $preset['popularity'] ?? 3 );
+                if ( $pop >= 5 && ( $popular_price === null || $price < $popular_price ) ) {
+                    $popular_price = $price;
+                }
+            }
+        }
+
+        if ( ! empty( $prices ) ) {
+            $min_price = min( $prices );
+            $max_price = max( $prices );
+
+            $range_html = '<span class="bannercalc-archive-price" style="font-weight:600;">';
+            $range_html .= esc_html__( 'From ', 'bannercalc' ) . esc_html( $currency . number_format( $min_price, 2 ) );
+            if ( $max_price > $min_price ) {
+                $range_html .= ' – ' . esc_html( $currency . number_format( $max_price, 2 ) );
+            }
+            $range_html .= '</span>';
+
+            if ( $popular_price !== null && $popular_price !== $min_price ) {
+                $range_html .= '<span class="bannercalc-archive-popular" style="display:block;font-size:0.8em;color:#8892A0;font-weight:400;">';
+                $range_html .= esc_html__( 'Popular size from ', 'bannercalc' ) . esc_html( $currency . number_format( $popular_price, 2 ) );
+                $range_html .= '</span>';
+            }
+
+            return $range_html;
+        }
+
+        // Fallback: minimum charge.
         if ( $min_charge > 0 ) {
             return '<span class="bannercalc-archive-price" style="font-weight:600;">'
                  . esc_html__( 'From ', 'bannercalc' )

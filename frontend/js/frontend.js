@@ -56,6 +56,8 @@
             serviceMarkupAmt: 0,
             designMode: 'upload',
             calculatedPrice: 0,
+            unitPrice: 0,
+            quantity: 1,
             isValid: false,
             validationErrors: []
         },
@@ -89,6 +91,9 @@
             // Set default attribute values.
             this.initDefaults();
 
+            // Set up quantity mode.
+            this.initQuantity();
+
             // Bind events.
             this.bindEvents();
 
@@ -96,6 +101,144 @@
             this.updateConstraintsDisplay();
             this.updatePresetPrices();
             this.updatePriceDisplay();
+
+            // Show price range on product page.
+            this.renderPriceRange();
+        },
+
+        /**
+         * Initialise quantity mode (standard or bundles).
+         */
+        initQuantity: function() {
+            var mode = this.config.quantityMode || 'standard';
+            var minQty = this.config.minQuantity || 0;
+            var defaultQty = Math.max(minQty || 1, this.config.defaultQuantity || 1);
+            var $qtyInput = $('form.cart').find('input.qty, input[name="quantity"]');
+
+            this.state.quantity = defaultQty;
+
+            if (mode === 'bundles') {
+                this.initBundleSelector($qtyInput);
+            } else {
+                // Standard mode: set min and default.
+                if ($qtyInput.length) {
+                    if (minQty > 0) {
+                        $qtyInput.attr('min', minQty);
+                    }
+                    $qtyInput.val(defaultQty);
+                    this.state.quantity = defaultQty;
+                }
+            }
+        },
+
+        /**
+         * Replace standard qty input with bundle selector pills.
+         */
+        initBundleSelector: function($qtyInput) {
+            var bundles = this.config.quantityBundles || [];
+            if (!bundles.length) return;
+
+            var $wrapper = $qtyInput.closest('.quantity');
+            if (!$wrapper.length) $wrapper = $qtyInput.parent();
+
+            // Hide the original qty input but keep it for form submission.
+            $qtyInput.attr('type', 'hidden');
+            $wrapper.find('label').hide();
+
+            // Remove WC +/- buttons if present.
+            $wrapper.find('.plus, .minus').hide();
+
+            // Create bundle pills.
+            var $bundleWrap = $('<div class="bannercalc-bundle-selector"></div>');
+            $bundleWrap.append('<span class="bannercalc-bundle-label">Quantity:</span>');
+
+            var $pills = $('<div class="bannercalc-bundle-pills"></div>');
+            var firstQty = bundles[0].qty;
+
+            for (var i = 0; i < bundles.length; i++) {
+                var b = bundles[i];
+                var isFirst = (i === 0);
+                var $pill = $('<button type="button" class="bannercalc-pill bannercalc-bundle-pill' + (isFirst ? ' active' : '') + '" data-qty="' + b.qty + '">' + this.escHtml(b.label) + '</button>');
+                $pills.append($pill);
+            }
+            $bundleWrap.append($pills);
+            $wrapper.append($bundleWrap);
+
+            // Set first bundle as default.
+            $qtyInput.val(firstQty);
+            this.state.quantity = firstQty;
+        },
+
+        /**
+         * Escape HTML for safe insertion.
+         */
+        escHtml: function(str) {
+            var div = document.createElement('div');
+            div.appendChild(document.createTextNode(str));
+            return div.innerHTML;
+        },
+
+        /**
+         * Calculate and render price range from preset sizes (for WC price area).
+         */
+        renderPriceRange: function() {
+            var presets = this.config.presetSizes || [];
+            var rate = this.config.areaRateSqft || 0;
+            var minCharge = this.config.minimumCharge || 0;
+            var cur = this.config.currency || '£';
+            var dec = this.config.decimals || 2;
+
+            if (!presets.length && rate <= 0) return;
+
+            var prices = [];
+            for (var i = 0; i < presets.length; i++) {
+                var p = presets[i];
+                var price;
+                if (p.price !== '' && p.price !== undefined && p.price !== null) {
+                    price = parseFloat(p.price);
+                } else {
+                    var wm = parseFloat(p.width_m || 0);
+                    var hm = parseFloat(p.height_m || 0);
+                    var sqft = (wm * hm) * SQFT_PER_SQM;
+                    price = sqft * rate;
+                    if (price < minCharge) price = minCharge;
+                }
+                prices.push({ price: price, popularity: parseInt(p.popularity || 3) });
+            }
+
+            if (!prices.length) return;
+
+            prices.sort(function(a, b) { return a.price - b.price; });
+            var minPrice = prices[0].price;
+            var maxPrice = prices[prices.length - 1].price;
+
+            // Find the most popular size for the "popular" label.
+            var popularPrices = prices.slice().sort(function(a, b) { return b.popularity - a.popularity; });
+            var popularPrice = popularPrices[0].price;
+
+            // Replace the CMYK bar / existing price area with the range.
+            var $priceArea = $('.bannercalc-cmyk-bar--price, .price .bannercalc-cmyk-bar--price');
+            if (!$priceArea.length) {
+                $priceArea = $('p.price, .price');
+            }
+
+            if ($priceArea.length) {
+                var rangeHtml = '<span class="bannercalc-price-range" style="font-family:var(--bp-font-body);font-weight:700;font-size:1.25em;color:var(--bp-ink);">';
+                if (minPrice === maxPrice) {
+                    rangeHtml += cur + minPrice.toFixed(dec);
+                } else {
+                    rangeHtml += cur + minPrice.toFixed(dec) + ' – ' + cur + maxPrice.toFixed(dec);
+                }
+                rangeHtml += '</span>';
+
+                if (popularPrice !== minPrice || prices.length > 1) {
+                    rangeHtml += '<span class="bannercalc-popular-price" style="display:block;font-family:var(--bp-font-body);font-size:0.78em;font-weight:400;color:var(--bp-text-muted);margin-top:2px;">';
+                    rangeHtml += 'Most popular size from ' + cur + popularPrice.toFixed(dec);
+                    rangeHtml += '</span>';
+                }
+
+                $priceArea.first().html(rangeHtml);
+            }
         },
 
         /**
@@ -314,6 +457,41 @@
                 self.calculatePrice();
                 self.updatePriceDisplay();
             });
+
+            // Quantity input change (standard mode) — live price update.
+            var qtyTimeout = null;
+            $('form.cart').on('input change', 'input.qty, input[name="quantity"]', function() {
+                clearTimeout(qtyTimeout);
+                qtyTimeout = setTimeout(function() {
+                    var qty = parseInt($('form.cart').find('input.qty, input[name="quantity"]').val()) || 1;
+                    var minQty = self.config.minQuantity || 0;
+                    if (minQty > 0 && qty < minQty) qty = minQty;
+                    self.state.quantity = qty;
+                    self.updatePriceDisplay();
+                }, 150);
+            });
+
+            // Also listen to WC +/- button clicks on the quantity input.
+            $('form.cart').on('click', '.plus, .minus', function() {
+                setTimeout(function() {
+                    var qty = parseInt($('form.cart').find('input.qty, input[name="quantity"]').val()) || 1;
+                    var minQty = self.config.minQuantity || 0;
+                    if (minQty > 0 && qty < minQty) qty = minQty;
+                    self.state.quantity = qty;
+                    self.updatePriceDisplay();
+                }, 50);
+            });
+
+            // Bundle pill clicks.
+            $('form.cart').on('click', '.bannercalc-bundle-pill', function() {
+                $('.bannercalc-bundle-pill').removeClass('active');
+                $(this).addClass('active');
+                var qty = parseInt($(this).data('qty')) || 1;
+                $('form.cart').find('input.qty, input[name="quantity"]').val(qty);
+                self.state.quantity = qty;
+                self.calculatePrice();
+                self.updatePriceDisplay();
+            });
         },
 
         /**
@@ -495,7 +673,8 @@
                 }
             }
 
-            this.state.calculatedPrice = parseFloat((basePrice + addonsTotal + this.state.serviceMarkupAmt).toFixed(2));
+            this.state.unitPrice = parseFloat((basePrice + addonsTotal + this.state.serviceMarkupAmt).toFixed(2));
+            this.state.calculatedPrice = parseFloat((this.state.unitPrice * this.state.quantity).toFixed(2));
             this.state.isValid = this.state.validationErrors.length === 0;
 
             // Update preview.
@@ -562,11 +741,26 @@
                 $('#bannercalc-service-row').hide();
             }
 
-            // Total.
-            $('#bannercalc-total-value').text(cur + this.state.calculatedPrice.toFixed(dec));
+            // Recalculate total with current quantity (in case qty changed without recalcPrice).
+            var unitPrice = (this.state.unitPrice !== undefined && this.state.unitPrice !== null) ? this.state.unitPrice : 0;
+            var qty = this.state.quantity || 1;
+            var totalPrice = parseFloat((unitPrice * qty).toFixed(dec));
+            this.state.calculatedPrice = totalPrice;
 
-            // Update hidden input.
-            $('#bannercalc-input-price').val(this.state.calculatedPrice);
+            // Quantity row — show if qty > 1.
+            if (qty > 1) {
+                $('#bannercalc-qty-row').show();
+                $('#bannercalc-qty-label').text('× ' + qty + ' items:');
+                $('#bannercalc-qty-unit-price').text(cur + unitPrice.toFixed(dec) + ' each');
+            } else {
+                $('#bannercalc-qty-row').hide();
+            }
+
+            // Total.
+            $('#bannercalc-total-value').text(cur + totalPrice.toFixed(dec));
+
+            // Update hidden input — store the unit price (WC multiplies by qty automatically).
+            $('#bannercalc-input-price').val(unitPrice);
         },
 
         /**
@@ -631,7 +825,7 @@
             $('#bannercalc-input-unit').val(this.state.selectedUnit);
             $('#bannercalc-input-width').val(this.state.widthRaw || '');
             $('#bannercalc-input-height').val(this.state.heightRaw || '');
-            $('#bannercalc-input-price').val(this.state.calculatedPrice || '');
+            $('#bannercalc-input-price').val(this.state.unitPrice || '');
             $('#bannercalc-input-service-type').val(this.state.serviceType || 'standard');
             $('#bannercalc-input-design-service').val(this.state.designService ? '1' : '0');
             $('#bannercalc-input-design-mode').val(this.state.designMode || 'upload');
