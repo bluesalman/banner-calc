@@ -139,27 +139,39 @@
             var bundles = this.config.quantityBundles || [];
             if (!bundles.length) return;
 
+            // Limit to 6 pills max (2 rows × 3 cols).
+            var maxPills = 6;
+            if (bundles.length > maxPills) bundles = bundles.slice(0, maxPills);
+
             var $wrapper = $qtyInput.closest('.quantity');
             if (!$wrapper.length) $wrapper = $qtyInput.parent();
+
+            // Add marker class to the quantity-row so CSS can target bundled layout.
+            var $quantityRow = $wrapper.closest('.bannercalc-quantity-row');
+            if ($quantityRow.length) {
+                $quantityRow.addClass('has-bundles');
+            }
 
             // Hide the original qty input but keep it for form submission.
             $qtyInput.attr('type', 'hidden');
             $wrapper.find('label').hide();
-
-            // Remove WC +/- buttons if present.
             $wrapper.find('.plus, .minus').hide();
 
-            // Create bundle pills.
-            var $bundleWrap = $('<div class="bannercalc-bundle-selector"></div>');
-            $bundleWrap.append('<span class="bannercalc-bundle-label">Quantity:</span>');
+            // Hide the .quantity wrapper itself (no longer needed visually).
+            $wrapper.css({ 'max-width': 'none', 'border': 'none', 'box-shadow': 'none', 'overflow': 'visible', 'height': 'auto' });
 
+            // Build bundle pills grid.
+            var $bundleWrap = $('<div class="bannercalc-bundle-selector"></div>');
             var $pills = $('<div class="bannercalc-bundle-pills"></div>');
             var firstQty = bundles[0].qty;
 
             for (var i = 0; i < bundles.length; i++) {
                 var b = bundles[i];
                 var isFirst = (i === 0);
-                var $pill = $('<button type="button" class="bannercalc-pill bannercalc-bundle-pill' + (isFirst ? ' active' : '') + '" data-qty="' + b.qty + '">' + this.escHtml(b.label) + '</button>');
+                var label = b.label;
+                // Shorten labels: "100 pcs" → "100", keep short ones.
+                var shortLabel = String(b.qty);
+                var $pill = $('<button type="button" class="bannercalc-pill bannercalc-bundle-pill' + (isFirst ? ' active' : '') + '" data-qty="' + b.qty + '">' + this.escHtml(shortLabel) + '</button>');
                 $pills.append($pill);
             }
             $bundleWrap.append($pills);
