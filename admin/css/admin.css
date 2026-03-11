@@ -787,3 +787,600 @@
 .bannercalc-metabox .bannercalc-override-label input[type="checkbox"] {
     accent-color: var(--bp-cyan);
 }
+
+/* ================================================================
+   HELP PAGE — LAYOUT
+================================================================ */
+.bannercalc-help-layout {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 28px;
+    align-items: start;
+}
+
+@media (max-width: 1024px) {
+    .bannercalc-help-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .bannercalc-help-sidebar {
+        position: static !important;
+    }
+}
+
+/* — Sidebar TOC — */
+.bannercalc-help-sidebar {
+    position: sticky;
+    top: 46px; /* below WP admin bar */
+    max-height: calc(100vh - 66px);
+    overflow-y: auto;
+}
+
+.bannercalc-help-sidebar-inner {
+    background: var(--bp-white);
+    border: 1px solid var(--bp-light-gray);
+    border-radius: var(--bp-radius-md);
+    padding: 20px;
+}
+
+.bannercalc-help-sidebar-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--bp-font-display);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--bp-key);
+    margin: 0 0 14px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--bp-light-gray);
+}
+
+.bannercalc-help-sidebar-title .dashicons {
+    color: var(--bp-cyan);
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+}
+
+.bannercalc-help-toc {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.bannercalc-help-toc li {
+    margin: 0;
+}
+
+.bannercalc-toc-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 10px;
+    margin: 0 -10px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-family: var(--bp-font-body);
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--bp-dark-gray);
+    transition: all 0.15s ease;
+    line-height: 1.4;
+}
+
+.bannercalc-toc-link:hover {
+    background: var(--bp-off-white);
+    color: var(--bp-cyan);
+}
+
+.bannercalc-toc-link.active {
+    background: rgba(0, 174, 239, 0.08);
+    color: var(--bp-cyan);
+    font-weight: 600;
+}
+
+.bannercalc-toc-num {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    background: var(--bp-off-white);
+    font-family: var(--bp-font-mono);
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--bp-muted);
+    transition: all 0.15s ease;
+}
+
+.bannercalc-toc-link.active .bannercalc-toc-num {
+    background: var(--bp-cyan);
+    color: var(--bp-white);
+}
+
+/* — Section Number Badges — */
+.bannercalc-section-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: var(--bp-gradient-print);
+    font-family: var(--bp-font-mono);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--bp-white);
+    margin-right: 10px;
+    flex-shrink: 0;
+}
+
+/* — Help Content Area — */
+.bannercalc-help-content {
+    min-width: 0;
+}
+
+.bannercalc-help-section {
+    scroll-margin-top: 80px;
+}
+
+.bannercalc-help-section .bannercalc-content-card {
+    margin-bottom: 20px;
+}
+
+.bannercalc-help-section .bannercalc-section-heading {
+    display: flex;
+    align-items: center;
+}
+
+/* — Intro Paragraph — */
+.bannercalc-help-intro p {
+    font-size: 14.5px;
+    line-height: 1.7;
+    color: var(--bp-dark-gray);
+    margin: 0 0 20px;
+}
+
+/* — Help Tables — */
+.bannercalc-help-table-wrap {
+    overflow-x: auto;
+    margin: 16px 0 20px;
+}
+
+.bannercalc-help-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--bp-font-body);
+    font-size: 13px;
+}
+
+.bannercalc-help-table thead th {
+    background: var(--bp-off-white);
+    font-family: var(--bp-font-display);
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--bp-dark-gray);
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 2px solid var(--bp-light-gray);
+}
+
+.bannercalc-help-table tbody td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--bp-light-gray);
+    color: var(--bp-key);
+    vertical-align: top;
+    line-height: 1.55;
+}
+
+.bannercalc-help-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.bannercalc-help-table code {
+    font-family: var(--bp-font-mono);
+    font-size: 12px;
+    background: rgba(0, 174, 239, 0.06);
+    border: 1px solid rgba(0, 174, 239, 0.12);
+    border-radius: 4px;
+    padding: 2px 7px;
+    color: var(--bp-cyan-dark);
+    white-space: nowrap;
+}
+
+/* — Callouts — */
+.bannercalc-help-callout {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 16px 18px;
+    border-radius: var(--bp-radius-sm);
+    margin: 20px 0;
+    font-size: 13px;
+    line-height: 1.55;
+}
+
+.bannercalc-help-callout .dashicons {
+    flex-shrink: 0;
+    margin-top: 1px;
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+}
+
+.bannercalc-help-callout strong {
+    display: block;
+    margin-bottom: 4px;
+    font-family: var(--bp-font-display);
+    font-size: 13px;
+}
+
+.bannercalc-help-callout p {
+    margin: 0;
+    color: var(--bp-dark-gray);
+}
+
+.bannercalc-help-callout-info {
+    background: rgba(0, 174, 239, 0.05);
+    border: 1px solid rgba(0, 174, 239, 0.18);
+}
+
+.bannercalc-help-callout-info .dashicons {
+    color: var(--bp-info);
+}
+
+.bannercalc-help-callout-info strong {
+    color: var(--bp-cyan-dark);
+}
+
+.bannercalc-help-callout-tip {
+    background: rgba(57, 181, 74, 0.05);
+    border: 1px solid rgba(57, 181, 74, 0.18);
+}
+
+.bannercalc-help-callout-tip .dashicons {
+    color: var(--bp-success);
+}
+
+.bannercalc-help-callout-tip strong {
+    color: #2a8a38;
+}
+
+.bannercalc-help-callout-warning {
+    background: rgba(247, 148, 29, 0.06);
+    border: 1px solid rgba(247, 148, 29, 0.22);
+}
+
+.bannercalc-help-callout-warning .dashicons {
+    color: var(--bp-warning);
+}
+
+.bannercalc-help-callout-warning strong {
+    color: #c97600;
+}
+
+/* — Help Steps (ordered lists) — */
+.bannercalc-help-steps {
+    counter-reset: help-step;
+    list-style: none;
+    padding: 0;
+    margin: 16px 0;
+}
+
+.bannercalc-help-steps li {
+    counter-increment: help-step;
+    position: relative;
+    padding: 14px 16px 14px 52px;
+    margin-bottom: 8px;
+    background: var(--bp-off-white);
+    border-radius: var(--bp-radius-sm);
+    border: 1px solid var(--bp-light-gray);
+}
+
+.bannercalc-help-steps li::before {
+    content: counter(help-step);
+    position: absolute;
+    left: 14px;
+    top: 14px;
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 7px;
+    background: var(--bp-cyan);
+    color: var(--bp-white);
+    font-family: var(--bp-font-mono);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.bannercalc-help-steps li strong {
+    font-family: var(--bp-font-display);
+    font-size: 13.5px;
+    color: var(--bp-key);
+}
+
+.bannercalc-help-steps li p {
+    margin: 4px 0 0;
+    font-size: 13px;
+    color: var(--bp-dark-gray);
+    line-height: 1.55;
+}
+
+.bannercalc-help-steps li a {
+    color: var(--bp-cyan);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.bannercalc-help-steps li a:hover {
+    text-decoration: underline;
+}
+
+/* — Help List (bulleted) — */
+.bannercalc-help-list {
+    list-style: none;
+    padding: 0;
+    margin: 12px 0;
+}
+
+.bannercalc-help-list li {
+    position: relative;
+    padding: 6px 0 6px 20px;
+    font-size: 13px;
+    color: var(--bp-dark-gray);
+    line-height: 1.55;
+}
+
+.bannercalc-help-list li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 14px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--bp-cyan);
+}
+
+.bannercalc-help-list li strong {
+    color: var(--bp-key);
+}
+
+/* — Feature Cards Grid — */
+.bannercalc-help-features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 14px;
+    margin: 16px 0 20px;
+}
+
+.bannercalc-help-feature-card {
+    background: var(--bp-off-white);
+    border: 1px solid var(--bp-light-gray);
+    border-radius: var(--bp-radius-sm);
+    padding: 18px;
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.bannercalc-help-feature-card:hover {
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+    transform: translateY(-1px);
+}
+
+.bannercalc-help-feature-icon {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 174, 239, 0.1);
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+.bannercalc-help-feature-icon .dashicons {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    color: var(--bp-cyan);
+}
+
+.bannercalc-help-feature-card h4 {
+    font-family: var(--bp-font-display);
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--bp-key);
+    margin: 0 0 6px;
+}
+
+.bannercalc-help-feature-card p {
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--bp-dark-gray);
+    margin: 0;
+}
+
+/* — Price Calculation Formula — */
+.bannercalc-help-formula {
+    margin: 16px 0;
+}
+
+.bannercalc-formula-step {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--bp-light-gray);
+}
+
+.bannercalc-formula-step:last-child {
+    border-bottom: none;
+}
+
+.bannercalc-formula-num {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--bp-gradient-print);
+    font-family: var(--bp-font-mono);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--bp-white);
+}
+
+.bannercalc-formula-step strong {
+    font-family: var(--bp-font-display);
+    font-size: 13.5px;
+    color: var(--bp-key);
+}
+
+.bannercalc-formula-step p {
+    font-size: 13px;
+    color: var(--bp-dark-gray);
+    margin: 4px 0 6px;
+    line-height: 1.5;
+}
+
+.bannercalc-formula-code {
+    display: inline-block;
+    font-family: var(--bp-font-mono);
+    font-size: 12px;
+    background: var(--bp-off-white);
+    border: 1px solid var(--bp-light-gray);
+    border-radius: 6px;
+    padding: 4px 10px;
+    color: var(--bp-magenta-dark);
+}
+
+/* — FAQ / Troubleshooting — */
+.bannercalc-help-faq {
+    margin: 0;
+}
+
+.bannercalc-faq-item {
+    border: 1px solid var(--bp-light-gray);
+    border-radius: var(--bp-radius-sm);
+    margin-bottom: 10px;
+    overflow: hidden;
+}
+
+.bannercalc-faq-question {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 16px;
+    margin: 0;
+    cursor: pointer;
+    font-family: var(--bp-font-display);
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--bp-key);
+    background: var(--bp-off-white);
+    transition: background 0.15s ease;
+    user-select: none;
+}
+
+.bannercalc-faq-question:hover {
+    background: var(--bp-light-gray);
+}
+
+.bannercalc-faq-question .dashicons {
+    flex-shrink: 0;
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    color: var(--bp-cyan);
+    transition: transform 0.2s ease;
+}
+
+.bannercalc-faq-item.open .bannercalc-faq-question .dashicons {
+    transform: rotate(90deg);
+}
+
+.bannercalc-faq-answer {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+    padding: 0 16px;
+}
+
+.bannercalc-faq-item.open .bannercalc-faq-answer {
+    max-height: 600px;
+    padding: 12px 16px 16px;
+}
+
+.bannercalc-faq-answer ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.bannercalc-faq-answer li {
+    position: relative;
+    padding: 5px 0 5px 18px;
+    font-size: 13px;
+    color: var(--bp-dark-gray);
+    line-height: 1.55;
+}
+
+.bannercalc-faq-answer li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 12px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--bp-cyan);
+}
+
+/* — Help page general typography — */
+.bannercalc-help-page h3 {
+    font-family: var(--bp-font-display);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--bp-key);
+    margin: 24px 0 10px;
+}
+
+.bannercalc-help-page p {
+    font-family: var(--bp-font-body);
+    font-size: 13.5px;
+    color: var(--bp-dark-gray);
+    line-height: 1.65;
+}
+
+.bannercalc-help-page a {
+    color: var(--bp-cyan);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.bannercalc-help-page a:hover {
+    text-decoration: underline;
+}
+
+/* Sidebar scrollbar */
+.bannercalc-help-sidebar::-webkit-scrollbar {
+    width: 4px;
+}
+
+.bannercalc-help-sidebar::-webkit-scrollbar-thumb {
+    background: var(--bp-mid-gray);
+    border-radius: 2px;
+}
+
+.bannercalc-help-sidebar::-webkit-scrollbar-track {
+    background: transparent;
+}

@@ -77,6 +77,16 @@ class SettingsPage {
             'bannercalc-categories',
             [ $this, 'render_categories' ]
         );
+
+        // Submenu: Help & Documentation.
+        add_submenu_page(
+            'bannercalc',
+            __( 'Help — BannerCalc', 'bannercalc' ),
+            __( 'Help', 'bannercalc' ),
+            'manage_woocommerce',
+            'bannercalc-help',
+            [ $this, 'render_help' ]
+        );
     }
 
     /**
@@ -188,5 +198,16 @@ class SettingsPage {
         }
 
         include BANNERCALC_PLUGIN_DIR . 'admin/views/categories-page.php';
+    }
+
+    /**
+     * Render the Help & Documentation page.
+     */
+    public function render_help(): void {
+        if ( ! current_user_can( 'manage_woocommerce' ) ) {
+            return;
+        }
+
+        include BANNERCALC_PLUGIN_DIR . 'admin/views/help-page.php';
     }
 }
