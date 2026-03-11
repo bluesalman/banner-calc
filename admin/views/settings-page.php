@@ -116,6 +116,23 @@ $all_units = \BannerCalc\UnitConverter::get_unit_labels();
             <p class="bannercalc-field-hint" style="margin-bottom:12px;">
                 <?php esc_html_e( 'Configure delivery speed tiers. Each tier maps to a WooCommerce shipping method. When a customer selects a delivery speed, the corresponding WC shipping method is applied in the cart.', 'bannercalc' ); ?>
             </p>
+
+            <!-- Collection toggle -->
+            <table class="form-table bannercalc-form-table" style="margin-bottom:20px;">
+                <tr>
+                    <th scope="row"><?php esc_html_e( 'Enable Collection', 'bannercalc' ); ?></th>
+                    <td>
+                        <label class="bannercalc-toggle-label">
+                            <input type="checkbox"
+                                   name="bannercalc_settings[collection_enabled]"
+                                   value="1"
+                                   <?php checked( ! empty( $settings['collection_enabled'] ) ); ?> />
+                            <?php esc_html_e( 'Show a Collection / Shipping toggle on the product page. Collection uses WooCommerce Local Pickup (free for standard, urgent markups still apply).', 'bannercalc' ); ?>
+                        </label>
+                    </td>
+                </tr>
+            </table>
+
             <?php
             $service_types = $settings['service_types'] ?? [
                 [ 'slug' => 'standard',  'label' => 'Standard Delivery',    'markup' => 0,  'default' => true,  'shipping_method' => '' ],

@@ -55,6 +55,7 @@
             serviceMarkupPct: 0,
             serviceMarkupAmt: 0,
             designMode: 'upload',
+            fulfilmentMode: 'delivery',
             calculatedPrice: 0,
             unitPrice: 0,
             quantity: 1,
@@ -433,6 +434,20 @@
                 $(this).addClass('active');
                 self.state.serviceType = $(this).data('service');
                 $('#bannercalc-input-service-type').val(self.state.serviceType);
+                self.calculatePrice();
+                self.updatePriceDisplay();
+            });
+
+            // Fulfilment mode toggle (Collection / Delivery).
+            this.el.closest('form').on('click', '.bannercalc-fulfilment-pill', function() {
+                $('.bannercalc-fulfilment-pill').removeClass('active');
+                $(this).addClass('active');
+                self.state.fulfilmentMode = $(this).data('fulfilment');
+                $('#bannercalc-input-fulfilment-mode').val(self.state.fulfilmentMode);
+
+                // Show/hide delivery speed section based on fulfilment.
+                // Collection: always show delivery pills (urgent markups still apply).
+                // Both modes show the service type pills.
                 self.calculatePrice();
                 self.updatePriceDisplay();
             });
@@ -829,6 +844,7 @@
             $('#bannercalc-input-service-type').val(this.state.serviceType || 'standard');
             $('#bannercalc-input-design-service').val(this.state.designService ? '1' : '0');
             $('#bannercalc-input-design-mode').val(this.state.designMode || 'upload');
+            $('#bannercalc-input-fulfilment-mode').val(this.state.fulfilmentMode || 'delivery');
         }
     };
 

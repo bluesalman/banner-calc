@@ -108,8 +108,11 @@ class CartHandler {
             }
         }
 
-        // Sanitize service type and design service.
+        // Sanitize service type, fulfilment mode, and design service.
         $service_type   = sanitize_text_field( $raw['service_type'] ?? 'standard' );
+        $fulfilment_mode = in_array( $raw['fulfilment_mode'] ?? '', [ 'collection', 'delivery' ], true )
+            ? $raw['fulfilment_mode']
+            : 'delivery';
         $design_service = ! empty( $raw['design_service'] );
 
         // Server-side price calculation (prevents client manipulation).
@@ -154,6 +157,7 @@ class CartHandler {
             'calculated_price'     => $price_for_cart,
             'full_price_with_markup' => $result['calculated_price'],
             'shipping_method'      => $shipping_map[ $service_type ] ?? '',
+            'fulfilment_mode'      => $fulfilment_mode,
         ];
 
         return $cart_item_data;
@@ -220,6 +224,16 @@ class CartHandler {
             ];
         }
 
+        // Fulfilment mode.
+        if ( ! empty( $bc['fulfilment_mode'] ) ) {
+            $item_data[] = [
+                'key'   => __( 'Fulfilment', 'bannercalc' ),
+                'value' => $bc['fulfilment_mode'] === 'collection'
+                    ? __( 'Collection (Free)', 'bannercalc' )
+                    : __( 'Delivery', 'bannercalc' ),
+            ];
+        }
+
         // Service type.
         if ( ! empty( $bc['service_type'] ) && $bc['service_type'] !== 'standard' ) {
             $settings      = \BannerCalc\Plugin::get_settings();
@@ -232,7 +246,7 @@ class CartHandler {
                 }
             }
             $item_data[] = [
-                'key'   => __( 'Delivery', 'bannercalc' ),
+                'key'   => __( 'Delivery Speed', 'bannercalc' ),
                 'value' => $st_label,
             ];
         }
@@ -276,11 +290,14 @@ class CartHandler {
             echo esc_html__( 'Size: ', 'bannercalc' ) . esc_html( $bc['size_label'] ?? '' ) . "\n";
             echo esc_html__( 'Area: ', 'bannercalc' ) . esc_html( $bc['area_sqft'] ?? 0 ) . " sqft\n";
 
+            if ( ! empty( $bc['fulfilment_mode'] ) ) {
+                echo esc_html__( 'Fulfilment: ', 'bannercalc' ) . esc_html( ucfirst( $bc['fulfilment_mode'] ) ) . "\n";
+            }
             if ( ! empty( $bc['design_service'] ) ) {
                 echo esc_html__( 'Design Service: Professional Design (+£', 'bannercalc' ) . number_format( (float) ( $bc['design_service_price'] ?? 0 ), 2 ) . ")\n";
             }
             if ( ! empty( $bc['service_type'] ) && $bc['service_type'] !== 'standard' ) {
-                echo esc_html__( 'Delivery: ', 'bannercalc' ) . esc_html( $bc['service_type'] ) . " (+" . (int) ( $bc['service_markup_pct'] ?? 0 ) . "%)\n";
+                echo esc_html__( 'Delivery Speed: ', 'bannercalc' ) . esc_html( $bc['service_type'] ) . " (+" . (int) ( $bc['service_markup_pct'] ?? 0 ) . "%)\n";
             }
         } else {
             echo '<div class="bannercalc-order-meta" style="margin-top:8px;font-size:12px;color:#555;">';
@@ -297,6 +314,9 @@ class CartHandler {
                 }
             }
 
+            if ( ! empty( $bc['fulfilment_mode'] ) ) {
+                echo esc_html__( 'Fulfilment: ', 'bannercalc' ) . esc_html( ucfirst( $bc['fulfilment_mode'] ) ) . '<br/>';
+            }
             if ( ! empty( $bc['design_service'] ) ) {
                 echo esc_html__( 'Design Service: Professional Design (+£', 'bannercalc' ) . number_format( (float) ( $bc['design_service_price'] ?? 0 ), 2 ) . ')<br/>';
             }
@@ -310,7 +330,7 @@ class CartHandler {
                         break;
                     }
                 }
-                echo esc_html__( 'Delivery: ', 'bannercalc' ) . esc_html( $st_display ) . '<br/>';
+                echo esc_html__( 'Delivery Speed: ', 'bannercalc' ) . esc_html( $st_display ) . '<br/>';
             }
 
             echo '</div>';
@@ -369,6 +389,29 @@ class CartHandler {
             if ( $urgency > $highest_urgency ) {
                 $highest_urgency = $urgency;
                 $required_method = $mapped_method;
+            }
+        }
+
+        // Check if any BannerCalc item is set to Collection fulfilment.
+        $is_collection = false;
+        foreach ( $cart->get_cart() as $cart_item ) {
+            if ( ! empty( $cart_item['bannercalc']['fulfilment_mode'] ) && $cart_item['bannercalc']['fulfilment_mode'] === 'collection' ) {
+                $is_collection = true;
+                break;
+            }
+        }
+
+        // Collection: show only Local Pickup method(s).
+        if ( $is_collection ) {
+            $local_pickup_rates = [];
+            foreach ( $rates as $rate_id => $rate ) {
+                if ( strpos( $rate_id, 'local_pickup' ) === 0 ) {
+                    $local_pickup_rates[ $rate_id ] = $rate;
+                }
+            }
+            // If Local Pickup is available, show only that; otherwise fall through to normal logic.
+            if ( ! empty( $local_pickup_rates ) ) {
+                return $local_pickup_rates;
             }
         }
 

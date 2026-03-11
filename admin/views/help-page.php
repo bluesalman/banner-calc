@@ -598,6 +598,29 @@ if ( ! defined( 'ABSPATH' ) ) {
                             <p><?php esc_html_e( 'Shipping method mapping is optional. If you leave the WC Shipping Method dropdown as "— None —", all shipping methods will remain available at checkout for that service type. Only mapped selections filter the checkout shipping options.', 'bannercalc' ); ?></p>
                         </div>
                     </div>
+
+                    <h3><?php esc_html_e( 'Collection / Fulfilment Mode', 'bannercalc' ); ?></h3>
+                    <p><?php esc_html_e( 'BannerCalc supports a Collection option that lets customers pick up their order instead of having it delivered. When enabled, a Delivery / Collection toggle appears on the product page above the delivery speed selector.', 'bannercalc' ); ?></p>
+
+                    <h4><?php esc_html_e( 'Setup', 'bannercalc' ); ?></h4>
+                    <ol class="bannercalc-help-steps">
+                        <li>
+                            <strong><?php esc_html_e( 'Enable WooCommerce Local Pickup', 'bannercalc' ); ?></strong>
+                            <p><?php esc_html_e( 'Go to WooCommerce → Settings → Shipping, add a "Local Pickup" method to a shipping zone, set the title to "Collection" (or your preferred label) and cost to 0.', 'bannercalc' ); ?></p>
+                        </li>
+                        <li>
+                            <strong><?php esc_html_e( 'Enable Collection in BannerCalc', 'bannercalc' ); ?></strong>
+                            <p><?php esc_html_e( 'Go to BannerCalc → Settings and tick the "Enable Collection" checkbox in the Service Types section.', 'bannercalc' ); ?></p>
+                        </li>
+                    </ol>
+
+                    <h4><?php esc_html_e( 'How Collection Works', 'bannercalc' ); ?></h4>
+                    <ul>
+                        <li><?php esc_html_e( 'When a customer selects "Collection", only the WooCommerce Local Pickup shipping method is shown at checkout — regular shipping options are hidden.', 'bannercalc' ); ?></li>
+                        <li><?php esc_html_e( 'Standard delivery is free for collection (no shipping charge).', 'bannercalc' ); ?></li>
+                        <li><?php esc_html_e( 'Urgent delivery speed markups still apply — these cover the production speed, not the shipping cost.', 'bannercalc' ); ?></li>
+                        <li><?php esc_html_e( 'The fulfilment method (Collection or Delivery) is saved with the order and displayed in the cart, checkout, and order admin.', 'bannercalc' ); ?></li>
+                    </ul>
                 </div>
             </section>
 

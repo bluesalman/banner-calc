@@ -913,6 +913,57 @@
 }
 
 /* ================================================================
+   FULFILMENT TOGGLE (Collection / Delivery)
+================================================================ */
+.bannercalc-fulfilment-section {
+    margin-bottom: 16px;
+}
+
+.bannercalc-fulfilment-toggle {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.bannercalc-fulfilment-pill {
+    flex-direction: row !important;
+    gap: 6px !important;
+}
+
+.bannercalc-fulfilment-pill .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    line-height: 1;
+}
+
+.bannercalc-fulfilment-pill .bannercalc-fulfilment-badge {
+    display: inline-block;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: var(--bp-green);
+    color: var(--bp-white);
+    padding: 1px 6px;
+    border-radius: 6px;
+    margin-left: 2px;
+    line-height: 1.5;
+}
+
+/* Active collection pill — green tint */
+.bannercalc-fulfilment-pill[data-fulfilment="collection"].active {
+    border-color: var(--bp-green) !important;
+    background: linear-gradient(135deg, var(--bp-green), #2A8A38) !important;
+    color: var(--bp-white) !important;
+    box-shadow: 0 4px 14px rgba(57, 181, 74, 0.25) !important;
+}
+
+.bannercalc-fulfilment-pill[data-fulfilment="collection"].active .bannercalc-fulfilment-badge {
+    background: rgba(255,255,255,0.25);
+}
+
+/* ================================================================
    PRICING SECTION
 ================================================================ */
 .bannercalc-price-section {

@@ -89,6 +89,7 @@ class ProductDisplay {
             'decimals'        => (int) $settings['price_display_decimals'],
             'serviceTypes'    => $settings['service_types'] ?? [],
             'designService'   => $settings['design_service'] ?? [],
+            'collectionEnabled' => ! empty( $settings['collection_enabled'] ),
             'quantityMode'    => $config['quantity_mode'] ?? 'standard',
             'quantityBundles' => $config['quantity_bundles'] ?? [],
             'minQuantity'     => (int) ( $config['min_quantity'] ?? 0 ),
@@ -185,6 +186,25 @@ class ProductDisplay {
 
         // Card 4: Delivery Speed + Pricing — separate card.
         echo '<div class="bannercalc-card bannercalc-card--delivery">';
+
+        // Collection / Shipping toggle (if enabled in global settings).
+        $collection_enabled = ! empty( $settings['collection_enabled'] );
+        if ( $collection_enabled ) {
+            echo '<div class="bannercalc-section bannercalc-fulfilment-section">';
+            echo '<div class="bannercalc-attribute bannercalc-attr--fulfilment">';
+            echo '<div class="bannercalc-attr-header"><span class="bannercalc-attr-label">' . esc_html__( 'Fulfilment Method', 'bannercalc' ) . '</span></div>';
+            echo '<div class="bannercalc-fulfilment-toggle">';
+            echo '<button type="button" class="bannercalc-pill bannercalc-fulfilment-pill active" data-fulfilment="delivery">';
+            echo '<span class="dashicons dashicons-car"></span> ' . esc_html__( 'Delivery', 'bannercalc' );
+            echo '</button>';
+            echo '<button type="button" class="bannercalc-pill bannercalc-fulfilment-pill" data-fulfilment="collection">';
+            echo '<span class="dashicons dashicons-store"></span> ' . esc_html__( 'Collection', 'bannercalc' ) . ' <span class="bannercalc-pill-price">' . esc_html__( 'Free', 'bannercalc' ) . '</span>';
+            echo '</button>';
+            echo '</div>';
+            echo '<input type="hidden" name="bannercalc[fulfilment_mode]" value="delivery" id="bannercalc-input-fulfilment-mode" />';
+            echo '</div>';
+            echo '</div>';
+        }
 
         // Service type selector.
         if ( ! empty( $service_types ) && count( $service_types ) > 1 ) {

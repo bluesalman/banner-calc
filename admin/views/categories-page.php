@@ -133,6 +133,25 @@ if ( isset( $_POST['bannercalc_category_save'] ) && wp_verify_nonce( $_POST['_wp
 
         $config['preset_sizes'] = $preset_sizes;
 
+        // Quantity settings.
+        $config['quantity_mode']    = sanitize_text_field( $raw['quantity_mode'] ?? 'standard' );
+        $config['min_quantity']     = absint( $raw['min_quantity'] ?? 0 );
+        $config['default_quantity'] = max( 1, absint( $raw['default_quantity'] ?? 1 ) );
+
+        // Bundle quantities — comma-separated string → array.
+        $bundles = [];
+        $raw_bundles = sanitize_text_field( $raw['quantity_bundles_csv'] ?? '' );
+        if ( ! empty( $raw_bundles ) ) {
+            $parts = array_map( 'trim', explode( ',', $raw_bundles ) );
+            foreach ( $parts as $part ) {
+                $qty = absint( $part );
+                if ( $qty > 0 ) {
+                    $bundles[] = [ 'qty' => $qty, 'label' => $qty . ' pcs' ];
+                }
+            }
+        }
+        $config['quantity_bundles'] = $bundles;
+
         update_term_meta( $cat_id, '_bannercalc_config', $config );
         $saved_message = __( 'Category configuration saved.', 'bannercalc' );
     }
@@ -574,6 +593,70 @@ if ( $editing_cat_id ) {
                                         <span id="bannercalc-import-status" style="font-size:12px;color:#8892A0;"></span>
                                     </div>
                                 </div>
+                            </td>
+                        </tr>
+
+                        <!-- Quantity Mode -->
+                        <tr>
+                            <th scope="row"><?php esc_html_e( 'Quantity Mode', 'bannercalc' ); ?></th>
+                            <td>
+                                <select name="bannercalc_category[quantity_mode]" class="bannercalc-select" id="bannercalc-quantity-mode">
+                                    <option value="standard" <?php selected( $editing_config['quantity_mode'] ?? 'standard', 'standard' ); ?>>
+                                        <?php esc_html_e( 'Standard (free quantity input)', 'bannercalc' ); ?>
+                                    </option>
+                                    <option value="bundles" <?php selected( $editing_config['quantity_mode'] ?? 'standard', 'bundles' ); ?>>
+                                        <?php esc_html_e( 'Bundle Quantities (predefined tiers)', 'bannercalc' ); ?>
+                                    </option>
+                                </select>
+                                <p class="bannercalc-field-hint">
+                                    <?php esc_html_e( 'Bundle mode replaces the standard qty input with selectable quantity pills.', 'bannercalc' ); ?>
+                                </p>
+                            </td>
+                        </tr>
+
+                        <!-- Minimum Order Quantity -->
+                        <tr>
+                            <th scope="row"><?php esc_html_e( 'Min Order Quantity', 'bannercalc' ); ?></th>
+                            <td>
+                                <input type="number"
+                                       name="bannercalc_category[min_quantity]"
+                                       value="<?php echo esc_attr( $editing_config['min_quantity'] ?? '' ); ?>"
+                                       step="1" min="0" class="small-text" />
+                                <span class="bannercalc-field-hint"><?php esc_html_e( '0 = no minimum', 'bannercalc' ); ?></span>
+                            </td>
+                        </tr>
+
+                        <!-- Default Quantity -->
+                        <tr>
+                            <th scope="row"><?php esc_html_e( 'Default Quantity', 'bannercalc' ); ?></th>
+                            <td>
+                                <input type="number"
+                                       name="bannercalc_category[default_quantity]"
+                                       value="<?php echo esc_attr( $editing_config['default_quantity'] ?? 1 ); ?>"
+                                       step="1" min="1" class="small-text" />
+                                <span class="bannercalc-field-hint"><?php esc_html_e( 'Pre-filled quantity on product page', 'bannercalc' ); ?></span>
+                            </td>
+                        </tr>
+
+                        <!-- Bundle Quantities -->
+                        <tr id="bannercalc-bundles-row" style="<?php echo ( $editing_config['quantity_mode'] ?? 'standard' ) !== 'bundles' ? 'display:none;' : ''; ?>">
+                            <th scope="row"><?php esc_html_e( 'Bundle Quantities', 'bannercalc' ); ?></th>
+                            <td>
+                                <?php
+                                $bundle_csv = '';
+                                $existing_bundles = $editing_config['quantity_bundles'] ?? [];
+                                if ( ! empty( $existing_bundles ) ) {
+                                    $bundle_csv = implode( ', ', array_column( $existing_bundles, 'qty' ) );
+                                }
+                                ?>
+                                <input type="text"
+                                       name="bannercalc_category[quantity_bundles_csv]"
+                                       value="<?php echo esc_attr( $bundle_csv ); ?>"
+                                       class="regular-text"
+                                       placeholder="<?php esc_attr_e( 'e.g. 25, 50, 100, 250, 500', 'bannercalc' ); ?>" />
+                                <p class="bannercalc-field-hint">
+                                    <?php esc_html_e( 'Comma-separated quantity tiers. Customers pick from these as clickable pills.', 'bannercalc' ); ?>
+                                </p>
                             </td>
                         </tr>
 

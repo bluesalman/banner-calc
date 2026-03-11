@@ -217,6 +217,7 @@ class Plugin {
                 'description' => 'Our team will create a professional design for your banner',
             ],
             'shipping_method_map'    => [],
+            'collection_enabled'     => false,
         ];
 
         $settings = get_option( 'bannercalc_settings', [] );

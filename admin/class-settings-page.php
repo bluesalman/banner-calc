@@ -156,6 +156,9 @@ class SettingsPage {
             $sanitized['shipping_method_map'] = $shipping_map;
         }
 
+        // Collection / local pickup toggle.
+        $sanitized['collection_enabled'] = ! empty( $input['collection_enabled'] );
+
         // Design service.
         $sanitized['design_service'] = [
             'enabled'     => ! empty( $input['design_service']['enabled'] ),
