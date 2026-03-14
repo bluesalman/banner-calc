@@ -220,10 +220,12 @@
 }
 
 .bannercalc-product-rating .star-rating {
-    font-size: 0.85rem;
+    font-size: 1.25rem;
     margin: 0;
 }
-
+.star-rating span:before{
+    color: #f96eb4;
+}
 .bannercalc-review-link {
     font-family: var(--bp-font-body, 'Plus Jakarta Sans', sans-serif);
     font-size: 0.82rem;

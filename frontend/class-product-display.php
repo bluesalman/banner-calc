@@ -41,6 +41,9 @@ class ProductDisplay {
         // Hide default WC price display — our configurator shows the calculated price.
         add_filter( 'woocommerce_get_price_html', [ $this, 'replace_price_html' ], 10, 2 );
 
+        // Override product structured data with correct price range.
+        add_filter( 'woocommerce_structured_data_product', [ $this, 'override_structured_data_price' ], 10, 2 );
+
         // Suppress WC variation dropdowns on BannerCalc products (safety net).
         add_action( 'woocommerce_before_single_product', [ $this, 'suppress_wc_variation_form' ] );
 
@@ -377,32 +380,11 @@ class ProductDisplay {
         $settings = \BannerCalc\Plugin::get_settings();
         $currency = $settings['currency_symbol'] ?? '£';
 
-        // Compute price range from presets.
-        $presets    = $config['preset_sizes'] ?? [];
-        $rate       = (float) ( $config['area_rate_sqft'] ?? 0 );
-        $min_charge = (float) ( $config['minimum_charge'] ?? 0 );
-        $prices     = [];
-
-        if ( ! empty( $presets ) ) {
-            $units = new \BannerCalc\UnitConverter();
-            foreach ( $presets as $preset ) {
-                if ( isset( $preset['price'] ) && $preset['price'] !== null && $preset['price'] !== '' ) {
-                    $p = (float) $preset['price'];
-                } else {
-                    $w    = (float) ( $preset['width_m'] ?? 0 );
-                    $h    = (float) ( $preset['height_m'] ?? 0 );
-                    $sqft = $units->area_sqft( $w, $h );
-                    $p    = $sqft * $rate;
-                    if ( $p < $min_charge ) {
-                        $p = $min_charge;
-                    }
-                }
-                $prices[] = $p;
-            }
-        }
+        $prices = $this->get_preset_prices( $config );
 
         // Build price HTML.
         $price_html = '';
+        $min_charge = (float) ( $config['minimum_charge'] ?? 0 );
         if ( ! empty( $prices ) ) {
             $min_price = min( $prices );
             $max_price = max( $prices );
@@ -563,35 +545,8 @@ class ProductDisplay {
         }
 
         // Archive / shop pages: compute price range from preset sizes.
-        $presets     = $config['preset_sizes'] ?? [];
-        $rate        = (float) ( $config['area_rate_sqft'] ?? 0 );
         $min_charge  = (float) ( $config['minimum_charge'] ?? 0 );
-        $prices      = [];
-        $popular_price = null;
-
-        if ( ! empty( $presets ) ) {
-            $units = new \BannerCalc\UnitConverter();
-            foreach ( $presets as $preset ) {
-                if ( isset( $preset['price'] ) && $preset['price'] !== null && $preset['price'] !== '' ) {
-                    $price = (float) $preset['price'];
-                } else {
-                    $w   = (float) ( $preset['width_m'] ?? 0 );
-                    $h   = (float) ( $preset['height_m'] ?? 0 );
-                    $sqft = $units->area_sqft( $w, $h );
-                    $price = $sqft * $rate;
-                    if ( $price < $min_charge ) {
-                        $price = $min_charge;
-                    }
-                }
-                $prices[] = $price;
-
-                // Track most popular.
-                $pop = (int) ( $preset['popularity'] ?? 3 );
-                if ( $pop >= 5 && ( $popular_price === null || $price < $popular_price ) ) {
-                    $popular_price = $price;
-                }
-            }
-        }
+        $prices      = $this->get_preset_prices( $config );
 
         if ( ! empty( $prices ) ) {
             $min_price = min( $prices );
@@ -623,5 +578,78 @@ class ProductDisplay {
         return '<span class="bannercalc-archive-price" style="font-style:italic;color:#8892A0;">'
              . esc_html__( 'Price on configuration', 'bannercalc' )
              . '</span>';
+    }
+
+    /**
+     * Compute all preset prices for a product config.
+     *
+     * @param array $config Product config array.
+     * @return float[] Array of prices.
+     */
+    private function get_preset_prices( array $config ): array {
+        $presets    = $config['preset_sizes'] ?? [];
+        $rate       = (float) ( $config['area_rate_sqft'] ?? 0 );
+        $min_charge = (float) ( $config['minimum_charge'] ?? 0 );
+        $prices     = [];
+
+        if ( ! empty( $presets ) ) {
+            $units = new \BannerCalc\UnitConverter();
+            foreach ( $presets as $preset ) {
+                if ( isset( $preset['price'] ) && $preset['price'] !== null && $preset['price'] !== '' ) {
+                    $p = (float) $preset['price'];
+                } else {
+                    $w    = (float) ( $preset['width_m'] ?? 0 );
+                    $h    = (float) ( $preset['height_m'] ?? 0 );
+                    $sqft = $units->area_sqft( $w, $h );
+                    $p    = $sqft * $rate;
+                    if ( $p < $min_charge ) {
+                        $p = $min_charge;
+                    }
+                }
+                $prices[] = $p;
+            }
+        }
+
+        return $prices;
+    }
+
+    /**
+     * Override WooCommerce product structured data with the correct price range.
+     *
+     * Replaces the single-price Offer with an AggregateOffer containing
+     * lowPrice / highPrice derived from BannerCalc preset sizes.
+     *
+     * @param array       $markup  Schema.org markup array.
+     * @param \WC_Product $product
+     * @return array
+     */
+    public function override_structured_data_price( array $markup, \WC_Product $product ): array {
+        $plugin = \BannerCalc\Plugin::instance();
+
+        if ( ! $plugin->is_enabled_for_product( $product->get_id() ) ) {
+            return $markup;
+        }
+
+        $config = $plugin->get_product_config( $product->get_id() );
+        $prices = $this->get_preset_prices( $config );
+
+        if ( empty( $prices ) ) {
+            return $markup;
+        }
+
+        $min_price = round( min( $prices ), 2 );
+        $max_price = round( max( $prices ), 2 );
+
+        $markup['offers'] = [
+            '@type'          => 'AggregateOffer',
+            'priceCurrency'  => get_woocommerce_currency(),
+            'lowPrice'       => number_format( $min_price, 2, '.', '' ),
+            'highPrice'      => number_format( $max_price, 2, '.', '' ),
+            'offerCount'     => count( $prices ),
+            'availability'   => 'https://schema.org/InStock',
+            'url'            => get_permalink( $product->get_id() ),
+        ];
+
+        return $markup;
     }
 }
