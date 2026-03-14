@@ -27,6 +27,10 @@ class ProductDisplay {
         // Banner preview tab switcher + SVG panel (injected above gallery).
         add_action( 'woocommerce_before_single_product', [ $this, 'render_preview_container' ], 30 );
 
+        // Wrap price + rating in a flex row below the title.
+        add_action( 'woocommerce_single_product_summary', [ $this, 'open_price_rating_row' ], 9 );
+        add_action( 'woocommerce_single_product_summary', [ $this, 'close_price_rating_row' ], 11 );
+
         // Make BannerCalc products purchasable even without a WC price.
         add_filter( 'woocommerce_product_get_price', [ $this, 'ensure_purchasable_price' ], 10, 2 );
         add_filter( 'woocommerce_product_get_regular_price', [ $this, 'ensure_purchasable_price' ], 10, 2 );
@@ -307,6 +311,44 @@ class ProductDisplay {
     }
 
     /**
+     * Open flex wrapper around price + rating below the title.
+     */
+    public function open_price_rating_row(): void {
+        global $product;
+
+        if ( ! $product ) {
+            return;
+        }
+
+        $plugin = \BannerCalc\Plugin::instance();
+
+        if ( ! $plugin->is_enabled_for_product( $product->get_id() ) ) {
+            return;
+        }
+
+        echo '<div class="bannercalc-price-rating-row">';
+    }
+
+    /**
+     * Close the price + rating flex wrapper.
+     */
+    public function close_price_rating_row(): void {
+        global $product;
+
+        if ( ! $product ) {
+            return;
+        }
+
+        $plugin = \BannerCalc\Plugin::instance();
+
+        if ( ! $plugin->is_enabled_for_product( $product->get_id() ) ) {
+            return;
+        }
+
+        echo '</div>';
+    }
+
+    /**
      * Open the quantity + button flex wrapper for BannerCalc products.
      */
     public function open_quantity_row(): void {
@@ -425,12 +467,7 @@ class ProductDisplay {
         $settings = \BannerCalc\Plugin::get_settings();
         $currency = $settings['currency_symbol'] ?? '£';
 
-        if ( is_product() ) {
-            // Single product page: CMYK stripe — JS will replace with dynamic range.
-            return '<span class="bannercalc-cmyk-bar bannercalc-cmyk-bar--price"><span></span><span></span><span></span><span></span></span>';
-        }
-
-        // Archive / shop pages: compute price range from preset sizes.
+        // Compute price range from preset sizes (used on both single + archive).
         $presets     = $config['preset_sizes'] ?? [];
         $rate        = (float) ( $config['area_rate_sqft'] ?? 0 );
         $min_charge  = (float) ( $config['minimum_charge'] ?? 0 );
@@ -472,7 +509,7 @@ class ProductDisplay {
             }
             $range_html .= '</span>';
 
-            if ( $popular_price !== null && $popular_price !== $min_price ) {
+            if ( ! is_product() && $popular_price !== null && $popular_price !== $min_price ) {
                 $range_html .= '<span class="bannercalc-archive-popular" style="display:block;font-size:0.8em;color:#8892A0;font-weight:400;">';
                 $range_html .= esc_html__( 'Popular size from ', 'bannercalc' ) . esc_html( $currency . number_format( $popular_price, 2 ) );
                 $range_html .= '</span>';
@@ -492,16 +529,5 @@ class ProductDisplay {
         return '<span class="bannercalc-archive-price" style="font-style:italic;color:#8892A0;">'
              . esc_html__( 'Price on configuration', 'bannercalc' )
              . '</span>';
-    }
-
-    /**
-     * Optionally hide the Variations tab in admin for BannerCalc products.
-     *
-     * @param array $tabs
-     * @return array
-     */
-    public function maybe_hide_variations_tab( array $tabs ): array {
-        // This is handled at the admin level — stub for now.
-        return $tabs;
     }
 }

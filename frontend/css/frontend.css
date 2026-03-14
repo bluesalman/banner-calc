@@ -181,6 +181,49 @@
 }
 
 /* ================================================================
+   PRICE + RATING ROW (below product title)
+================================================================ */
+.bannercalc-price-rating-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 8px;
+    padding-bottom: 4px;
+}
+
+/* Price left, rating right */
+.bannercalc-price-rating-row .price {
+    order: 1;
+    font-family: var(--bp-font-display, 'Outfit', sans-serif);
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--bp-dark, #2D3748);
+    margin: 0;
+}
+
+.bannercalc-price-rating-row .bannercalc-archive-price {
+    font-family: var(--bp-font-display, 'Outfit', sans-serif);
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--bp-dark, #2D3748);
+}
+
+.bannercalc-price-rating-row .woocommerce-product-rating {
+    order: 2;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+    margin-left: auto;
+}
+
+.bannercalc-price-rating-row .star-rating {
+    font-size: 0.85rem;
+}
+
+/* ================================================================
    SECTION FRAMEWORK
 ================================================================ */
 .bannercalc-section {
