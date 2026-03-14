@@ -76,6 +76,7 @@ class ProductDisplay {
         $default_unit     = $config['default_unit'] ?? $settings['default_unit'];
         $available_units  = $config['available_units'] ?? $settings['available_units'];
         $preset_sizes     = $config['preset_sizes'] ?? [];
+        $preset_columns   = max( 1, min( 6, (int) ( $config['preset_columns'] ?? 4 ) ) );
         $enabled_attrs    = $config['enabled_attributes'] ?? [];
         $attribute_pricing = $config['attribute_pricing'] ?? [];
         $currency         = $settings['currency_symbol'];

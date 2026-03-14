@@ -11,6 +11,7 @@
  * @var array  $available_units
  * @var array  $preset_sizes
  * @var string $currency
+ * @var int    $preset_columns
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -47,7 +48,7 @@ if ( ! empty( $preset_sizes ) ) {
 <?php if ( $show_presets ) : ?>
     <!-- Preset sizes grid -->
     <div class="bannercalc-preset-sizes" id="bannercalc-presets">
-        <div class="bannercalc-preset-grid">
+        <div class="bannercalc-preset-grid" style="grid-template-columns: repeat(<?php echo (int) $preset_columns; ?>, 1fr);">
             <?php foreach ( $preset_sizes as $preset ) :
                 $popularity  = (int) ( $preset['popularity'] ?? 3 );
                 $description = $preset['description'] ?? '';

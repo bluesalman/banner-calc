@@ -84,6 +84,7 @@ class CategoryDefaults {
         $config['enabled']      = ! empty( $raw['enabled'] );
         $config['sizing_mode']  = sanitize_text_field( $raw['sizing_mode'] ?? 'preset_and_custom' );
         $config['default_unit'] = sanitize_text_field( $raw['default_unit'] ?? 'ft' );
+        $config['preset_columns'] = max( 1, min( 6, (int) ( $raw['preset_columns'] ?? 4 ) ) );
 
         $config['area_rate_sqft'] = (float) ( $raw['area_rate_sqft'] ?? 0 );
         $config['area_rate_sqm']  = (float) ( $raw['area_rate_sqm'] ?? 0 );

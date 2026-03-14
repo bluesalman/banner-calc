@@ -64,6 +64,23 @@ $attributes = $attr_mgr->get_all_attributes();
     </td>
 </tr>
 
+<!-- Preset size columns per row -->
+<tr class="form-field">
+    <th scope="row">
+        <label><?php esc_html_e( 'Size Grid Columns', 'bannercalc' ); ?></label>
+    </th>
+    <td>
+        <input type="number"
+               name="bannercalc_category[preset_columns]"
+               value="<?php echo esc_attr( $config['preset_columns'] ?? 4 ); ?>"
+               min="1"
+               max="6"
+               step="1"
+               class="small-text" />
+        <p class="description"><?php esc_html_e( 'Number of preset size cards per row (1–6).', 'bannercalc' ); ?></p>
+    </td>
+</tr>
+
 <!-- Default unit -->
 <tr class="form-field">
     <th scope="row">

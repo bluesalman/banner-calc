@@ -323,7 +323,7 @@
 ================================================================ */
 .bannercalc-preset-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+    grid-template-columns: repeat(4, 1fr);
     gap: 8px;
 }
 
@@ -978,13 +978,13 @@
 
 /* Combined fulfilment + delivery speed: compact, no internal divider */
 .bannercalc-delivery-combined {
-    padding: 16px 15px !important;
+    padding: 14px 15px !important;
 }
 .bannercalc-delivery-combined .bannercalc-attribute + .bannercalc-attribute {
-    margin-top: 12px;
+    margin-top: 10px;
 }
 .bannercalc-delivery-combined .bannercalc-attr-header {
-    margin-bottom: 6px;
+    margin-bottom: 4px;
 }
 
 .bannercalc-fulfilment-toggle {
@@ -996,17 +996,16 @@
 /* Higher specificity to override .bannercalc-card--delivery .bannercalc-pill column direction */
 .bannercalc-card--delivery .bannercalc-pill.bannercalc-fulfilment-pill {
     flex-direction: row !important;
-    gap: 8px !important;
-    padding: 12px 24px !important;
-    font-size: 14px !important;
-    min-width: 130px !important;
+    gap: 6px !important;
+    padding: 8px 18px !important;
+    font-size: 13px !important;
     justify-content: center !important;
 }
 
 .bannercalc-card--delivery .bannercalc-fulfilment-pill .dashicons {
-    font-size: 22px;
-    width: 22px;
-    height: 22px;
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
     line-height: 1;
 }
 
