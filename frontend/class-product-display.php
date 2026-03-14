@@ -205,45 +205,48 @@ class ProductDisplay {
         // Card 4: Delivery Speed + Pricing — separate card.
         echo '<div class="bannercalc-card bannercalc-card--delivery">';
 
-        // Collection / Shipping toggle (if enabled in global settings).
-        $collection_enabled = ! empty( $settings['collection_enabled'] );
-        if ( $collection_enabled ) {
-            echo '<div class="bannercalc-section bannercalc-fulfilment-section">';
-            echo '<div class="bannercalc-attribute bannercalc-attr--fulfilment">';
-            echo '<div class="bannercalc-attr-header"><span class="bannercalc-attr-label">' . esc_html__( 'Fulfilment Method', 'bannercalc' ) . '</span></div>';
-            echo '<div class="bannercalc-fulfilment-toggle">';
-            echo '<button type="button" class="bannercalc-pill bannercalc-fulfilment-pill active" data-fulfilment="delivery">';
-            echo '<span class="dashicons dashicons-car"></span><span>' . esc_html__( 'Shipping', 'bannercalc' ) . '</span>';
-            echo '</button>';
-            echo '<button type="button" class="bannercalc-pill bannercalc-fulfilment-pill" data-fulfilment="collection">';
-            echo '<span class="dashicons dashicons-store"></span><span>' . esc_html__( 'Collection', 'bannercalc' ) . '</span> <span class="bannercalc-fulfilment-badge">' . esc_html__( 'Free', 'bannercalc' ) . '</span>';
-            echo '</button>';
-            echo '</div>';
-            echo '<input type="hidden" name="bannercalc[fulfilment_mode]" value="delivery" id="bannercalc-input-fulfilment-mode" />';
-            echo '</div>';
-            echo '</div>';
-        }
+        // Combined fulfilment + delivery speed section.
+        $has_fulfilment = ! empty( $settings['collection_enabled'] );
+        $has_service    = ! empty( $service_types ) && count( $service_types ) > 1;
 
-        // Service type selector.
-        if ( ! empty( $service_types ) && count( $service_types ) > 1 ) {
-            echo '<div class="bannercalc-section bannercalc-service-section">';
-            echo '<div class="bannercalc-attribute bannercalc-attr--service-type">';
-            echo '<div class="bannercalc-attr-header"><span class="bannercalc-attr-label">' . esc_html__( 'Delivery Speed', 'bannercalc' ) . '</span></div>';
-            echo '<div class="bannercalc-attr-pills">';
-            foreach ( $service_types as $st ) {
-                $is_default = ! empty( $st['default'] );
-                $markup     = (float) ( $st['markup'] ?? 0 );
-                $slug       = $st['slug'] ?? '';
-                $label      = esc_html( $st['label'] ?? $slug );
+        if ( $has_fulfilment || $has_service ) {
+            echo '<div class="bannercalc-section bannercalc-delivery-combined">';
 
-                if ( $markup > 0 ) {
-                    $label .= ' <span class="bannercalc-pill-price">(+' . (int) $markup . '%)</span>';
-                }
-                echo '<button type="button" class="bannercalc-pill bannercalc-service-pill' . ( $is_default ? ' active' : '' ) . '" data-service="' . esc_attr( $slug ) . '">' . $label . '</button>';
+            if ( $has_fulfilment ) {
+                echo '<div class="bannercalc-attribute bannercalc-attr--fulfilment">';
+                echo '<div class="bannercalc-attr-header"><span class="bannercalc-attr-label">' . esc_html__( 'Fulfilment Method', 'bannercalc' ) . '</span></div>';
+                echo '<div class="bannercalc-fulfilment-toggle">';
+                echo '<button type="button" class="bannercalc-pill bannercalc-fulfilment-pill active" data-fulfilment="delivery">';
+                echo '<span class="dashicons dashicons-car"></span><span>' . esc_html__( 'Shipping', 'bannercalc' ) . '</span>';
+                echo '</button>';
+                echo '<button type="button" class="bannercalc-pill bannercalc-fulfilment-pill" data-fulfilment="collection">';
+                echo '<span class="dashicons dashicons-store"></span><span>' . esc_html__( 'Collection', 'bannercalc' ) . '</span> <span class="bannercalc-fulfilment-badge">' . esc_html__( 'Free', 'bannercalc' ) . '</span>';
+                echo '</button>';
+                echo '</div>';
+                echo '<input type="hidden" name="bannercalc[fulfilment_mode]" value="delivery" id="bannercalc-input-fulfilment-mode" />';
+                echo '</div>';
             }
-            echo '</div>';
-            echo '<input type="hidden" name="bannercalc[service_type]" value="standard" id="bannercalc-input-service-type" />';
-            echo '</div>';
+
+            if ( $has_service ) {
+                echo '<div class="bannercalc-attribute bannercalc-attr--service-type">';
+                echo '<div class="bannercalc-attr-header"><span class="bannercalc-attr-label">' . esc_html__( 'Delivery Speed', 'bannercalc' ) . '</span></div>';
+                echo '<div class="bannercalc-attr-pills">';
+                foreach ( $service_types as $st ) {
+                    $is_default = ! empty( $st['default'] );
+                    $markup     = (float) ( $st['markup'] ?? 0 );
+                    $slug       = $st['slug'] ?? '';
+                    $label      = esc_html( $st['label'] ?? $slug );
+
+                    if ( $markup > 0 ) {
+                        $label .= ' <span class="bannercalc-pill-price">(+' . (int) $markup . '%)</span>';
+                    }
+                    echo '<button type="button" class="bannercalc-pill bannercalc-service-pill' . ( $is_default ? ' active' : '' ) . '" data-service="' . esc_attr( $slug ) . '">' . $label . '</button>';
+                }
+                echo '</div>';
+                echo '<input type="hidden" name="bannercalc[service_type]" value="standard" id="bannercalc-input-service-type" />';
+                echo '</div>';
+            }
+
             echo '</div>';
         }
 
