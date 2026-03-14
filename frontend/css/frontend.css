@@ -925,7 +925,8 @@
     flex-wrap: wrap;
 }
 
-.bannercalc-fulfilment-pill {
+/* Higher specificity to override .bannercalc-card--delivery .bannercalc-pill column direction */
+.bannercalc-card--delivery .bannercalc-pill.bannercalc-fulfilment-pill {
     flex-direction: row !important;
     gap: 8px !important;
     padding: 12px 24px !important;
@@ -934,7 +935,7 @@
     justify-content: center !important;
 }
 
-.bannercalc-fulfilment-pill .dashicons {
+.bannercalc-card--delivery .bannercalc-fulfilment-pill .dashicons {
     font-size: 22px;
     width: 22px;
     height: 22px;

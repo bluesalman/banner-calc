@@ -32,6 +32,10 @@ if ( ! defined( 'ABSPATH' ) ) {
             <span class="bannercalc-price-label" id="bannercalc-service-label"></span>
             <span class="bannercalc-price-value" id="bannercalc-service-value"></span>
         </div>
+        <div class="bannercalc-price-row bannercalc-price-shipping" id="bannercalc-shipping-row" style="display: none;">
+            <span class="bannercalc-price-label" id="bannercalc-shipping-label"><?php esc_html_e( 'Shipping:', 'bannercalc' ); ?></span>
+            <span class="bannercalc-price-value" id="bannercalc-shipping-value"></span>
+        </div>
         <div class="bannercalc-price-row bannercalc-price-qty" id="bannercalc-qty-row" style="display: none;">
             <span class="bannercalc-price-label" id="bannercalc-qty-label"></span>
             <span class="bannercalc-price-value bannercalc-price-value--muted" id="bannercalc-qty-unit-price"></span>

@@ -70,6 +70,21 @@ class ProductDisplay {
         $attribute_pricing = $config['attribute_pricing'] ?? [];
         $currency         = $settings['currency_symbol'];
 
+        // Look up WC shipping costs for each mapped service type.
+        $shipping_costs = [];
+        $shipping_map   = $settings['shipping_method_map'] ?? [];
+        foreach ( $shipping_map as $slug => $method_id ) {
+            if ( empty( $method_id ) ) {
+                continue;
+            }
+            $parts = explode( ':', $method_id );
+            if ( count( $parts ) >= 2 ) {
+                $instance_id     = (int) $parts[1];
+                $method_settings = get_option( 'woocommerce_' . $parts[0] . '_' . $instance_id . '_settings', [] );
+                $shipping_costs[ $slug ] = (float) ( $method_settings['cost'] ?? 0 );
+            }
+        }
+
         // Output the config as a data attribute for JavaScript.
         $js_config = wp_json_encode( [
             'productId'       => $product->get_id(),
@@ -90,6 +105,7 @@ class ProductDisplay {
             'serviceTypes'    => $settings['service_types'] ?? [],
             'designService'   => $settings['design_service'] ?? [],
             'collectionEnabled' => ! empty( $settings['collection_enabled'] ),
+            'shippingCosts'   => (object) $shipping_costs,
             'quantityMode'    => $config['quantity_mode'] ?? 'standard',
             'quantityBundles' => $config['quantity_bundles'] ?? [],
             'minQuantity'     => (int) ( $config['min_quantity'] ?? 0 ),
@@ -195,10 +211,10 @@ class ProductDisplay {
             echo '<div class="bannercalc-attr-header"><span class="bannercalc-attr-label">' . esc_html__( 'Fulfilment Method', 'bannercalc' ) . '</span></div>';
             echo '<div class="bannercalc-fulfilment-toggle">';
             echo '<button type="button" class="bannercalc-pill bannercalc-fulfilment-pill active" data-fulfilment="delivery">';
-            echo '<span class="dashicons dashicons-car"></span> ' . esc_html__( 'Delivery', 'bannercalc' );
+            echo '<span class="dashicons dashicons-car"></span><span>' . esc_html__( 'Shipping', 'bannercalc' ) . '</span>';
             echo '</button>';
             echo '<button type="button" class="bannercalc-pill bannercalc-fulfilment-pill" data-fulfilment="collection">';
-            echo '<span class="dashicons dashicons-store"></span> ' . esc_html__( 'Collection', 'bannercalc' ) . ' <span class="bannercalc-fulfilment-badge">' . esc_html__( 'Free', 'bannercalc' ) . '</span>';
+            echo '<span class="dashicons dashicons-store"></span><span>' . esc_html__( 'Collection', 'bannercalc' ) . '</span> <span class="bannercalc-fulfilment-badge">' . esc_html__( 'Free', 'bannercalc' ) . '</span>';
             echo '</button>';
             echo '</div>';
             echo '<input type="hidden" name="bannercalc[fulfilment_mode]" value="delivery" id="bannercalc-input-fulfilment-mode" />';
@@ -215,11 +231,21 @@ class ProductDisplay {
             foreach ( $service_types as $st ) {
                 $is_default = ! empty( $st['default'] );
                 $markup     = (float) ( $st['markup'] ?? 0 );
-                $label      = esc_html( $st['label'] ?? $st['slug'] );
+                $slug       = $st['slug'] ?? '';
+                $label      = esc_html( $st['label'] ?? $slug );
+                $ship_cost  = $shipping_costs[ $slug ] ?? 0;
+
+                $extra_parts = [];
                 if ( $markup > 0 ) {
-                    $label .= ' <span class="bannercalc-pill-price">(+' . (int) $markup . '%)</span>';
+                    $extra_parts[] = '+' . (int) $markup . '%';
                 }
-                echo '<button type="button" class="bannercalc-pill bannercalc-service-pill' . ( $is_default ? ' active' : '' ) . '" data-service="' . esc_attr( $st['slug'] ) . '">' . $label . '</button>';
+                if ( $ship_cost > 0 ) {
+                    $extra_parts[] = '+' . esc_html( $currency ) . number_format( $ship_cost, 2 );
+                }
+                if ( ! empty( $extra_parts ) ) {
+                    $label .= ' <span class="bannercalc-pill-price">(' . implode( ' ', $extra_parts ) . ')</span>';
+                }
+                echo '<button type="button" class="bannercalc-pill bannercalc-service-pill' . ( $is_default ? ' active' : '' ) . '" data-service="' . esc_attr( $slug ) . '">' . $label . '</button>';
             }
             echo '</div>';
             echo '<input type="hidden" name="bannercalc[service_type]" value="standard" id="bannercalc-input-service-type" />';

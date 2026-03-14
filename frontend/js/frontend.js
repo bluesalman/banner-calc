@@ -54,6 +54,7 @@
             serviceType: 'standard',
             serviceMarkupPct: 0,
             serviceMarkupAmt: 0,
+            shippingCost: 0,
             designMode: 'upload',
             fulfilmentMode: 'delivery',
             calculatedPrice: 0,
@@ -700,6 +701,13 @@
                 }
             }
 
+            // Shipping cost from WC mapped method (0 when collection).
+            this.state.shippingCost = 0;
+            if (this.state.fulfilmentMode !== 'collection') {
+                var shippingCosts = this.config.shippingCosts || {};
+                this.state.shippingCost = parseFloat(shippingCosts[this.state.serviceType] || 0);
+            }
+
             this.state.unitPrice = parseFloat((basePrice + addonsTotal + this.state.serviceMarkupAmt).toFixed(2));
             this.state.calculatedPrice = parseFloat((this.state.unitPrice * this.state.quantity).toFixed(2));
             this.state.isValid = this.state.validationErrors.length === 0;
@@ -774,6 +782,20 @@
             var totalPrice = parseFloat((unitPrice * qty).toFixed(dec));
             this.state.calculatedPrice = totalPrice;
 
+            // Shipping row.
+            var shippingCost = this.state.shippingCost || 0;
+            if (this.state.fulfilmentMode === 'collection') {
+                $('#bannercalc-shipping-row').show();
+                $('#bannercalc-shipping-label').text('Shipping:');
+                $('#bannercalc-shipping-value').text('Free (Collection)').css('color', 'var(--bp-green, #39B54A)');
+            } else if (shippingCost > 0) {
+                $('#bannercalc-shipping-row').show();
+                $('#bannercalc-shipping-label').text('Shipping:');
+                $('#bannercalc-shipping-value').text('+' + cur + shippingCost.toFixed(dec)).css('color', '');
+            } else {
+                $('#bannercalc-shipping-row').hide();
+            }
+
             // Quantity row — show if qty > 1.
             if (qty > 1) {
                 $('#bannercalc-qty-row').show();
@@ -783,10 +805,11 @@
                 $('#bannercalc-qty-row').hide();
             }
 
-            // Total.
-            $('#bannercalc-total-value').text(cur + totalPrice.toFixed(dec));
+            // Total (product + shipping).
+            var estimatedTotal = parseFloat((totalPrice + shippingCost).toFixed(dec));
+            $('#bannercalc-total-value').text(cur + estimatedTotal.toFixed(dec));
 
-            // Update hidden input — store the unit price (WC multiplies by qty automatically).
+            // Update hidden input — store the unit price (WC multiplies by qty automatically, shipping added by WC at checkout).
             $('#bannercalc-input-price').val(unitPrice);
         },
 

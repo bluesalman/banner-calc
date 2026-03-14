@@ -118,22 +118,11 @@ class CartHandler {
         // Server-side price calculation (prevents client manipulation).
         $result = $this->pricing->calculate( $config, $width_m, $height_m, $attrs, $preset, $service_type, $design_service );
 
-        // Determine if this service type maps to a WC shipping method.
-        // If so, we strip the service markup from the product price — WC shipping handles the cost.
-        // Exception: collection mode — shipping is waived (Local Pickup), so the urgent markup
-        // must stay in the product price as a production-speed surcharge.
+        // Product price always includes the service markup (production speed surcharge).
+        // WC shipping handles the actual delivery cost separately at checkout.
         $settings          = Plugin::get_settings();
         $shipping_map      = $settings['shipping_method_map'] ?? [];
-        $has_shipping_map  = ! empty( $shipping_map[ $service_type ] );
-        $is_collection     = ( $fulfilment_mode === 'collection' );
-
-        if ( $has_shipping_map && ! $is_collection ) {
-            // Delivery mode with mapped shipping: strip markup (WC shipping covers it).
-            $price_for_cart = round( $result['base_price'] + $result['addons_total'], 2 );
-        } else {
-            // Collection mode OR no shipping map: keep full price with markup.
-            $price_for_cart = $result['calculated_price'];
-        }
+        $price_for_cart    = $result['calculated_price'];
 
         // Build human-readable size label.
         $unit_abbr  = [ 'mm' => 'mm', 'cm' => 'cm', 'inch' => 'in', 'ft' => 'ft', 'm' => 'm' ];
