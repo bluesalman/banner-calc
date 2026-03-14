@@ -27,6 +27,9 @@ class ProductDisplay {
         // Banner preview tab switcher + SVG panel (injected above gallery).
         add_action( 'woocommerce_before_single_product', [ $this, 'render_preview_container' ], 30 );
 
+        // CMYK bar above the product title.
+        add_action( 'woocommerce_single_product_summary', [ $this, 'render_cmyk_bar' ], 4 );
+
         // Price + rating row below the title (replaces default WC price & rating).
         add_action( 'woocommerce_single_product_summary', [ $this, 'render_price_rating_row' ], 6 );
         add_action( 'woocommerce_single_product_summary', [ $this, 'remove_default_price_rating' ], 1 );
@@ -312,6 +315,25 @@ class ProductDisplay {
             <div class="bannercalc-fullscreen-canvas" id="bannercalc-fullscreen-canvas"></div>
         </div>
         <?php
+    }
+
+    /**
+     * Render the CMYK colour bar above the product title.
+     */
+    public function render_cmyk_bar(): void {
+        global $product;
+
+        if ( ! $product ) {
+            return;
+        }
+
+        $plugin = \BannerCalc\Plugin::instance();
+
+        if ( ! $plugin->is_enabled_for_product( $product->get_id() ) ) {
+            return;
+        }
+
+        echo '<span class="bannercalc-cmyk-bar bannercalc-cmyk-bar--price"><span></span><span></span><span></span><span></span></span>';
     }
 
     /**
