@@ -3,7 +3,7 @@
  * Plugin Name: BannerCalc
  * Plugin URI:  https://github.com/your-repo/bannercalc
  * Description: Product Configurator & Pricing Engine for WooCommerce. Replaces variation-based configuration with a unified pricing engine using area-based calculations and attribute modifiers.
- * Version:     1.5.1
+ * Version:     1.5.2
  * Author:      BannerCalc
  * Author URI:  https://github.com/your-repo/bannercalc
  * License:     GPL-2.0-or-later
