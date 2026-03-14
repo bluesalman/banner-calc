@@ -27,9 +27,9 @@ class ProductDisplay {
         // Banner preview tab switcher + SVG panel (injected above gallery).
         add_action( 'woocommerce_before_single_product', [ $this, 'render_preview_container' ], 30 );
 
-        // Wrap price + rating in a flex row below the title.
-        add_action( 'woocommerce_single_product_summary', [ $this, 'open_price_rating_row' ], 9 );
-        add_action( 'woocommerce_single_product_summary', [ $this, 'close_price_rating_row' ], 11 );
+        // Price + rating row below the title (replaces default WC price & rating).
+        add_action( 'woocommerce_single_product_summary', [ $this, 'render_price_rating_row' ], 6 );
+        add_action( 'woocommerce_single_product_summary', [ $this, 'remove_default_price_rating' ], 1 );
 
         // Make BannerCalc products purchasable even without a WC price.
         add_filter( 'woocommerce_product_get_price', [ $this, 'ensure_purchasable_price' ], 10, 2 );
@@ -311,9 +311,10 @@ class ProductDisplay {
     }
 
     /**
-     * Open flex wrapper around price + rating below the title.
+     * Remove default WC price and rating from single product summary
+     * (we render our own combined row instead).
      */
-    public function open_price_rating_row(): void {
+    public function remove_default_price_rating(): void {
         global $product;
 
         if ( ! $product ) {
@@ -326,13 +327,14 @@ class ProductDisplay {
             return;
         }
 
-        echo '<div class="bannercalc-price-rating-row">';
+        remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_price', 10 );
+        remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_rating', 10 );
     }
 
     /**
-     * Close the price + rating flex wrapper.
+     * Render price range + star rating in a single flex row below the title.
      */
-    public function close_price_rating_row(): void {
+    public function render_price_rating_row(): void {
         global $product;
 
         if ( ! $product ) {
@@ -345,6 +347,66 @@ class ProductDisplay {
             return;
         }
 
+        $config   = $plugin->get_product_config( $product->get_id() );
+        $settings = \BannerCalc\Plugin::get_settings();
+        $currency = $settings['currency_symbol'] ?? '£';
+
+        // Compute price range from presets.
+        $presets    = $config['preset_sizes'] ?? [];
+        $rate       = (float) ( $config['area_rate_sqft'] ?? 0 );
+        $min_charge = (float) ( $config['minimum_charge'] ?? 0 );
+        $prices     = [];
+
+        if ( ! empty( $presets ) ) {
+            $units = new \BannerCalc\UnitConverter();
+            foreach ( $presets as $preset ) {
+                if ( isset( $preset['price'] ) && $preset['price'] !== null && $preset['price'] !== '' ) {
+                    $p = (float) $preset['price'];
+                } else {
+                    $w    = (float) ( $preset['width_m'] ?? 0 );
+                    $h    = (float) ( $preset['height_m'] ?? 0 );
+                    $sqft = $units->area_sqft( $w, $h );
+                    $p    = $sqft * $rate;
+                    if ( $p < $min_charge ) {
+                        $p = $min_charge;
+                    }
+                }
+                $prices[] = $p;
+            }
+        }
+
+        // Build price HTML.
+        $price_html = '';
+        if ( ! empty( $prices ) ) {
+            $min_price = min( $prices );
+            $max_price = max( $prices );
+            $price_html = esc_html__( 'From ', 'bannercalc' ) . esc_html( $currency . number_format( $min_price, 2 ) );
+            if ( $max_price > $min_price ) {
+                $price_html .= ' – ' . esc_html( $currency . number_format( $max_price, 2 ) );
+            }
+        } elseif ( $min_charge > 0 ) {
+            $price_html = esc_html__( 'From ', 'bannercalc' ) . esc_html( $currency . number_format( $min_charge, 2 ) );
+        }
+
+        // Build rating HTML.
+        $rating_html = '';
+        $rating_count = $product->get_rating_count();
+        if ( $rating_count > 0 ) {
+            $average = $product->get_average_rating();
+            $rating_html  = wc_get_rating_html( $average, $rating_count );
+            $review_link  = '#reviews';
+            $rating_html .= '<a href="' . esc_url( $review_link ) . '" class="bannercalc-review-link">(';
+            $rating_html .= sprintf( _n( '%s review', '%s reviews', $rating_count, 'bannercalc' ), esc_html( $rating_count ) );
+            $rating_html .= ')</a>';
+        }
+
+        echo '<div class="bannercalc-price-rating-row">';
+        if ( $price_html ) {
+            echo '<span class="bannercalc-product-price">' . $price_html . '</span>';
+        }
+        if ( $rating_html ) {
+            echo '<div class="bannercalc-product-rating">' . $rating_html . '</div>';
+        }
         echo '</div>';
     }
 
@@ -467,7 +529,12 @@ class ProductDisplay {
         $settings = \BannerCalc\Plugin::get_settings();
         $currency = $settings['currency_symbol'] ?? '£';
 
-        // Compute price range from preset sizes (used on both single + archive).
+        // Single product page: hide default price — shown in our custom price+rating row.
+        if ( is_product() ) {
+            return '';
+        }
+
+        // Archive / shop pages: compute price range from preset sizes.
         $presets     = $config['preset_sizes'] ?? [];
         $rate        = (float) ( $config['area_rate_sqft'] ?? 0 );
         $min_charge  = (float) ( $config['minimum_charge'] ?? 0 );
@@ -509,7 +576,7 @@ class ProductDisplay {
             }
             $range_html .= '</span>';
 
-            if ( ! is_product() && $popular_price !== null && $popular_price !== $min_price ) {
+            if ( $popular_price !== null && $popular_price !== $min_price ) {
                 $range_html .= '<span class="bannercalc-archive-popular" style="display:block;font-size:0.8em;color:#8892A0;font-weight:400;">';
                 $range_html .= esc_html__( 'Popular size from ', 'bannercalc' ) . esc_html( $currency . number_format( $popular_price, 2 ) );
                 $range_html .= '</span>';

@@ -192,35 +192,34 @@
     padding-bottom: 4px;
 }
 
-/* Price left, rating right */
-.bannercalc-price-rating-row .price {
-    order: 1;
+.bannercalc-product-price {
     font-family: var(--bp-font-display, 'Outfit', sans-serif);
-    font-size: 1.35rem;
-    font-weight: 700;
-    color: var(--bp-dark, #2D3748);
-    margin: 0;
-}
-
-.bannercalc-price-rating-row .bannercalc-archive-price {
-    font-family: var(--bp-font-display, 'Outfit', sans-serif);
-    font-size: 1.35rem;
+    font-size: 1.3rem;
     font-weight: 700;
     color: var(--bp-dark, #2D3748);
 }
 
-.bannercalc-price-rating-row .woocommerce-product-rating {
-    order: 2;
-    margin: 0;
+.bannercalc-product-rating {
     display: flex;
     align-items: center;
     gap: 6px;
     flex-shrink: 0;
-    margin-left: auto;
 }
 
-.bannercalc-price-rating-row .star-rating {
+.bannercalc-product-rating .star-rating {
     font-size: 0.85rem;
+    margin: 0;
+}
+
+.bannercalc-review-link {
+    font-family: var(--bp-font-body, 'Plus Jakarta Sans', sans-serif);
+    font-size: 0.82rem;
+    color: var(--bp-medium-gray, #8892A0);
+    text-decoration: none;
+}
+
+.bannercalc-review-link:hover {
+    color: var(--bp-cyan, #00AEEF);
 }
 
 /* ================================================================
