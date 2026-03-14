@@ -399,11 +399,14 @@ class CartHandler {
 
         // Check if any BannerCalc item exists in the cart.
         $has_bannercalc = false;
+        $is_collection  = false;
 
         foreach ( $cart->get_cart() as $cart_item ) {
             if ( ! empty( $cart_item['bannercalc'] ) ) {
                 $has_bannercalc = true;
-                break;
+                if ( ( $cart_item['bannercalc']['fulfilment_mode'] ?? '' ) === 'collection' ) {
+                    $is_collection = true;
+                }
             }
         }
 
@@ -414,9 +417,18 @@ class CartHandler {
         $settings        = Plugin::get_settings();
         $shipping_method = $settings['shipping_method'] ?? '';
 
-        // Force the single configured shipping method for the "Ship" tab.
-        // WC block checkout handles Local Pickup (Collection) natively via its
-        // own Ship/Collection toggle — we do not need to manipulate rates for that.
+        // Collection: zero out shipping — customer picks up in person.
+        if ( $is_collection ) {
+            if ( ! empty( $rates ) ) {
+                $first_key  = array_key_first( $rates );
+                $first_rate = $rates[ $first_key ];
+                $first_rate->set_cost( 0 );
+                $first_rate->set_label( __( 'Collection (Free)', 'bannercalc' ) );
+                return [ $first_key => $first_rate ];
+            }
+        }
+
+        // Delivery: force the single configured shipping method.
         if ( ! empty( $shipping_method ) && isset( $rates[ $shipping_method ] ) ) {
             return [ $shipping_method => $rates[ $shipping_method ] ];
         }
