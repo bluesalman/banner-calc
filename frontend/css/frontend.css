@@ -764,9 +764,9 @@
 #bannercalc-configurator .bannercalc-pill,
 .bannercalc-card--extras .bannercalc-pill,
 .bannercalc-card--delivery .bannercalc-pill {
-    padding: 10px 20px !important;
+    padding: 10px 15px !important;
     border: 1.5px solid var(--bp-light-gray) !important;
-    border-radius: 24px !important;
+    border-radius: 10px !important;
     background: var(--bp-white) !important;
     cursor: pointer !important;
     font-family: var(--bp-font-body) !important;
