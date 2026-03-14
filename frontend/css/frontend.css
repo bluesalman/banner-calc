@@ -976,12 +976,16 @@
     margin-bottom: 16px;
 }
 
-/* Combined fulfilment + delivery speed: compact, no internal divider */
+/* Combined fulfilment + delivery speed: single row, compact */
 .bannercalc-delivery-combined {
     padding: 14px 15px !important;
+    display: flex !important;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 16px;
 }
 .bannercalc-delivery-combined .bannercalc-attribute + .bannercalc-attribute {
-    margin-top: 10px;
+    margin-top: 0;
 }
 .bannercalc-delivery-combined .bannercalc-attr-header {
     margin-bottom: 4px;
