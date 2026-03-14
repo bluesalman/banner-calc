@@ -42,6 +42,9 @@ class CartHandler {
         // Display config in order emails and order detail.
         add_action( 'woocommerce_order_item_meta_end', [ $this, 'display_order_item_meta' ], 10, 4 );
 
+        // Add service markup as a separate cart fee (itemised in basket totals).
+        add_action( 'woocommerce_cart_calculate_fees', [ $this, 'add_service_markup_fee' ], 10 );
+
         // Force WooCommerce shipping selection based on delivery speed.
         add_filter( 'woocommerce_package_rates', [ $this, 'filter_shipping_rates' ], 100, 2 );
 
@@ -118,11 +121,11 @@ class CartHandler {
         // Server-side price calculation (prevents client manipulation).
         $result = $this->pricing->calculate( $config, $width_m, $height_m, $attrs, $preset, $service_type, $design_service );
 
-        // Product price always includes the service markup (production speed surcharge).
-        // WC shipping handles the actual delivery cost separately at checkout.
+        // Product price = base + addons only. Markup is added as a separate WC fee
+        // so the cart shows an itemised breakdown the customer can understand.
         $settings          = Plugin::get_settings();
         $shipping_map      = $settings['shipping_method_map'] ?? [];
-        $price_for_cart    = $result['calculated_price'];
+        $price_for_cart    = round( $result['base_price'] + $result['addons_total'], 2 );
 
         // Build human-readable size label.
         $unit_abbr  = [ 'mm' => 'mm', 'cm' => 'cm', 'inch' => 'in', 'ft' => 'ft', 'm' => 'm' ];
@@ -164,7 +167,7 @@ class CartHandler {
     }
 
     /**
-     * Override product price with calculated price.
+     * Override product price with base + addons (no markup).
      *
      * @param \WC_Cart $cart
      */
@@ -177,6 +180,47 @@ class CartHandler {
             if ( ! empty( $cart_item['bannercalc']['calculated_price'] ) ) {
                 $cart_item['data']->set_price( $cart_item['bannercalc']['calculated_price'] );
             }
+        }
+    }
+
+    /**
+     * Add service markup as a separate fee in the cart totals.
+     *
+     * @param \WC_Cart $cart
+     */
+    public function add_service_markup_fee( \WC_Cart $cart ): void {
+        if ( is_admin() && ! wp_doing_ajax() ) {
+            return;
+        }
+
+        $total_markup = 0;
+        $markup_label = '';
+
+        foreach ( $cart->get_cart() as $cart_item ) {
+            if ( empty( $cart_item['bannercalc']['service_markup_amt'] ) ) {
+                continue;
+            }
+
+            $markup_amt = (float) $cart_item['bannercalc']['service_markup_amt'];
+            $qty        = (int) ( $cart_item['quantity'] ?? 1 );
+            $total_markup += $markup_amt * $qty;
+
+            // Use the label from the last (most urgent) item.
+            if ( empty( $markup_label ) ) {
+                $settings      = Plugin::get_settings();
+                $service_types = $settings['service_types'] ?? [];
+                $service_slug  = $cart_item['bannercalc']['service_type'] ?? '';
+                foreach ( $service_types as $st ) {
+                    if ( ( $st['slug'] ?? '' ) === $service_slug ) {
+                        $markup_label = $st['label'] . ' (+' . (int) $st['markup'] . '%)';
+                        break;
+                    }
+                }
+            }
+        }
+
+        if ( $total_markup > 0 && ! empty( $markup_label ) ) {
+            $cart->add_fee( $markup_label, $total_markup, false );
         }
     }
 
