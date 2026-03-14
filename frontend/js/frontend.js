@@ -1312,8 +1312,8 @@
 
             // Calculate SVG dimensions — scale to fill available width, cap height at 640px.
             var containerW = this.canvasEl.width() || 500;
-            var padTop = 28;   // space for width label on top
-            var padRight = 30; // space for height label on right
+            var padTop = 44;   // space for width label on top (clear of fullscreen header)
+            var padRight = 44; // space for height label on right
             var padBottom = 15;
             var padLeft = 15;
             var availW = containerW - padLeft - padRight;
@@ -1553,7 +1553,7 @@
 
             var arrowX = bx + bw + pocketPxRight + 14;
             svg += '<line x1="' + arrowX + '" y1="' + by + '" x2="' + arrowX + '" y2="' + (by + bh) + '" stroke="#8892A0" stroke-width="1"/>';
-            svg += '<text x="' + arrowX + '" y="' + (by + bh/2 + 3) + '" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#555E6E" font-weight="600" transform="rotate(90,' + arrowX + ',' + (by + bh/2) + ')">' + hDisp + abbr + '</text>';
+            svg += '<text x="' + (arrowX + 14) + '" y="' + (by + bh/2 + 3) + '" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#555E6E" font-weight="600" transform="rotate(90,' + (arrowX + 14) + ',' + (by + bh/2) + ')">' + hDisp + abbr + '</text>';
 
             svg += '</svg>';
 
