@@ -51,6 +51,7 @@
             addonsTotal: 0,
             designService: false,
             designServicePrice: 0,
+            designQty: 1,
             serviceType: 'standard',
             serviceMarkupPct: 0,
             serviceMarkupAmt: 0,
@@ -485,6 +486,18 @@
                 self.updatePriceDisplay();
             });
 
+            // Design quantity input change (Pro Design panel).
+            var designQtyTimeout = null;
+            this.el.closest('form').on('input change', '#bannercalc-design-qty', function() {
+                clearTimeout(designQtyTimeout);
+                designQtyTimeout = setTimeout(function() {
+                    var dQty = parseInt($('#bannercalc-design-qty').val()) || 1;
+                    if (dQty < 1) dQty = 1;
+                    self.state.designQty = dQty;
+                    self.updatePriceDisplay();
+                }, 150);
+            });
+
             // Quantity input change (standard mode) — live price update.
             var qtyTimeout = null;
             $('form.cart').on('input change', 'input.qty, input[name="quantity"]', function() {
@@ -674,13 +687,12 @@
             this.state.basePrice = parseFloat(basePrice.toFixed(2));
             this.state.addonsTotal = parseFloat(addonsTotal.toFixed(2));
 
-            // Design service.
+            // Design service — stored separately, NOT added to addonsTotal.
             this.state.designServicePrice = 0;
             if (this.state.designService) {
                 var dsConfig = this.config.designService || {};
                 if (dsConfig.enabled) {
                     this.state.designServicePrice = parseFloat(dsConfig.price || 0);
-                    addonsTotal += this.state.designServicePrice;
                 }
             }
 
@@ -750,9 +762,16 @@
             }
 
             // Design service row.
+            var designServiceTotal = 0;
             if (this.state.designService && this.state.designServicePrice > 0) {
+                var dQty = this.state.designQty || 1;
+                designServiceTotal = this.state.designServicePrice * dQty;
                 $('#bannercalc-design-row').show();
-                $('#bannercalc-design-value').text('+' + cur + this.state.designServicePrice.toFixed(dec));
+                var designLabel = (dQty > 1)
+                    ? '+ Professional Design (×' + dQty + '):'
+                    : '+ Professional Design:';
+                $('#bannercalc-design-label').text(designLabel);
+                $('#bannercalc-design-value').text('+' + cur + designServiceTotal.toFixed(dec));
             } else {
                 $('#bannercalc-design-row').hide();
             }
@@ -803,8 +822,12 @@
                 $('#bannercalc-qty-row').hide();
             }
 
-            // Total (product + shipping).
-            var estimatedTotal = parseFloat((totalPrice + shippingCost).toFixed(dec));
+            // Total (product + design service + shipping).
+            var designFee = 0;
+            if (this.state.designService && this.state.designServicePrice > 0) {
+                designFee = this.state.designServicePrice * (this.state.designQty || 1);
+            }
+            var estimatedTotal = parseFloat((totalPrice + designFee + shippingCost).toFixed(dec));
             $('#bannercalc-total-value').text(cur + estimatedTotal.toFixed(dec));
 
             // Update hidden input — store the unit price (WC multiplies by qty automatically, shipping added by WC at checkout).
@@ -1350,9 +1373,6 @@
             // User-uploaded image or placeholder text.
             if (this.uploadedImageUrl) {
                 svg += '<image href="' + this.uploadedImageUrl.replace(/&/g, '&amp;').replace(/"/g, '&quot;') + '" x="' + bx + '" y="' + by + '" width="' + bw + '" height="' + bh + '" preserveAspectRatio="xMidYMid slice" clip-path="url(#bcBannerClip)"/>';
-                // Subtle dimension overlay at bottom.
-                svg += '<rect x="' + bx + '" y="' + (by + bh - 28) + '" width="' + bw + '" height="28" fill="rgba(0,0,0,0.45)" rx="0"/>';
-                svg += '<text x="' + (bx + bw/2) + '" y="' + (by + bh - 9) + '" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#ffffff" font-weight="600" letter-spacing="0.5">' + wDisp + abbr + ' × ' + hDisp + abbr + '</text>';
             } else {
                 svg += '<text x="' + (bx + bw/2) + '" y="' + (by + bh/2 - 10) + '" text-anchor="middle" font-family="Outfit, sans-serif" font-size="18" font-weight="700" fill="#a0a0a0" letter-spacing="2">YOUR DESIGN</text>';
                 svg += '<text x="' + (bx + bw/2) + '" y="' + (by + bh/2 + 14) + '" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#b0b0b0" font-weight="500" letter-spacing="0.5">' + wDisp + abbr + ' × ' + hDisp + abbr + '</text>';

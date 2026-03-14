@@ -91,13 +91,13 @@ class PricingEngine {
             $addons_total += $addon_price;
         }
 
-        // Design service add-on (added to addons_total so it's subject to service markup).
+        // Design service — tracked separately, NOT added to addons_total.
+        // It's a flat fee handled as a separate WC cart fee.
         $design_service_price = 0.0;
         if ( $design_service ) {
             $global_settings      = \BannerCalc\Plugin::get_settings();
             $ds_config            = $global_settings['design_service'] ?? [];
             $design_service_price = ( ! empty( $ds_config['enabled'] ) ) ? (float) ( $ds_config['price'] ?? 0 ) : 0.0;
-            $addons_total        += $design_service_price;
         }
 
         // Service type markup.

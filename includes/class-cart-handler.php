@@ -117,6 +117,7 @@ class CartHandler {
             ? $raw['fulfilment_mode']
             : 'delivery';
         $design_service = ! empty( $raw['design_service'] );
+        $design_qty     = max( 1, (int) ( $raw['design_qty'] ?? 1 ) );
 
         // Server-side price calculation (prevents client manipulation).
         $result = $this->pricing->calculate( $config, $width_m, $height_m, $attrs, $preset, $service_type, $design_service );
@@ -149,6 +150,7 @@ class CartHandler {
             'addons_total'         => $result['addons_total'],
             'design_service'       => $result['design_service'],
             'design_service_price' => $result['design_service_price'],
+            'design_qty'           => $design_qty,
             'service_type'         => $result['service_type'],
             'service_markup_pct'   => $result['service_markup_pct'],
             'service_markup_amt'   => $result['service_markup_amt'],
@@ -218,6 +220,21 @@ class CartHandler {
         if ( $total_markup > 0 && ! empty( $markup_label ) ) {
             $cart->add_fee( $markup_label, $total_markup, false );
         }
+
+        // Design service fee — flat fee, independent of product quantity.
+        $design_total = 0;
+        foreach ( $cart->get_cart() as $cart_item ) {
+            if ( empty( $cart_item['bannercalc']['design_service'] ) ) {
+                continue;
+            }
+            $ds_price  = (float) ( $cart_item['bannercalc']['design_service_price'] ?? 0 );
+            $ds_qty    = max( 1, (int) ( $cart_item['bannercalc']['design_qty'] ?? 1 ) );
+            $design_total += $ds_price * $ds_qty;
+        }
+
+        if ( $design_total > 0 ) {
+            $cart->add_fee( __( 'Professional Design', 'bannercalc' ), $design_total, false );
+        }
     }
 
     /**
@@ -258,9 +275,16 @@ class CartHandler {
 
         // Design service.
         if ( ! empty( $bc['design_service'] ) ) {
+            $ds_price = (float) ( $bc['design_service_price'] ?? 0 );
+            $ds_qty   = max( 1, (int) ( $bc['design_qty'] ?? 1 ) );
+            $ds_label = __( 'Professional Design', 'bannercalc' );
+            if ( $ds_qty > 1 ) {
+                $ds_label .= ' ×' . $ds_qty;
+            }
+            $ds_label .= ' (+£' . number_format( $ds_price * $ds_qty, 2 ) . ')';
             $item_data[] = [
                 'key'   => __( 'Design Service', 'bannercalc' ),
-                'value' => __( 'Professional Design', 'bannercalc' ) . ' (+£' . number_format( (float) ( $bc['design_service_price'] ?? 0 ), 2 ) . ')',
+                'value' => $ds_label,
             ];
         }
 
@@ -334,7 +358,14 @@ class CartHandler {
                 echo esc_html__( 'Fulfilment: ', 'bannercalc' ) . esc_html( ucfirst( $bc['fulfilment_mode'] ) ) . "\n";
             }
             if ( ! empty( $bc['design_service'] ) ) {
-                echo esc_html__( 'Design Service: Professional Design (+£', 'bannercalc' ) . number_format( (float) ( $bc['design_service_price'] ?? 0 ), 2 ) . ")\n";
+                $ds_price = (float) ( $bc['design_service_price'] ?? 0 );
+                $ds_qty   = max( 1, (int) ( $bc['design_qty'] ?? 1 ) );
+                $ds_total = $ds_price * $ds_qty;
+                $ds_txt   = 'Professional Design';
+                if ( $ds_qty > 1 ) {
+                    $ds_txt .= ' ×' . $ds_qty;
+                }
+                echo esc_html__( 'Design Service: ', 'bannercalc' ) . esc_html( $ds_txt ) . ' (+£' . number_format( $ds_total, 2 ) . ")\n";
             }
             if ( ! empty( $bc['service_type'] ) && $bc['service_type'] !== 'standard' ) {
                 echo esc_html__( 'Delivery Speed: ', 'bannercalc' ) . esc_html( $bc['service_type'] ) . " (+" . (int) ( $bc['service_markup_pct'] ?? 0 ) . "%)\n";
@@ -358,7 +389,14 @@ class CartHandler {
                 echo esc_html__( 'Fulfilment: ', 'bannercalc' ) . esc_html( ucfirst( $bc['fulfilment_mode'] ) ) . '<br/>';
             }
             if ( ! empty( $bc['design_service'] ) ) {
-                echo esc_html__( 'Design Service: Professional Design (+£', 'bannercalc' ) . number_format( (float) ( $bc['design_service_price'] ?? 0 ), 2 ) . ')<br/>';
+                $ds_price = (float) ( $bc['design_service_price'] ?? 0 );
+                $ds_qty   = max( 1, (int) ( $bc['design_qty'] ?? 1 ) );
+                $ds_total = $ds_price * $ds_qty;
+                $ds_txt   = 'Professional Design';
+                if ( $ds_qty > 1 ) {
+                    $ds_txt .= ' ×' . $ds_qty;
+                }
+                echo esc_html__( 'Design Service: ', 'bannercalc' ) . esc_html( $ds_txt ) . ' (+£' . number_format( $ds_total, 2 ) . ')<br/>';
             }
             if ( ! empty( $bc['service_type'] ) && $bc['service_type'] !== 'standard' ) {
                 $settings      = \BannerCalc\Plugin::get_settings();

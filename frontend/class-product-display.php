@@ -183,6 +183,10 @@ class ProductDisplay {
             echo '<textarea name="bannercalc[design_brief]" rows="3" placeholder="' . esc_attr__( 'Describe what you would like on your banner…', 'bannercalc' ) . '" class="bannercalc-textarea"></textarea></label>';
             echo '<label class="bannercalc-pro-field"><span>' . esc_html__( 'Brand Colours / Text', 'bannercalc' ) . '</span>';
             echo '<input type="text" name="bannercalc[design_colours]" placeholder="' . esc_attr__( 'e.g. Blue, White, Company Name…', 'bannercalc' ) . '" class="bannercalc-input" /></label>';
+            echo '<label class="bannercalc-pro-field"><span>' . esc_html__( 'Reference Files (logos, images, etc.)', 'bannercalc' ) . '</span>';
+            echo '<input type="file" name="bannercalc_design_files[]" multiple accept="image/*,.pdf,.ai,.eps,.svg" class="bannercalc-input bannercalc-pro-file-input" /></label>';
+            echo '<label class="bannercalc-pro-field"><span>' . esc_html__( 'Number of Designs', 'bannercalc' ) . '</span>';
+            echo '<input type="number" name="bannercalc[design_qty]" value="1" min="1" max="50" class="bannercalc-input bannercalc-pro-design-qty" id="bannercalc-design-qty" style="max-width:80px;" /></label>';
             echo '</div>';
             echo '<input type="hidden" name="bannercalc[design_service]" value="0" id="bannercalc-input-design-service" />';
             echo '</div>';
@@ -380,12 +384,14 @@ class ProductDisplay {
         if ( ! empty( $prices ) ) {
             $min_price = min( $prices );
             $max_price = max( $prices );
-            $price_html = esc_html__( 'From ', 'bannercalc' ) . esc_html( $currency . number_format( $min_price, 2 ) );
+            $price_html = esc_html( $currency . number_format( $min_price, 2 ) );
             if ( $max_price > $min_price ) {
                 $price_html .= ' – ' . esc_html( $currency . number_format( $max_price, 2 ) );
             }
+            $price_html .= ' <span class="bannercalc-price-hint">' . esc_html__( '(popular sizes)', 'bannercalc' ) . '</span>';
         } elseif ( $min_charge > 0 ) {
-            $price_html = esc_html__( 'From ', 'bannercalc' ) . esc_html( $currency . number_format( $min_charge, 2 ) );
+            $price_html = esc_html( $currency . number_format( $min_charge, 2 ) );
+            $price_html .= ' <span class="bannercalc-price-hint">' . esc_html__( '(popular sizes)', 'bannercalc' ) . '</span>';
         }
 
         // Build rating HTML.
@@ -570,17 +576,14 @@ class ProductDisplay {
             $max_price = max( $prices );
 
             $range_html = '<span class="bannercalc-archive-price" style="font-weight:600;">';
-            $range_html .= esc_html__( 'From ', 'bannercalc' ) . esc_html( $currency . number_format( $min_price, 2 ) );
+            $range_html .= esc_html( $currency . number_format( $min_price, 2 ) );
             if ( $max_price > $min_price ) {
                 $range_html .= ' – ' . esc_html( $currency . number_format( $max_price, 2 ) );
             }
             $range_html .= '</span>';
-
-            if ( $popular_price !== null && $popular_price !== $min_price ) {
-                $range_html .= '<span class="bannercalc-archive-popular" style="display:block;font-size:0.8em;color:#8892A0;font-weight:400;">';
-                $range_html .= esc_html__( 'Popular size from ', 'bannercalc' ) . esc_html( $currency . number_format( $popular_price, 2 ) );
-                $range_html .= '</span>';
-            }
+            $range_html .= '<span class="bannercalc-archive-popular" style="display:block;font-size:0.8em;color:#8892A0;font-weight:400;">';
+            $range_html .= esc_html__( '(popular sizes)', 'bannercalc' );
+            $range_html .= '</span>';
 
             return $range_html;
         }
@@ -588,8 +591,10 @@ class ProductDisplay {
         // Fallback: minimum charge.
         if ( $min_charge > 0 ) {
             return '<span class="bannercalc-archive-price" style="font-weight:600;">'
-                 . esc_html__( 'From ', 'bannercalc' )
                  . esc_html( $currency . number_format( $min_charge, 2 ) )
+                 . '</span>'
+                 . '<span class="bannercalc-archive-popular" style="display:block;font-size:0.8em;color:#8892A0;font-weight:400;">'
+                 . esc_html__( '(popular sizes)', 'bannercalc' )
                  . '</span>';
         }
 
