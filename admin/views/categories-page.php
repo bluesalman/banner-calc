@@ -45,8 +45,9 @@ if ( isset( $_POST['bannercalc_category_save'] ) && wp_verify_nonce( $_POST['_wp
         $config = [];
 
         $config['enabled']      = ! empty( $raw['enabled'] );
-        $config['sizing_mode']  = sanitize_text_field( $raw['sizing_mode'] ?? 'preset_and_custom' );
-        $config['default_unit'] = sanitize_text_field( $raw['default_unit'] ?? 'ft' );
+        $config['sizing_mode']     = sanitize_text_field( $raw['sizing_mode'] ?? 'preset_and_custom' );
+        $config['default_unit']    = sanitize_text_field( $raw['default_unit'] ?? 'ft' );
+        $config['preset_columns']  = max( 1, min( 6, (int) ( $raw['preset_columns'] ?? 4 ) ) );
 
         $config['area_rate_sqft'] = (float) ( $raw['area_rate_sqft'] ?? 0 );
         $config['area_rate_sqm']  = (float) ( $raw['area_rate_sqm'] ?? 0 );
@@ -274,6 +275,18 @@ if ( $editing_cat_id ) {
                                         </option>
                                     <?php endforeach; ?>
                                 </select>
+                            </td>
+                        </tr>
+
+                        <!-- Size grid columns -->
+                        <tr>
+                            <th scope="row"><?php esc_html_e( 'Size Grid Columns', 'bannercalc' ); ?></th>
+                            <td>
+                                <input type="number"
+                                       name="bannercalc_category[preset_columns]"
+                                       value="<?php echo esc_attr( $editing_config['preset_columns'] ?? 4 ); ?>"
+                                       min="1" max="6" step="1" class="small-text">
+                                <p class="description"><?php esc_html_e( 'Number of columns in the preset-size grid (1–6).', 'bannercalc' ); ?></p>
                             </td>
                         </tr>
 
