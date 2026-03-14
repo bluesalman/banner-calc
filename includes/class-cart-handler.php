@@ -357,51 +357,28 @@ class CartHandler {
             return $rates;
         }
 
-        // Find the most urgent (highest priority) shipping method requested by BannerCalc items.
+        // Check if any BannerCalc item exists in the cart.
+        $has_bannercalc = false;
+        $is_collection  = false;
+
+        foreach ( $cart->get_cart() as $cart_item ) {
+            if ( ! empty( $cart_item['bannercalc'] ) ) {
+                $has_bannercalc = true;
+                if ( ( $cart_item['bannercalc']['fulfilment_mode'] ?? '' ) === 'collection' ) {
+                    $is_collection = true;
+                }
+            }
+        }
+
+        if ( ! $has_bannercalc ) {
+            return $rates;
+        }
+
         $settings      = Plugin::get_settings();
         $service_types = $settings['service_types'] ?? [];
         $shipping_map  = $settings['shipping_method_map'] ?? [];
 
-        $required_method = '';
-        $highest_urgency = -1;
-
-        foreach ( $cart->get_cart() as $cart_item ) {
-            if ( empty( $cart_item['bannercalc']['service_type'] ) ) {
-                continue;
-            }
-
-            $service_slug   = $cart_item['bannercalc']['service_type'];
-            $mapped_method  = $shipping_map[ $service_slug ] ?? '';
-
-            if ( empty( $mapped_method ) ) {
-                continue;
-            }
-
-            // Urgency = index in service_types (higher index = more urgent).
-            $urgency = 0;
-            foreach ( $service_types as $idx => $st ) {
-                if ( ( $st['slug'] ?? '' ) === $service_slug ) {
-                    $urgency = $idx;
-                    break;
-                }
-            }
-
-            if ( $urgency > $highest_urgency ) {
-                $highest_urgency = $urgency;
-                $required_method = $mapped_method;
-            }
-        }
-
-        // Check if any BannerCalc item is set to Collection fulfilment.
-        $is_collection = false;
-        foreach ( $cart->get_cart() as $cart_item ) {
-            if ( ! empty( $cart_item['bannercalc']['fulfilment_mode'] ) && $cart_item['bannercalc']['fulfilment_mode'] === 'collection' ) {
-                $is_collection = true;
-                break;
-            }
-        }
-
-        // Collection: zero out all shipping rates (WC block-based Local Pickup is separate).
+        // Collection: zero out shipping — customer picks up in person.
         if ( $is_collection ) {
             if ( ! empty( $rates ) ) {
                 $first_key  = array_key_first( $rates );
@@ -412,22 +389,25 @@ class CartHandler {
             }
         }
 
-        // If we have a required shipping method, filter rates to only show it.
-        // Override the WC rate cost with the shipping_cost from our service type settings
-        // so urgency pricing is controlled in one place (BannerCalc settings, not WC).
-        if ( ! empty( $required_method ) && isset( $rates[ $required_method ] ) ) {
-            $rate = $rates[ $required_method ];
-
-            // Find the matching service type and apply our shipping_cost value.
-            foreach ( $service_types as $st ) {
-                $st_method = $shipping_map[ $st['slug'] ?? '' ] ?? '';
-                if ( $st_method === $required_method ) {
-                    $rate->set_cost( (float) ( $st['shipping_cost'] ?? $rate->get_cost() ) );
-                    break;
-                }
+        // Delivery: always use the STANDARD service type's shipping method and cost.
+        // Urgency (markup %) is a production speed surcharge already included in the product price —
+        // it does NOT change the shipping method or shipping cost.
+        $standard_method = '';
+        $standard_cost   = null;
+        foreach ( $service_types as $st ) {
+            if ( ( $st['slug'] ?? '' ) === 'standard' || ! empty( $st['default'] ) ) {
+                $standard_method = $shipping_map[ $st['slug'] ] ?? '';
+                $standard_cost   = (float) ( $st['shipping_cost'] ?? 0 );
+                break;
             }
+        }
 
-            return [ $required_method => $rate ];
+        if ( ! empty( $standard_method ) && isset( $rates[ $standard_method ] ) ) {
+            $rate = $rates[ $standard_method ];
+            if ( $standard_cost !== null ) {
+                $rate->set_cost( $standard_cost );
+            }
+            return [ $standard_method => $rate ];
         }
 
         return $rates;
