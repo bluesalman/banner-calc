@@ -198,7 +198,7 @@ class ProductDisplay {
             echo '<span class="dashicons dashicons-car"></span> ' . esc_html__( 'Delivery', 'bannercalc' );
             echo '</button>';
             echo '<button type="button" class="bannercalc-pill bannercalc-fulfilment-pill" data-fulfilment="collection">';
-            echo '<span class="dashicons dashicons-store"></span> ' . esc_html__( 'Collection', 'bannercalc' ) . ' <span class="bannercalc-pill-price">' . esc_html__( 'Free', 'bannercalc' ) . '</span>';
+            echo '<span class="dashicons dashicons-store"></span> ' . esc_html__( 'Collection', 'bannercalc' ) . ' <span class="bannercalc-fulfilment-badge">' . esc_html__( 'Free', 'bannercalc' ) . '</span>';
             echo '</button>';
             echo '</div>';
             echo '<input type="hidden" name="bannercalc[fulfilment_mode]" value="delivery" id="bannercalc-input-fulfilment-mode" />';
