@@ -764,7 +764,7 @@
 #bannercalc-configurator .bannercalc-pill,
 .bannercalc-card--extras .bannercalc-pill,
 .bannercalc-card--delivery .bannercalc-pill {
-    padding: 10px 15px !important;
+    padding: 10px 13px !important
     border: 1.5px solid var(--bp-light-gray) !important;
     border-radius: 10px !important;
     background: var(--bp-white) !important;
@@ -978,7 +978,7 @@
 
 /* Combined fulfilment + delivery speed: single row, compact */
 .bannercalc-delivery-combined {
-    padding: 14px 15px !important;
+    padding: 14px 9px !important;
     display: flex !important;
     flex-wrap: wrap;
     align-items: flex-end;
