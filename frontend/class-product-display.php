@@ -70,19 +70,10 @@ class ProductDisplay {
         $attribute_pricing = $config['attribute_pricing'] ?? [];
         $currency         = $settings['currency_symbol'];
 
-        // Look up WC shipping costs for each mapped service type.
+        // Build shipping costs map from service type settings.
         $shipping_costs = [];
-        $shipping_map   = $settings['shipping_method_map'] ?? [];
-        foreach ( $shipping_map as $slug => $method_id ) {
-            if ( empty( $method_id ) ) {
-                continue;
-            }
-            $parts = explode( ':', $method_id );
-            if ( count( $parts ) >= 2 ) {
-                $instance_id     = (int) $parts[1];
-                $method_settings = get_option( 'woocommerce_' . $parts[0] . '_' . $instance_id . '_settings', [] );
-                $shipping_costs[ $slug ] = (float) ( $method_settings['cost'] ?? 0 );
-            }
+        foreach ( ( $settings['service_types'] ?? [] ) as $st ) {
+            $shipping_costs[ $st['slug'] ] = (float) ( $st['shipping_cost'] ?? 0 );
         }
 
         // Output the config as a data attribute for JavaScript.

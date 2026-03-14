@@ -458,9 +458,8 @@
                 self.state.fulfilmentMode = $(this).data('fulfilment');
                 $('#bannercalc-input-fulfilment-mode').val(self.state.fulfilmentMode);
 
-                // Show/hide delivery speed section based on fulfilment.
-                // Collection: always show delivery pills (urgent markups still apply).
-                // Both modes show the service type pills.
+                // Update delivery speed pill labels (hide shipping costs for collection).
+                self.updateServicePillLabels();
                 self.calculatePrice();
                 self.updatePriceDisplay();
             });
@@ -811,6 +810,46 @@
 
             // Update hidden input — store the unit price (WC multiplies by qty automatically, shipping added by WC at checkout).
             $('#bannercalc-input-price').val(unitPrice);
+        },
+
+        /**
+         * Update delivery speed pill labels based on fulfilment mode.
+         * Collection: hide shipping costs. Delivery: show shipping costs.
+         */
+        updateServicePillLabels: function() {
+            var cur = this.config.currency || '£';
+            var isCollection = (this.state.fulfilmentMode === 'collection');
+            var serviceTypes = this.config.serviceTypes || [];
+
+            this.el.closest('form').find('.bannercalc-service-pill').each(function() {
+                var slug = $(this).data('service');
+                var st = null;
+                for (var i = 0; i < serviceTypes.length; i++) {
+                    if (serviceTypes[i].slug === slug) {
+                        st = serviceTypes[i];
+                        break;
+                    }
+                }
+                if (!st) return;
+
+                var label = st.label;
+                var extraParts = [];
+                var markup = parseFloat(st.markup || 0);
+                var shippingCost = parseFloat(st.shipping_cost || 0);
+
+                if (markup > 0) {
+                    extraParts.push('+' + parseInt(markup) + '%');
+                }
+                if (!isCollection && shippingCost > 0) {
+                    extraParts.push('+' + cur + shippingCost.toFixed(2));
+                }
+
+                var html = label;
+                if (extraParts.length > 0) {
+                    html += ' <span class="bannercalc-pill-price">(' + extraParts.join(' ') + ')</span>';
+                }
+                $(this).html(html);
+            });
         },
 
         /**

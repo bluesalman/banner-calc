@@ -200,6 +200,13 @@ $all_units = \BannerCalc\UnitConverter::get_unit_labels();
                                        step="0.1" min="0" max="100" class="small-text" style="width:70px;" />
                             </label>
                             <label style="font-size:12px;">
+                                <?php esc_html_e( 'Shipping £:', 'bannercalc' ); ?>
+                                <input type="number"
+                                       name="bannercalc_settings[service_types][<?php echo $si; ?>][shipping_cost]"
+                                       value="<?php echo esc_attr( $st['shipping_cost'] ?? 0 ); ?>"
+                                       step="0.01" min="0" class="small-text" style="width:90px;" />
+                            </label>
+                            <label style="font-size:12px;">
                                 <?php esc_html_e( 'WC Shipping Method:', 'bannercalc' ); ?>
                                 <select name="bannercalc_settings[service_types][<?php echo $si; ?>][shipping_method]" style="min-width:200px;">
                                     <option value=""><?php esc_html_e( '— None (use markup only) —', 'bannercalc' ); ?></option>

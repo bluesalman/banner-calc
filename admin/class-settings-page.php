@@ -132,6 +132,7 @@ class SettingsPage {
                     'slug'            => sanitize_text_field( $st['slug'] ?? '' ),
                     'label'           => sanitize_text_field( $st['label'] ?? '' ),
                     'markup'          => max( 0, (float) ( $st['markup'] ?? 0 ) ),
+                    'shipping_cost'   => max( 0, (float) ( $st['shipping_cost'] ?? 0 ) ),
                     'default'         => ! empty( $st['default'] ),
                     'shipping_method' => sanitize_text_field( $st['shipping_method'] ?? '' ),
                 ];
