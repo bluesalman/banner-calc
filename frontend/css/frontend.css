@@ -1005,6 +1005,15 @@
     font-size: 13px !important;
     justify-content: center !important;
 }
+.bannercalc-card--delivery .bannercalc-pill.bannercalc-service-pill {
+    flex-direction: row !important;
+    gap: 5px !important;
+    white-space: nowrap !important;
+}
+.bannercalc-card--delivery .bannercalc-service-pill .bannercalc-pill-price {
+    display: inline !important;
+    margin-top: 0 !important;
+}
 
 .bannercalc-card--delivery .bannercalc-fulfilment-pill .dashicons {
     font-size: 18px;
