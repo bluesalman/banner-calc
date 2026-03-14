@@ -413,8 +413,21 @@ class CartHandler {
         }
 
         // If we have a required shipping method, filter rates to only show it.
+        // Override the WC rate cost with the shipping_cost from our service type settings
+        // so urgency pricing is controlled in one place (BannerCalc settings, not WC).
         if ( ! empty( $required_method ) && isset( $rates[ $required_method ] ) ) {
-            return [ $required_method => $rates[ $required_method ] ];
+            $rate = $rates[ $required_method ];
+
+            // Find the matching service type and apply our shipping_cost value.
+            foreach ( $service_types as $st ) {
+                $st_method = $shipping_map[ $st['slug'] ?? '' ] ?? '';
+                if ( $st_method === $required_method ) {
+                    $rate->set_cost( (float) ( $st['shipping_cost'] ?? $rate->get_cost() ) );
+                    break;
+                }
+            }
+
+            return [ $required_method => $rate ];
         }
 
         return $rates;
