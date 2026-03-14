@@ -157,6 +157,9 @@ class CartHandler {
             'fulfilment_mode'      => $fulfilment_mode,
         ];
 
+        // Invalidate WC shipping rate cache so collection/delivery takes effect immediately.
+        WC()->session->set( 'shipping_for_package_0', false );
+
         return $cart_item_data;
     }
 
@@ -398,17 +401,14 @@ class CartHandler {
             }
         }
 
-        // Collection: show only Local Pickup method(s).
+        // Collection: zero out all shipping rates (WC block-based Local Pickup is separate).
         if ( $is_collection ) {
-            $local_pickup_rates = [];
-            foreach ( $rates as $rate_id => $rate ) {
-                if ( strpos( $rate_id, 'local_pickup' ) === 0 ) {
-                    $local_pickup_rates[ $rate_id ] = $rate;
-                }
-            }
-            // If Local Pickup is available, show only that; otherwise fall through to normal logic.
-            if ( ! empty( $local_pickup_rates ) ) {
-                return $local_pickup_rates;
+            if ( ! empty( $rates ) ) {
+                $first_key  = array_key_first( $rates );
+                $first_rate = $rates[ $first_key ];
+                $first_rate->set_cost( 0 );
+                $first_rate->set_label( __( 'Collection (Free)', 'bannercalc' ) );
+                return [ $first_key => $first_rate ];
             }
         }
 

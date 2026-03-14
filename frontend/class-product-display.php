@@ -133,6 +133,12 @@ class ProductDisplay {
         $design_service_config = $settings['design_service'] ?? [];
         $service_types         = $settings['service_types'] ?? [];
 
+        // Build shipping costs map from service type settings.
+        $shipping_costs = [];
+        foreach ( $service_types as $st ) {
+            $shipping_costs[ $st['slug'] ] = (float) ( $st['shipping_cost'] ?? 0 );
+        }
+
         echo '<div class="bannercalc-card bannercalc-card--extras">';
 
         // 3-way design mode selector (replaces the old accordion).
