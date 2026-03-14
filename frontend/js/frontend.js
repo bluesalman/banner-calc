@@ -820,6 +820,7 @@
             var cur = this.config.currency || '£';
             var isCollection = (this.state.fulfilmentMode === 'collection');
             var serviceTypes = this.config.serviceTypes || [];
+            var shippingCosts = this.config.shippingCosts || {};
 
             this.el.closest('form').find('.bannercalc-service-pill').each(function() {
                 var slug = $(this).data('service');
@@ -835,7 +836,7 @@
                 var label = st.label;
                 var extraParts = [];
                 var markup = parseFloat(st.markup || 0);
-                var shippingCost = parseFloat(st.shipping_cost || 0);
+                var shippingCost = parseFloat(shippingCosts[slug] || 0);
 
                 if (markup > 0) {
                     extraParts.push('+' + parseInt(markup) + '%');

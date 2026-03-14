@@ -128,11 +128,19 @@ class SettingsPage {
         $raw_st = $input['service_types'] ?? [];
         if ( is_array( $raw_st ) ) {
             foreach ( $raw_st as $st ) {
+                $label = sanitize_text_field( $st['label'] ?? '' );
+                $slug  = sanitize_text_field( $st['slug'] ?? '' );
+                // Auto-generate slug from label if empty.
+                if ( empty( $slug ) && ! empty( $label ) ) {
+                    $slug = sanitize_title( $label );
+                }
+                if ( empty( $slug ) || empty( $label ) ) {
+                    continue; // Skip rows with no label.
+                }
                 $service_types[] = [
-                    'slug'            => sanitize_text_field( $st['slug'] ?? '' ),
-                    'label'           => sanitize_text_field( $st['label'] ?? '' ),
+                    'slug'            => $slug,
+                    'label'           => $label,
                     'markup'          => max( 0, (float) ( $st['markup'] ?? 0 ) ),
-                    'shipping_cost'   => max( 0, (float) ( $st['shipping_cost'] ?? 0 ) ),
                     'default'         => ! empty( $st['default'] ),
                     'shipping_method' => sanitize_text_field( $st['shipping_method'] ?? '' ),
                 ];

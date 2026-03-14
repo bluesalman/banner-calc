@@ -433,25 +433,19 @@ class CartHandler {
             }
         }
 
-        // Delivery: always use the STANDARD service type's shipping method and cost.
-        // Urgency (markup %) is a production speed surcharge already included in the product price —
+        // Delivery: always use the STANDARD (default) service type's shipping method.
+        // Urgency (markup %) is a production speed surcharge already in the product price —
         // it does NOT change the shipping method or shipping cost.
         $standard_method = '';
-        $standard_cost   = null;
         foreach ( $service_types as $st ) {
             if ( ( $st['slug'] ?? '' ) === 'standard' || ! empty( $st['default'] ) ) {
                 $standard_method = $shipping_map[ $st['slug'] ] ?? '';
-                $standard_cost   = (float) ( $st['shipping_cost'] ?? 0 );
                 break;
             }
         }
 
         if ( ! empty( $standard_method ) && isset( $rates[ $standard_method ] ) ) {
-            $rate = $rates[ $standard_method ];
-            if ( $standard_cost !== null ) {
-                $rate->set_cost( $standard_cost );
-            }
-            return [ $standard_method => $rate ];
+            return [ $standard_method => $rates[ $standard_method ] ];
         }
 
         return $rates;

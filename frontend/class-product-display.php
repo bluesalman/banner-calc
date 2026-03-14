@@ -70,10 +70,12 @@ class ProductDisplay {
         $attribute_pricing = $config['attribute_pricing'] ?? [];
         $currency         = $settings['currency_symbol'];
 
-        // Build shipping costs map from service type settings.
+        // Build shipping costs map from mapped WC shipping methods.
+        $shipping_map   = $settings['shipping_method_map'] ?? [];
         $shipping_costs = [];
         foreach ( ( $settings['service_types'] ?? [] ) as $st ) {
-            $shipping_costs[ $st['slug'] ] = (float) ( $st['shipping_cost'] ?? 0 );
+            $method_id = $shipping_map[ $st['slug'] ] ?? '';
+            $shipping_costs[ $st['slug'] ] = \BannerCalc\Plugin::get_wc_shipping_cost( $method_id );
         }
 
         // Output the config as a data attribute for JavaScript.
@@ -133,10 +135,12 @@ class ProductDisplay {
         $design_service_config = $settings['design_service'] ?? [];
         $service_types         = $settings['service_types'] ?? [];
 
-        // Build shipping costs map from service type settings.
+        // Build shipping costs map from mapped WC shipping methods.
+        $shipping_map   = $settings['shipping_method_map'] ?? [];
         $shipping_costs = [];
         foreach ( $service_types as $st ) {
-            $shipping_costs[ $st['slug'] ] = (float) ( $st['shipping_cost'] ?? 0 );
+            $method_id = $shipping_map[ $st['slug'] ] ?? '';
+            $shipping_costs[ $st['slug'] ] = \BannerCalc\Plugin::get_wc_shipping_cost( $method_id );
         }
 
         echo '<div class="bannercalc-card bannercalc-card--extras">';

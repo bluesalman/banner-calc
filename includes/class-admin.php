@@ -79,9 +79,29 @@ class Admin {
             true
         );
 
+        // Build WC shipping methods list for JS.
+        $wc_methods = [];
+        if ( class_exists( 'WC_Shipping_Zones' ) ) {
+            $zones = \WC_Shipping_Zones::get_zones();
+            $zone_zero = new \WC_Shipping_Zone( 0 );
+            $zones[0] = [
+                'zone_id'          => 0,
+                'zone_name'        => $zone_zero->get_zone_name(),
+                'shipping_methods' => $zone_zero->get_shipping_methods(),
+            ];
+            foreach ( $zones as $zone ) {
+                $zone_name = $zone['zone_name'] ?? 'Zone';
+                foreach ( $zone['shipping_methods'] ?? [] as $method ) {
+                    $mid = $method->id . ':' . $method->get_instance_id();
+                    $wc_methods[ $mid ] = $zone_name . ' — ' . $method->get_title();
+                }
+            }
+        }
+
         wp_localize_script( 'bannercalc-admin', 'bannercalcAdmin', [
-            'ajaxUrl' => admin_url( 'admin-ajax.php' ),
-            'nonce'   => wp_create_nonce( 'bannercalc_admin' ),
+            'ajaxUrl'           => admin_url( 'admin-ajax.php' ),
+            'nonce'             => wp_create_nonce( 'bannercalc_admin' ),
+            'wcShippingMethods' => $wc_methods,
         ] );
     }
 }

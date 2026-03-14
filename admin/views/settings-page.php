@@ -114,7 +114,7 @@ $all_units = \BannerCalc\UnitConverter::get_unit_labels();
         <div class="bannercalc-section-block">
             <h2 class="bannercalc-section-heading"><?php esc_html_e( 'Service Types / Delivery Speed', 'bannercalc' ); ?></h2>
             <p class="bannercalc-field-hint" style="margin-bottom:12px;">
-                <?php esc_html_e( 'Configure delivery speed tiers. Each tier maps to a WooCommerce shipping method. When a customer selects a delivery speed, the corresponding WC shipping method is applied in the cart.', 'bannercalc' ); ?>
+                <?php esc_html_e( 'Configure delivery speed tiers. Each tier maps to a WooCommerce shipping method. Shipping cost is read automatically from the mapped WC method.', 'bannercalc' ); ?>
             </p>
 
             <!-- Collection toggle -->
@@ -169,9 +169,16 @@ $all_units = \BannerCalc\UnitConverter::get_unit_labels();
                 }
             }
             ?>
-            <table class="form-table bannercalc-form-table">
-                <?php foreach ( $service_types as $si => $st ) : ?>
-                <tr>
+            <table class="form-table bannercalc-form-table" id="bannercalc-service-types-table">
+                <?php foreach ( $service_types as $si => $st ) :
+                    $mapped_method = $st['shipping_method'] ?? '';
+                    $auto_cost     = '';
+                    if ( ! empty( $mapped_method ) ) {
+                        $auto_cost = \BannerCalc\Plugin::get_wc_shipping_cost( $mapped_method );
+                        $auto_cost = '£' . number_format( $auto_cost, 2 );
+                    }
+                ?>
+                <tr class="bannercalc-service-type-row">
                     <th scope="row" style="width:50px;">
                         <label>
                             <input type="radio"
@@ -182,7 +189,7 @@ $all_units = \BannerCalc\UnitConverter::get_unit_labels();
                         </label>
                     </th>
                     <td>
-                        <input type="hidden" name="bannercalc_settings[service_types][<?php echo $si; ?>][slug]"
+                        <input type="hidden" class="bannercalc-st-slug" name="bannercalc_settings[service_types][<?php echo $si; ?>][slug]"
                                value="<?php echo esc_attr( $st['slug'] ); ?>" />
                         <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
                             <label style="font-size:12px;">
@@ -190,7 +197,7 @@ $all_units = \BannerCalc\UnitConverter::get_unit_labels();
                                 <input type="text"
                                        name="bannercalc_settings[service_types][<?php echo $si; ?>][label]"
                                        value="<?php echo esc_attr( $st['label'] ); ?>"
-                                       class="regular-text" style="width:220px;" />
+                                       class="regular-text bannercalc-st-label" style="width:220px;" />
                             </label>
                             <label style="font-size:12px;">
                                 <?php esc_html_e( 'Markup %:', 'bannercalc' ); ?>
@@ -200,29 +207,35 @@ $all_units = \BannerCalc\UnitConverter::get_unit_labels();
                                        step="0.1" min="0" max="100" class="small-text" style="width:70px;" />
                             </label>
                             <label style="font-size:12px;">
-                                <?php esc_html_e( 'Shipping £:', 'bannercalc' ); ?>
-                                <input type="number"
-                                       name="bannercalc_settings[service_types][<?php echo $si; ?>][shipping_cost]"
-                                       value="<?php echo esc_attr( $st['shipping_cost'] ?? 0 ); ?>"
-                                       step="0.01" min="0" class="small-text" style="width:90px;" />
-                            </label>
-                            <label style="font-size:12px;">
                                 <?php esc_html_e( 'WC Shipping Method:', 'bannercalc' ); ?>
-                                <select name="bannercalc_settings[service_types][<?php echo $si; ?>][shipping_method]" style="min-width:200px;">
-                                    <option value=""><?php esc_html_e( '— None (use markup only) —', 'bannercalc' ); ?></option>
+                                <select name="bannercalc_settings[service_types][<?php echo $si; ?>][shipping_method]" class="bannercalc-st-shipping-method" style="min-width:200px;">
+                                    <option value=""><?php esc_html_e( '— None —', 'bannercalc' ); ?></option>
                                     <?php foreach ( $wc_shipping_methods as $method_id => $method_label ) : ?>
                                         <option value="<?php echo esc_attr( $method_id ); ?>"
-                                                <?php selected( $st['shipping_method'] ?? '', $method_id ); ?>>
+                                                <?php selected( $mapped_method, $method_id ); ?>>
                                             <?php echo esc_html( $method_label ); ?>
                                         </option>
                                     <?php endforeach; ?>
                                 </select>
                             </label>
+                            <?php if ( $auto_cost ) : ?>
+                                <span class="bannercalc-st-auto-cost" style="font-size:12px;color:#666;background:#f0f0f1;padding:4px 10px;border-radius:4px;">
+                                    <?php echo esc_html( $auto_cost ); ?>
+                                </span>
+                            <?php else : ?>
+                                <span class="bannercalc-st-auto-cost" style="font-size:12px;color:#999;">—</span>
+                            <?php endif; ?>
+                            <button type="button" class="button-link bannercalc-remove-service-type" style="color:#b32d2e;font-size:12px;" title="<?php esc_attr_e( 'Remove', 'bannercalc' ); ?>">✕</button>
                         </div>
                     </td>
                 </tr>
                 <?php endforeach; ?>
             </table>
+            <p>
+                <button type="button" class="button" id="bannercalc-add-service-type">
+                    <?php esc_html_e( '+ Add Service Type', 'bannercalc' ); ?>
+                </button>
+            </p>
         </div>
 
         <div class="bannercalc-section-block">
