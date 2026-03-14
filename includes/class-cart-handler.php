@@ -123,8 +123,6 @@ class CartHandler {
 
         // Product price = base + addons only. Markup is added as a separate WC fee
         // so the cart shows an itemised breakdown the customer can understand.
-        $settings          = Plugin::get_settings();
-        $shipping_map      = $settings['shipping_method_map'] ?? [];
         $price_for_cart    = round( $result['base_price'] + $result['addons_total'], 2 );
 
         // Build human-readable size label.
@@ -155,8 +153,6 @@ class CartHandler {
             'service_markup_pct'   => $result['service_markup_pct'],
             'service_markup_amt'   => $result['service_markup_amt'],
             'calculated_price'     => $price_for_cart,
-            'full_price_with_markup' => $result['calculated_price'],
-            'shipping_method'      => $shipping_map[ $service_type ] ?? '',
             'fulfilment_mode'      => $fulfilment_mode,
         ];
 
@@ -419,8 +415,7 @@ class CartHandler {
         }
 
         $settings      = Plugin::get_settings();
-        $service_types = $settings['service_types'] ?? [];
-        $shipping_map  = $settings['shipping_method_map'] ?? [];
+        $shipping_method = $settings['shipping_method'] ?? '';
 
         // Collection: zero out shipping — customer picks up in person.
         if ( $is_collection ) {
@@ -433,19 +428,11 @@ class CartHandler {
             }
         }
 
-        // Delivery: always use the STANDARD (default) service type's shipping method.
-        // Urgency (markup %) is a production speed surcharge already in the product price —
+        // Delivery: always use the single configured shipping method.
+        // Urgency (markup %) is a production speed surcharge added as a WC fee —
         // it does NOT change the shipping method or shipping cost.
-        $standard_method = '';
-        foreach ( $service_types as $st ) {
-            if ( ( $st['slug'] ?? '' ) === 'standard' || ! empty( $st['default'] ) ) {
-                $standard_method = $shipping_map[ $st['slug'] ] ?? '';
-                break;
-            }
-        }
-
-        if ( ! empty( $standard_method ) && isset( $rates[ $standard_method ] ) ) {
-            return [ $standard_method => $rates[ $standard_method ] ];
+        if ( ! empty( $shipping_method ) && isset( $rates[ $shipping_method ] ) ) {
+            return [ $shipping_method => $rates[ $shipping_method ] ];
         }
 
         return $rates;

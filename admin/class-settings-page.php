@@ -138,11 +138,10 @@ class SettingsPage {
                     continue; // Skip rows with no label.
                 }
                 $service_types[] = [
-                    'slug'            => $slug,
-                    'label'           => $label,
-                    'markup'          => max( 0, (float) ( $st['markup'] ?? 0 ) ),
-                    'default'         => ! empty( $st['default'] ),
-                    'shipping_method' => sanitize_text_field( $st['shipping_method'] ?? '' ),
+                    'slug'    => $slug,
+                    'label'   => $label,
+                    'markup'  => max( 0, (float) ( $st['markup'] ?? 0 ) ),
+                    'default' => ! empty( $st['default'] ),
                 ];
             }
         }
@@ -154,16 +153,11 @@ class SettingsPage {
             }
             unset( $st_item );
             $sanitized['service_types'] = $service_types;
-
-            // Build shipping method map for frontend/cart use: { service_slug => wc_shipping_method_id }.
-            $shipping_map = [];
-            foreach ( $service_types as $st_item ) {
-                if ( ! empty( $st_item['shipping_method'] ) ) {
-                    $shipping_map[ $st_item['slug'] ] = $st_item['shipping_method'];
-                }
-            }
-            $sanitized['shipping_method_map'] = $shipping_map;
         }
+
+        // Shipping: one WC method + manual cost (applies to all delivery service types).
+        $sanitized['shipping_method'] = sanitize_text_field( $input['shipping_method'] ?? '' );
+        $sanitized['shipping_cost']   = max( 0, (float) ( $input['shipping_cost'] ?? 0 ) );
 
         // Collection / local pickup toggle.
         $sanitized['collection_enabled'] = ! empty( $input['collection_enabled'] );

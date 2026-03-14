@@ -189,25 +189,22 @@ class Plugin {
             'price_display_decimals' => 2,
             'service_types'          => [
                 [
-                    'slug'            => 'standard',
-                    'label'           => 'Standard Delivery',
-                    'markup'          => 0,
-                    'default'         => true,
-                    'shipping_method' => '',
+                    'slug'    => 'standard',
+                    'label'   => 'Standard Delivery',
+                    'markup'  => 0,
+                    'default' => true,
                 ],
                 [
-                    'slug'            => 'urgent-48',
-                    'label'           => 'Urgent — 48 Hours',
-                    'markup'          => 15,
-                    'default'         => false,
-                    'shipping_method' => '',
+                    'slug'    => 'urgent-48',
+                    'label'   => 'Urgent — 48 Hours',
+                    'markup'  => 15,
+                    'default' => false,
                 ],
                 [
-                    'slug'            => 'urgent-24',
-                    'label'           => 'Urgent — 24 Hours',
-                    'markup'          => 25,
-                    'default'         => false,
-                    'shipping_method' => '',
+                    'slug'    => 'urgent-24',
+                    'label'   => 'Urgent — 24 Hours',
+                    'markup'  => 25,
+                    'default' => false,
                 ],
             ],
             'design_service'         => [
@@ -216,7 +213,8 @@ class Plugin {
                 'price'       => 14.99,
                 'description' => 'Our team will create a professional design for your banner',
             ],
-            'shipping_method_map'    => [],
+            'shipping_cost'          => 0,
+            'shipping_method'        => '',
             'collection_enabled'     => false,
         ];
 
@@ -225,29 +223,7 @@ class Plugin {
         return wp_parse_args( $settings, $defaults );
     }
 
-    /**
-     * Look up the shipping cost for a WC shipping method by its method:instance ID.
-     *
-     * @param string $method_id e.g. 'flat_rate:1'.
-     * @return float The cost, or 0 if not found.
-     */
-    public static function get_wc_shipping_cost( string $method_id ): float {
-        if ( empty( $method_id ) ) {
-            return 0.0;
-        }
 
-        $parts = explode( ':', $method_id );
-        if ( count( $parts ) < 2 ) {
-            return 0.0;
-        }
-
-        $method_type = $parts[0];
-        $instance_id = (int) $parts[1];
-        $option_key  = 'woocommerce_' . $method_type . '_' . $instance_id . '_settings';
-        $settings    = get_option( $option_key, [] );
-
-        return (float) ( $settings['cost'] ?? 0 );
-    }
 
     /**
      * Deep merge category config with product overrides.

@@ -70,13 +70,8 @@ class ProductDisplay {
         $attribute_pricing = $config['attribute_pricing'] ?? [];
         $currency         = $settings['currency_symbol'];
 
-        // Build shipping costs map from mapped WC shipping methods.
-        $shipping_map   = $settings['shipping_method_map'] ?? [];
-        $shipping_costs = [];
-        foreach ( ( $settings['service_types'] ?? [] ) as $st ) {
-            $method_id = $shipping_map[ $st['slug'] ] ?? '';
-            $shipping_costs[ $st['slug'] ] = \BannerCalc\Plugin::get_wc_shipping_cost( $method_id );
-        }
+        // Single shipping cost from global settings.
+        $shipping_cost = (float) ( $settings['shipping_cost'] ?? 0 );
 
         // Output the config as a data attribute for JavaScript.
         $js_config = wp_json_encode( [
@@ -98,7 +93,7 @@ class ProductDisplay {
             'serviceTypes'    => $settings['service_types'] ?? [],
             'designService'   => $settings['design_service'] ?? [],
             'collectionEnabled' => ! empty( $settings['collection_enabled'] ),
-            'shippingCosts'   => (object) $shipping_costs,
+            'shippingCost'    => $shipping_cost,
             'quantityMode'    => $config['quantity_mode'] ?? 'standard',
             'quantityBundles' => $config['quantity_bundles'] ?? [],
             'minQuantity'     => (int) ( $config['min_quantity'] ?? 0 ),
@@ -134,14 +129,6 @@ class ProductDisplay {
         $currency = $settings['currency_symbol'];
         $design_service_config = $settings['design_service'] ?? [];
         $service_types         = $settings['service_types'] ?? [];
-
-        // Build shipping costs map from mapped WC shipping methods.
-        $shipping_map   = $settings['shipping_method_map'] ?? [];
-        $shipping_costs = [];
-        foreach ( $service_types as $st ) {
-            $method_id = $shipping_map[ $st['slug'] ] ?? '';
-            $shipping_costs[ $st['slug'] ] = \BannerCalc\Plugin::get_wc_shipping_cost( $method_id );
-        }
 
         echo '<div class="bannercalc-card bannercalc-card--extras">';
 
@@ -234,17 +221,9 @@ class ProductDisplay {
                 $markup     = (float) ( $st['markup'] ?? 0 );
                 $slug       = $st['slug'] ?? '';
                 $label      = esc_html( $st['label'] ?? $slug );
-                $ship_cost  = $shipping_costs[ $slug ] ?? 0;
 
-                $extra_parts = [];
                 if ( $markup > 0 ) {
-                    $extra_parts[] = '+' . (int) $markup . '%';
-                }
-                if ( $ship_cost > 0 ) {
-                    $extra_parts[] = '+' . esc_html( $currency ) . number_format( $ship_cost, 2 );
-                }
-                if ( ! empty( $extra_parts ) ) {
-                    $label .= ' <span class="bannercalc-pill-price">(' . implode( ' ', $extra_parts ) . ')</span>';
+                    $label .= ' <span class="bannercalc-pill-price">(+' . (int) $markup . '%)</span>';
                 }
                 echo '<button type="button" class="bannercalc-pill bannercalc-service-pill' . ( $is_default ? ' active' : '' ) . '" data-service="' . esc_attr( $slug ) . '">' . $label . '</button>';
             }

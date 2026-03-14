@@ -700,11 +700,10 @@
                 }
             }
 
-            // Shipping cost from WC mapped method (0 when collection).
+            // Shipping cost: one flat rate for delivery, 0 for collection.
             this.state.shippingCost = 0;
             if (this.state.fulfilmentMode !== 'collection') {
-                var shippingCosts = this.config.shippingCosts || {};
-                this.state.shippingCost = parseFloat(shippingCosts[this.state.serviceType] || 0);
+                this.state.shippingCost = parseFloat(this.config.shippingCost || 0);
             }
 
             this.state.unitPrice = parseFloat((basePrice + addonsTotal + this.state.serviceMarkupAmt).toFixed(2));
@@ -814,13 +813,10 @@
 
         /**
          * Update delivery speed pill labels based on fulfilment mode.
-         * Collection: hide shipping costs. Delivery: show shipping costs.
+         * Pills show only markup % (shipping is flat, shown in the price box).
          */
         updateServicePillLabels: function() {
-            var cur = this.config.currency || '£';
-            var isCollection = (this.state.fulfilmentMode === 'collection');
             var serviceTypes = this.config.serviceTypes || [];
-            var shippingCosts = this.config.shippingCosts || {};
 
             this.el.closest('form').find('.bannercalc-service-pill').each(function() {
                 var slug = $(this).data('service');
@@ -834,22 +830,12 @@
                 if (!st) return;
 
                 var label = st.label;
-                var extraParts = [];
                 var markup = parseFloat(st.markup || 0);
-                var shippingCost = parseFloat(shippingCosts[slug] || 0);
 
                 if (markup > 0) {
-                    extraParts.push('+' + parseInt(markup) + '%');
+                    label += ' <span class="bannercalc-pill-price">(+' + parseInt(markup) + '%)</span>';
                 }
-                if (!isCollection && shippingCost > 0) {
-                    extraParts.push('+' + cur + shippingCost.toFixed(2));
-                }
-
-                var html = label;
-                if (extraParts.length > 0) {
-                    html += ' <span class="bannercalc-pill-price">(' + extraParts.join(' ') + ')</span>';
-                }
-                $(this).html(html);
+                $(this).html(label);
             });
         },
 

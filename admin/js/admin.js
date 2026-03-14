@@ -83,21 +83,12 @@
             $(document).on('click', '#bannercalc-add-service-type', function() {
                 var $table = $('#bannercalc-service-types-table');
                 var idx = $table.find('.bannercalc-service-type-row').length;
-                var methods = bannercalcAdmin.wcShippingMethods || {};
-                var options = '<option value="">— None —</option>';
-                for (var mid in methods) {
-                    if (methods.hasOwnProperty(mid)) {
-                        options += '<option value="' + mid + '">' + methods[mid] + '</option>';
-                    }
-                }
                 var row = '<tr class="bannercalc-service-type-row">' +
                     '<th scope="row" style="width:50px;"><label><input type="radio" name="bannercalc_settings[service_types_default]" value="" /> Default</label></th>' +
                     '<td><input type="hidden" class="bannercalc-st-slug" name="bannercalc_settings[service_types][' + idx + '][slug]" value="" />' +
                     '<div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">' +
                     '<label style="font-size:12px;">Label: <input type="text" name="bannercalc_settings[service_types][' + idx + '][label]" value="" class="regular-text bannercalc-st-label" style="width:220px;" /></label>' +
                     '<label style="font-size:12px;">Markup %: <input type="number" name="bannercalc_settings[service_types][' + idx + '][markup]" value="0" step="0.1" min="0" max="100" class="small-text" style="width:70px;" /></label>' +
-                    '<label style="font-size:12px;">WC Shipping Method: <select name="bannercalc_settings[service_types][' + idx + '][shipping_method]" class="bannercalc-st-shipping-method" style="min-width:200px;">' + options + '</select></label>' +
-                    '<span class="bannercalc-st-auto-cost" style="font-size:12px;color:#999;">—</span>' +
                     '<button type="button" class="button-link bannercalc-remove-service-type" style="color:#b32d2e;font-size:12px;" title="Remove">✕</button>' +
                     '</div></td></tr>';
                 $table.append(row);
