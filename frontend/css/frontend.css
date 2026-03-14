@@ -764,7 +764,7 @@
 #bannercalc-configurator .bannercalc-pill,
 .bannercalc-card--extras .bannercalc-pill,
 .bannercalc-card--delivery .bannercalc-pill {
-    padding: 10px 13px !important;
+    padding: 10px 11px !important;
     border: 1.5px solid var(--bp-light-gray) !important;
     border-radius: 10px !important;
     background: var(--bp-white) !important;
@@ -1624,6 +1624,7 @@ form.cart .single_add_to_cart_button:active {
 }
 .bannercalc-card.bannercalc-card--delivery {
     margin-top: 16px !important;
+    padding: 10px;
 }
 
 /* ================================================================
