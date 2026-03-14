@@ -189,8 +189,8 @@ class ProductDisplay {
             echo '<textarea name="bannercalc[design_brief]" rows="3" placeholder="' . esc_attr__( 'Describe what you would like on your banner…', 'bannercalc' ) . '" class="bannercalc-textarea"></textarea></label>';
             echo '<label class="bannercalc-pro-field"><span>' . esc_html__( 'Brand Colours / Text', 'bannercalc' ) . '</span>';
             echo '<input type="text" name="bannercalc[design_colours]" placeholder="' . esc_attr__( 'e.g. Blue, White, Company Name…', 'bannercalc' ) . '" class="bannercalc-input" /></label>';
-            echo '<label class="bannercalc-pro-field"><span>' . esc_html__( 'Reference Files (logos, images, etc.)', 'bannercalc' ) . '</span>';
-            echo '<input type="file" name="bannercalc_design_files[]" multiple accept="image/*,.pdf,.ai,.eps,.svg" class="bannercalc-input bannercalc-pro-file-input" /></label>';
+            echo '<div class="bannercalc-pro-field"><span>' . esc_html__( 'Reference Files (logos, images, etc.)', 'bannercalc' ) . '</span>';
+            echo '<div id="bannercalc-pro-design-slot"></div></div>';
             echo '<label class="bannercalc-pro-field"><span>' . esc_html__( 'Number of Designs', 'bannercalc' ) . '</span>';
             echo '<input type="number" name="bannercalc[design_qty]" value="1" min="1" max="50" class="bannercalc-input bannercalc-pro-design-qty" id="bannercalc-design-qty" style="max-width:80px;" /></label>';
             echo '</div>';

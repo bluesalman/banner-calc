@@ -478,6 +478,16 @@
                 $('#bannercalc-design-online').toggle(mode === 'online');
                 $('#bannercalc-design-pro').toggle(mode === 'pro');
 
+                // Move the shared file uploader to the active panel.
+                var $uploader = $('form.cart .wc-dnd-file-upload');
+                if ($uploader.length) {
+                    if (mode === 'upload') {
+                        $uploader.appendTo('#bannercalc-design-slot');
+                    } else if (mode === 'pro') {
+                        $uploader.appendTo('#bannercalc-pro-design-slot');
+                    }
+                }
+
                 // Auto-enable/disable design service based on mode.
                 self.state.designService = (mode === 'pro');
                 $('#bannercalc-input-design-service').val(mode === 'pro' ? '1' : '0');

@@ -224,7 +224,7 @@
     margin: 0;
 }
 .star-rating span:before{
-    color: #f96eb4;
+    color: #f96eb4 !important; /* Magenta stars */
 }
 .bannercalc-review-link {
     font-family: var(--bp-font-body, 'Plus Jakarta Sans', sans-serif);
@@ -1667,10 +1667,6 @@ form.cart .single_add_to_cart_button:active {
     color: var(--bp-text-secondary);
     line-height: 1.5;
     margin-bottom: 4px;
-}
-.bannercalc-pro-file-input {
-    padding: 6px !important;
-    cursor: pointer;
 }
 .bannercalc-pro-design-qty {
     text-align: center;
