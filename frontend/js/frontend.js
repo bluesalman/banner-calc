@@ -195,6 +195,7 @@
 
         /**
          * Calculate and render price range from preset sizes (for WC price area).
+         * Updates the PHP-rendered .bannercalc-product-price element (not the CMYK bar).
          */
         renderPriceRange: function() {
             var presets = this.config.presetSizes || [];
@@ -227,33 +228,20 @@
             var minPrice = prices[0].price;
             var maxPrice = prices[prices.length - 1].price;
 
-            // Find the most popular size for the "popular" label.
-            var popularPrices = prices.slice().sort(function(a, b) { return b.popularity - a.popularity; });
-            var popularPrice = popularPrices[0].price;
+            // Update the PHP-rendered product price element (never the CMYK bar).
+            var $priceEl = $('.bannercalc-product-price');
+            if (!$priceEl.length) return;
 
-            // Replace the CMYK bar / existing price area with the range.
-            var $priceArea = $('.bannercalc-cmyk-bar--price, .price .bannercalc-cmyk-bar--price');
-            if (!$priceArea.length) {
-                $priceArea = $('p.price, .price');
+            var rangeHtml = '<span class="bannercalc-price-range">';
+            if (minPrice === maxPrice) {
+                rangeHtml += cur + minPrice.toFixed(dec);
+            } else {
+                rangeHtml += cur + minPrice.toFixed(dec) + ' – ' + cur + maxPrice.toFixed(dec);
             }
+            rangeHtml += '</span>';
+            rangeHtml += ' <span class="bannercalc-price-hint">(popular sizes)</span>';
 
-            if ($priceArea.length) {
-                var rangeHtml = '<span class="bannercalc-price-range" style="font-family:var(--bp-font-body);font-weight:700;font-size:1.25em;color:var(--bp-ink);">';
-                if (minPrice === maxPrice) {
-                    rangeHtml += cur + minPrice.toFixed(dec);
-                } else {
-                    rangeHtml += cur + minPrice.toFixed(dec) + ' – ' + cur + maxPrice.toFixed(dec);
-                }
-                rangeHtml += '</span>';
-
-                if (popularPrice !== minPrice || prices.length > 1) {
-                    rangeHtml += '<span class="bannercalc-popular-price" style="display:block;font-family:var(--bp-font-body);font-size:0.78em;font-weight:400;color:var(--bp-text-muted);margin-top:2px;">';
-                    rangeHtml += 'Most popular size from ' + cur + popularPrice.toFixed(dec);
-                    rangeHtml += '</span>';
-                }
-
-                $priceArea.first().html(rangeHtml);
-            }
+            $priceEl.html(rangeHtml);
         },
 
         /**
@@ -735,9 +723,10 @@
             // Update preview.
             if (BannerCalcPreview.initialized) {
                 BannerCalcPreview.checkVisibility();
-                BannerCalcPreview.render();
-                // Auto-switch to Your Banner tab when state changes.
+                // Switch to preview tab first so the panel is visible and
+                // canvasEl.width() returns the correct layout width.
                 BannerCalcPreview.switchToPreview();
+                BannerCalcPreview.render();
             }
         },
 

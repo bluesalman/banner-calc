@@ -384,12 +384,14 @@ class ProductDisplay {
         $settings = \BannerCalc\Plugin::get_settings();
         $currency = $settings['currency_symbol'] ?? '£';
 
-        $prices = $this->get_preset_prices( $config );
+        $sizing_mode = $config['sizing_mode'] ?? 'preset_and_custom';
+        $prices      = $this->get_preset_prices( $config );
+        $min_charge  = (float) ( $config['minimum_charge'] ?? 0 );
 
         // Build price HTML.
         $price_html = '';
-        $min_charge = (float) ( $config['minimum_charge'] ?? 0 );
         if ( ! empty( $prices ) ) {
+            // Has preset / popular sizes.
             $min_price = min( $prices );
             $max_price = max( $prices );
             $price_html = esc_html( $currency . number_format( $min_price, 2 ) );
@@ -397,9 +399,19 @@ class ProductDisplay {
                 $price_html .= ' – ' . esc_html( $currency . number_format( $max_price, 2 ) );
             }
             $price_html .= ' <span class="bannercalc-price-hint">' . esc_html__( '(popular sizes)', 'bannercalc' ) . '</span>';
+        } elseif ( 'none' === $sizing_mode ) {
+            // Fixed / single size — use the WooCommerce product price.
+            $wc_price = (float) $product->get_price();
+            if ( $wc_price > 0 ) {
+                $price_html = esc_html( $currency . number_format( $wc_price, 2 ) );
+            }
+        } elseif ( 'custom_only' === $sizing_mode && $min_charge > 0 ) {
+            // Custom size only — show "From" minimum rate.
+            $price_html  = esc_html__( 'From ', 'bannercalc' ) . esc_html( $currency . number_format( $min_charge, 2 ) );
+            $price_html .= ' <span class="bannercalc-price-hint">' . esc_html__( '(custom sizes)', 'bannercalc' ) . '</span>';
         } elseif ( $min_charge > 0 ) {
-            $price_html = esc_html( $currency . number_format( $min_charge, 2 ) );
-            $price_html .= ' <span class="bannercalc-price-hint">' . esc_html__( '(popular sizes)', 'bannercalc' ) . '</span>';
+            // Other modes without presets — show minimum charge.
+            $price_html  = esc_html__( 'From ', 'bannercalc' ) . esc_html( $currency . number_format( $min_charge, 2 ) );
         }
 
         // Build rating HTML.
@@ -549,6 +561,7 @@ class ProductDisplay {
         }
 
         // Archive / shop pages: compute price range from preset sizes.
+        $sizing_mode = $config['sizing_mode'] ?? 'preset_and_custom';
         $min_charge  = (float) ( $config['minimum_charge'] ?? 0 );
         $prices      = $this->get_preset_prices( $config );
 
@@ -569,13 +582,32 @@ class ProductDisplay {
             return $range_html;
         }
 
-        // Fallback: minimum charge.
-        if ( $min_charge > 0 ) {
+        // Fixed / single size — use the WooCommerce product price.
+        if ( 'none' === $sizing_mode ) {
+            $wc_price = (float) $product->get_price();
+            if ( $wc_price > 0 ) {
+                return '<span class="bannercalc-archive-price" style="font-weight:600;">'
+                     . esc_html( $currency . number_format( $wc_price, 2 ) )
+                     . '</span>';
+            }
+        }
+
+        // Custom size only — show "From" minimum rate.
+        if ( 'custom_only' === $sizing_mode && $min_charge > 0 ) {
             return '<span class="bannercalc-archive-price" style="font-weight:600;">'
+                 . esc_html__( 'From ', 'bannercalc' )
                  . esc_html( $currency . number_format( $min_charge, 2 ) )
                  . '</span>'
                  . '<span class="bannercalc-archive-popular" style="display:block;font-size:0.8em;color:#8892A0;font-weight:400;">'
-                 . esc_html__( '(popular sizes)', 'bannercalc' )
+                 . esc_html__( '(custom sizes)', 'bannercalc' )
+                 . '</span>';
+        }
+
+        // Other modes without presets — show minimum charge.
+        if ( $min_charge > 0 ) {
+            return '<span class="bannercalc-archive-price" style="font-weight:600;">'
+                 . esc_html__( 'From ', 'bannercalc' )
+                 . esc_html( $currency . number_format( $min_charge, 2 ) )
                  . '</span>';
         }
 
