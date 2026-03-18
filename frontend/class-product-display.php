@@ -105,6 +105,7 @@ class ProductDisplay {
             'designService'   => $settings['design_service'] ?? [],
             'collectionEnabled' => ! empty( $settings['collection_enabled'] ),
             'shippingCost'    => $shipping_cost,
+            'productPrice'    => (float) $product->get_price(),
             'quantityMode'    => $config['quantity_mode'] ?? 'standard',
             'quantityBundles' => $config['quantity_bundles'] ?? [],
             'minQuantity'     => (int) ( $config['min_quantity'] ?? 0 ),

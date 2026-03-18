@@ -119,20 +119,40 @@ class CartHandler {
         $design_service = ! empty( $raw['design_service'] );
         $design_qty     = max( 1, (int) ( $raw['design_qty'] ?? 1 ) );
 
-        // Server-side price calculation (prevents client manipulation).
-        $result = $this->pricing->calculate( $config, $width_m, $height_m, $attrs, $preset, $service_type, $design_service );
+        // Fixed-price (none) mode — use the WooCommerce product price directly.
+        $sizing_mode_config = $config['sizing_mode'] ?? 'preset_and_custom';
+        if ( 'none' === $sizing_mode_config ) {
+            $product    = wc_get_product( $product_id );
+            $wc_price   = $product ? (float) $product->get_regular_price() : 0;
+            $size_label = $product ? $product->get_name() : '';
 
-        // Product price = base + addons only. Markup is added as a separate WC fee
-        // so the cart shows an itemised breakdown the customer can understand.
-        $price_for_cart    = round( $result['base_price'] + $result['addons_total'], 2 );
+            // Still calculate addons (fixed-type only, no area).
+            $result = $this->pricing->calculate( $config, 0, 0, $attrs, null, $service_type, $design_service );
 
-        // Build human-readable size label.
-        $unit_abbr  = [ 'mm' => 'mm', 'cm' => 'cm', 'inch' => 'in', 'ft' => 'ft', 'm' => 'm' ];
-        $abbr       = $unit_abbr[ $unit ] ?? $unit;
-        $size_label = $width_raw . $abbr . ' × ' . $height_raw . $abbr;
+            // Override base price with WC product price.
+            $result['base_price'] = $wc_price;
+            $price_for_cart = round( $wc_price + $result['addons_total'], 2 );
 
-        if ( $sizing_mode === 'preset' && $preset ) {
-            $size_label = $preset['label'] ?? $size_label;
+            // Recalculate service markup on correct base.
+            if ( $result['service_markup_pct'] > 0 ) {
+                $result['service_markup_amt'] = round( $price_for_cart * ( $result['service_markup_pct'] / 100 ), 2 );
+            }
+        } else {
+            // Server-side price calculation (prevents client manipulation).
+            $result = $this->pricing->calculate( $config, $width_m, $height_m, $attrs, $preset, $service_type, $design_service );
+
+            // Product price = base + addons only. Markup is added as a separate WC fee
+            // so the cart shows an itemised breakdown the customer can understand.
+            $price_for_cart = round( $result['base_price'] + $result['addons_total'], 2 );
+
+            // Build human-readable size label.
+            $unit_abbr  = [ 'mm' => 'mm', 'cm' => 'cm', 'inch' => 'in', 'ft' => 'ft', 'm' => 'm' ];
+            $abbr       = $unit_abbr[ $unit ] ?? $unit;
+            $size_label = $width_raw . $abbr . ' × ' . $height_raw . $abbr;
+
+            if ( $sizing_mode === 'preset' && $preset ) {
+                $size_label = $preset['label'] ?? $size_label;
+            }
         }
 
         $cart_item_data['bannercalc'] = [

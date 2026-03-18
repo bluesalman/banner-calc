@@ -80,7 +80,8 @@
             }
 
             this.state.selectedUnit = this.config.defaultUnit || 'ft';
-            this.state.sizingMode = (this.config.sizingMode === 'custom_only') ? 'custom' : 'preset';
+            this.state.sizingMode = (this.config.sizingMode === 'none') ? 'none'
+                : (this.config.sizingMode === 'custom_only') ? 'custom' : 'preset';
 
             // Set default service type.
             var serviceTypes = this.config.serviceTypes || [];
@@ -103,10 +104,17 @@
             // Initial render.
             this.updateConstraintsDisplay();
             this.updatePresetPrices();
+
+            // For fixed-price (none) mode, set price immediately from WC product price.
+            if (this.state.sizingMode === 'none') {
+                this.initFixedPrice();
+            }
+
             this.updatePriceDisplay();
 
             // Show price range on product page.
             this.renderPriceRange();
+            this.updateHiddenFields();
         },
 
         /**
@@ -242,6 +250,63 @@
             rangeHtml += ' <span class="bannercalc-price-hint">(popular sizes)</span>';
 
             $priceEl.html(rangeHtml);
+        },
+
+        /**
+         * Initialise fixed-price (none sizing mode) products.
+         * Uses the WC product price directly — no size selection needed.
+         */
+        initFixedPrice: function() {
+            var productPrice = this.config.productPrice || 0;
+            if (productPrice <= 0) return;
+
+            this.state.basePrice = productPrice;
+            this.state.isValid = true;
+
+            // Calculate add-ons using fixed pricing only (no area).
+            var addonsTotal = 0;
+            var pricing = this.config.attributePricing || {};
+            for (var attr in this.state.selectedAttributes) {
+                if (!this.state.selectedAttributes.hasOwnProperty(attr)) continue;
+                if (!pricing[attr]) continue;
+                var attrConfig = pricing[attr];
+                var termSlug = this.state.selectedAttributes[attr];
+                var values = attrConfig.values || {};
+                var modifier = parseFloat(values[termSlug] || 0);
+                var pType = attrConfig.pricing_type || 'fixed';
+                if (pType === 'fixed') {
+                    addonsTotal += modifier;
+                } else if (pType === 'percentage') {
+                    addonsTotal += productPrice * (modifier / 100);
+                }
+                // per_sqft addons don't apply in none mode (no area).
+            }
+            this.state.addonsTotal = parseFloat(addonsTotal.toFixed(2));
+
+            // Service type markup.
+            this.state.serviceMarkupPct = 0;
+            this.state.serviceMarkupAmt = 0;
+            if (this.state.serviceType && this.state.serviceType !== 'standard') {
+                var serviceTypes = this.config.serviceTypes || [];
+                for (var s = 0; s < serviceTypes.length; s++) {
+                    if (serviceTypes[s].slug === this.state.serviceType) {
+                        this.state.serviceMarkupPct = parseFloat(serviceTypes[s].markup || 0);
+                        break;
+                    }
+                }
+                if (this.state.serviceMarkupPct > 0) {
+                    this.state.serviceMarkupAmt = parseFloat(((productPrice + addonsTotal) * (this.state.serviceMarkupPct / 100)).toFixed(2));
+                }
+            }
+
+            // Shipping.
+            this.state.shippingCost = 0;
+            if (this.state.fulfilmentMode !== 'collection') {
+                this.state.shippingCost = parseFloat(this.config.shippingCost || 0);
+            }
+
+            this.state.unitPrice = parseFloat((productPrice + addonsTotal + this.state.serviceMarkupAmt).toFixed(2));
+            this.state.calculatedPrice = parseFloat((this.state.unitPrice * this.state.quantity).toFixed(2));
         },
 
         /**
@@ -637,6 +702,12 @@
          * Calculate total price.
          */
         calculatePrice: function() {
+            // Fixed-price (none) mode — recalculate from product price.
+            if (this.state.sizingMode === 'none') {
+                this.initFixedPrice();
+                return;
+            }
+
             if (!this.state.areaSqft) {
                 this.state.basePrice = 0;
                 this.state.addonsTotal = 0;
@@ -737,20 +808,26 @@
             var cur = this.config.currency || '£';
             var dec = this.config.decimals || 2;
 
-            if (!this.state.areaSqft || this.state.calculatedPrice <= 0) {
+            // Fixed-price (none) mode — show product price directly.
+            if (this.state.sizingMode === 'none' && this.state.basePrice > 0) {
+                $('#bannercalc-price-placeholder').hide();
+                $('#bannercalc-price-details').show();
+                $('#bannercalc-base-label').text('Product price');
+                $('#bannercalc-base-value').text(cur + this.state.basePrice.toFixed(dec));
+            } else if (!this.state.areaSqft || this.state.calculatedPrice <= 0) {
                 $('#bannercalc-price-placeholder').show();
                 $('#bannercalc-price-details').hide();
                 return;
+            } else {
+                $('#bannercalc-price-placeholder').hide();
+                $('#bannercalc-price-details').show();
+
+                // Base price label.
+                var rate = this.config.areaRateSqft || 0;
+                var baseLabel = this.state.areaSqft.toFixed(2) + ' sqft × ' + cur + rate.toFixed(2) + ' = ' + cur + this.state.basePrice.toFixed(dec);
+                $('#bannercalc-base-label').text(baseLabel);
+                $('#bannercalc-base-value').text(cur + this.state.basePrice.toFixed(dec));
             }
-
-            $('#bannercalc-price-placeholder').hide();
-            $('#bannercalc-price-details').show();
-
-            // Base price label.
-            var rate = this.config.areaRateSqft || 0;
-            var baseLabel = this.state.areaSqft.toFixed(2) + ' sqft × ' + cur + rate.toFixed(2) + ' = ' + cur + this.state.basePrice.toFixed(dec);
-            $('#bannercalc-base-label').text(baseLabel);
-            $('#bannercalc-base-value').text(cur + this.state.basePrice.toFixed(dec));
 
             // Add-ons.
             if (this.state.addonsTotal > 0) {
