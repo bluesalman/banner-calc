@@ -406,12 +406,11 @@ class ProductDisplay {
                 $price_html = esc_html( $currency . number_format( $wc_price, 2 ) );
             }
         } elseif ( 'custom_only' === $sizing_mode && $min_charge > 0 ) {
-            // Custom size only — show "From" minimum rate.
-            $price_html  = esc_html__( 'From ', 'bannercalc' ) . esc_html( $currency . number_format( $min_charge, 2 ) );
-            $price_html .= ' <span class="bannercalc-price-hint">' . esc_html__( '(custom sizes)', 'bannercalc' ) . '</span>';
+            // Custom size only — "Starting from" + minimum rate, same row.
+            $price_html = esc_html__( 'Starting from ', 'bannercalc' ) . esc_html( $currency . number_format( $min_charge, 2 ) );
         } elseif ( $min_charge > 0 ) {
             // Other modes without presets — show minimum charge.
-            $price_html  = esc_html__( 'From ', 'bannercalc' ) . esc_html( $currency . number_format( $min_charge, 2 ) );
+            $price_html = esc_html__( 'Starting from ', 'bannercalc' ) . esc_html( $currency . number_format( $min_charge, 2 ) );
         }
 
         // Build rating HTML.
@@ -592,21 +591,18 @@ class ProductDisplay {
             }
         }
 
-        // Custom size only — show "From" minimum rate.
+        // Custom size only — "Starting from" + minimum rate.
         if ( 'custom_only' === $sizing_mode && $min_charge > 0 ) {
             return '<span class="bannercalc-archive-price" style="font-weight:600;">'
-                 . esc_html__( 'From ', 'bannercalc' )
+                 . esc_html__( 'Starting from ', 'bannercalc' )
                  . esc_html( $currency . number_format( $min_charge, 2 ) )
-                 . '</span>'
-                 . '<span class="bannercalc-archive-popular" style="display:block;font-size:0.8em;color:#8892A0;font-weight:400;">'
-                 . esc_html__( '(custom sizes)', 'bannercalc' )
                  . '</span>';
         }
 
         // Other modes without presets — show minimum charge.
         if ( $min_charge > 0 ) {
             return '<span class="bannercalc-archive-price" style="font-weight:600;">'
-                 . esc_html__( 'From ', 'bannercalc' )
+                 . esc_html__( 'Starting from ', 'bannercalc' )
                  . esc_html( $currency . number_format( $min_charge, 2 ) )
                  . '</span>';
         }
