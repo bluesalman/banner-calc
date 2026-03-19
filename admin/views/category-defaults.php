@@ -252,7 +252,7 @@ $attributes = $attr_mgr->get_all_attributes();
                name="bannercalc_category[google_product_category]"
                value="<?php echo esc_attr( $config['google_product_category'] ?? '' ); ?>"
                class="regular-text"
-               placeholder="e.g. Signage > Banners" />
+               placeholder="e.g. Business & Industrial > Signage" />
         <p class="description">
             <?php esc_html_e( 'Google Merchant Center product taxonomy. Used in the supplemental feed.', 'bannercalc' ); ?>
             <a href="https://www.google.com/basepages/producttype/taxonomy-with-ids.en-GB.txt" target="_blank" rel="noopener">

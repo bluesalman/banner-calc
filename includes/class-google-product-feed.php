@@ -404,34 +404,73 @@ class GoogleProductFeed {
     }
 
     /**
+     * Map of common text paths to Google taxonomy numeric IDs (en-GB 2021-09-21).
+     * Numeric IDs are always accepted by GMC and avoid text-matching issues.
+     */
+    private const TAXONOMY_IDS = [
+        'Business & Industrial > Signage'                                          => 976,
+        'Business & Industrial > Advertising & Marketing'                          => 5863,
+        'Business & Industrial > Advertising & Marketing > Trade Show Displays'    => 5865,
+        'Business & Industrial > Advertising & Marketing > Trade Show Counters'    => 5864,
+        'Business & Industrial > Advertising & Marketing > Brochures'              => 5884,
+        'Business & Industrial > Signage > Electric Signs'                         => 4297,
+        'Business & Industrial > Signage > Retail & Sale Signs'                    => 5898,
+        'Arts & Entertainment > Party & Celebration > Party Supplies > Banners'    => 2531,
+    ];
+
+    /**
      * Resolve the Google product category for a product.
      *
+     * Returns a numeric taxonomy ID when possible for maximum GMC compatibility.
      * Priority: per-product meta → BannerCalc category config → GMC default setting.
      */
     private function get_product_google_category( \WC_Product $product, string $default = '' ): string {
+        $category = '';
+
         // 1. Per-product: Yoast SEO meta.
         $gpc = get_post_meta( $product->get_id(), '_wpseo_global_identifier_values', true );
         if ( ! empty( $gpc ) && is_array( $gpc ) && ! empty( $gpc['google_product_category'] ) ) {
-            return $gpc['google_product_category'];
+            $category = $gpc['google_product_category'];
         }
 
         // 2. Per-product: Google for WooCommerce meta.
-        $gla_cat = get_post_meta( $product->get_id(), '_wc_gla_google_category', true );
-        if ( ! empty( $gla_cat ) ) {
-            return $gla_cat;
+        if ( ! $category ) {
+            $gla_cat = get_post_meta( $product->get_id(), '_wc_gla_google_category', true );
+            if ( ! empty( $gla_cat ) ) {
+                $category = $gla_cat;
+            }
         }
 
         // 3. Per-category: BannerCalc category config.
-        $cat_ids = $product->get_category_ids();
-        foreach ( $cat_ids as $cat_id ) {
-            $cat_config = get_term_meta( $cat_id, '_bannercalc_config', true );
-            if ( ! empty( $cat_config['google_product_category'] ) ) {
-                return $cat_config['google_product_category'];
+        if ( ! $category ) {
+            $cat_ids = $product->get_category_ids();
+            foreach ( $cat_ids as $cat_id ) {
+                $cat_config = get_term_meta( $cat_id, '_bannercalc_config', true );
+                if ( ! empty( $cat_config['google_product_category'] ) ) {
+                    $category = $cat_config['google_product_category'];
+                    break;
+                }
             }
         }
 
         // 4. Global default from GMC settings page.
-        return $default;
+        if ( ! $category ) {
+            $category = $default;
+        }
+
+        if ( ! $category ) {
+            return '';
+        }
+
+        // If already numeric, return as-is.
+        if ( ctype_digit( (string) $category ) ) {
+            return (string) $category;
+        }
+
+        // Convert known text paths to numeric IDs for reliability.
+        return isset( self::TAXONOMY_IDS[ $category ] )
+            ? (string) self::TAXONOMY_IDS[ $category ]
+            : $category;
     }
 
     /**

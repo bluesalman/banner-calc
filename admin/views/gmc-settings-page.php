@@ -154,7 +154,7 @@ $feed_size     = (int) ( $feed_meta['size'] ?? 0 );
                     <td>
                         <input type="text" id="gmc-default-category" name="bannercalc_settings[gmc_default_category]"
                                value="<?php echo esc_attr( $settings['gmc_default_category'] ?? '' ); ?>"
-                               class="regular-text" placeholder="e.g. Signage > Banners" />
+                               class="regular-text" placeholder="e.g. Business & Industrial > Signage" />
                         <p class="description">
                             Google product taxonomy category. See
                             <a href="https://www.google.com/basepages/producttype/taxonomy-with-ids.en-GB.txt" target="_blank" rel="noopener">

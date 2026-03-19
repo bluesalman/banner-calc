@@ -682,14 +682,12 @@ if ( $editing_cat_id ) {
                             <td>
                                 <?php
                                 $gpc_suggestions = [
-                                    'vinyl banners'          => 'Business & Industrial > Signage > Banners',
-                                    'mesh banners'           => 'Business & Industrial > Signage > Banners',
-                                    'roller banners'         => 'Business & Industrial > Signage > Banner Stands',
-                                    'backdrop banner stands' => 'Business & Industrial > Signage > Banner Stands',
-                                    'posters'                => 'Arts & Entertainment > Party & Celebration > Party Decorations > Banners',
-                                    'business cards'         => 'Office Supplies > General Office Supplies > Printed Cards > Business Cards',
-                                    'flyers'                 => 'Business & Industrial > Advertising & Marketing > Flyers',
-                                    'stickers'               => 'Arts & Crafts > Craft Supplies > Stickers',
+                                    'vinyl banners'          => 'Business & Industrial > Signage',
+                                    'mesh banners'           => 'Business & Industrial > Signage',
+                                    'fence banners'          => 'Business & Industrial > Signage',
+                                    'scaffold banners'       => 'Business & Industrial > Signage',
+                                    'roller banners'         => 'Business & Industrial > Advertising & Marketing > Trade Show Displays',
+                                    'backdrop banner stands' => 'Business & Industrial > Advertising & Marketing > Trade Show Displays',
                                 ];
                                 $cat_name_lower = strtolower( $editing_term->name ?? '' );
                                 $suggested = $gpc_suggestions[ $cat_name_lower ] ?? '';
@@ -698,7 +696,7 @@ if ( $editing_cat_id ) {
                                        name="bannercalc_category[google_product_category]"
                                        value="<?php echo esc_attr( $editing_config['google_product_category'] ?? '' ); ?>"
                                        class="regular-text"
-                                       placeholder="<?php echo esc_attr( $suggested ?: 'e.g. Business & Industrial > Signage > Banners' ); ?>" />
+                                       placeholder="<?php echo esc_attr( $suggested ?: 'e.g. Business & Industrial > Signage' ); ?>" />
                                 <?php if ( $suggested && empty( $editing_config['google_product_category'] ) ) : ?>
                                     <button type="button" class="button bannercalc-btn-secondary bannercalc-gpc-suggest"
                                             onclick="this.previousElementSibling.value='<?php echo esc_js( $suggested ); ?>';this.remove();">
