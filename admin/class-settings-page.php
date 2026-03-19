@@ -78,6 +78,16 @@ class SettingsPage {
             [ $this, 'render_categories' ]
         );
 
+        // Submenu: Google Merchant Center.
+        add_submenu_page(
+            'bannercalc',
+            __( 'Google Merchant Center — BannerCalc', 'bannercalc' ),
+            __( 'Google MC', 'bannercalc' ),
+            'manage_woocommerce',
+            'bannercalc-gmc',
+            [ $this, 'render_gmc' ]
+        );
+
         // Submenu: Help & Documentation.
         add_submenu_page(
             'bannercalc',
@@ -162,6 +172,10 @@ class SettingsPage {
         // Collection / local pickup toggle.
         $sanitized['collection_enabled'] = ! empty( $input['collection_enabled'] );
 
+        // Google Merchant Center defaults.
+        $sanitized['gmc_default_brand']    = sanitize_text_field( $input['gmc_default_brand'] ?? '' );
+        $sanitized['gmc_default_category'] = sanitize_text_field( $input['gmc_default_category'] ?? '' );
+
         // Design service.
         $sanitized['design_service'] = [
             'enabled'     => ! empty( $input['design_service']['enabled'] ),
@@ -204,6 +218,17 @@ class SettingsPage {
         }
 
         include BANNERCALC_PLUGIN_DIR . 'admin/views/categories-page.php';
+    }
+
+    /**
+     * Render the Google Merchant Center settings page.
+     */
+    public function render_gmc(): void {
+        if ( ! current_user_can( 'manage_woocommerce' ) ) {
+            return;
+        }
+
+        include BANNERCALC_PLUGIN_DIR . 'admin/views/gmc-settings-page.php';
     }
 
     /**

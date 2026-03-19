@@ -1384,3 +1384,140 @@
 .bannercalc-help-sidebar::-webkit-scrollbar-track {
     background: transparent;
 }
+
+/* =====================================================================
+   Google Merchant Center Settings Page
+   ===================================================================== */
+
+/* Feed URL row */
+.bannercalc-gmc-feed-url-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-top: 8px;
+}
+
+.bannercalc-gmc-feed-url {
+    flex: 1;
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    font-size: 13px;
+    padding: 8px 12px;
+    border: 1px solid var(--bp-mid-gray);
+    border-radius: 4px;
+    background: var(--bp-off-white);
+    color: var(--bp-dark-gray);
+    cursor: text;
+}
+
+.bannercalc-gmc-feed-url:focus {
+    border-color: var(--bp-cyan);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0, 174, 239, 0.15);
+}
+
+/* Status grid */
+.bannercalc-gmc-status-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 16px;
+    margin-top: 12px;
+}
+
+.bannercalc-gmc-status-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 12px 16px;
+    background: var(--bp-off-white);
+    border-radius: 6px;
+    border: 1px solid var(--bp-light-gray);
+}
+
+.bannercalc-gmc-status-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--bp-text-muted);
+}
+
+.bannercalc-gmc-status-value {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--bp-dark-gray);
+}
+
+.bannercalc-gmc-status-value em {
+    font-weight: 400;
+    color: var(--bp-text-muted);
+    font-size: 14px;
+}
+
+/* Regenerate row */
+.bannercalc-gmc-regenerate-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--bp-light-gray);
+}
+
+.bannercalc-gmc-regenerate-row .spinner {
+    float: none;
+    margin: 0;
+}
+
+.bannercalc-gmc-regenerate-msg {
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.bannercalc-gmc-msg-success {
+    color: var(--bp-success);
+}
+
+.bannercalc-gmc-msg-error {
+    color: var(--bp-error);
+}
+
+/* Setup guide accordion */
+.bannercalc-gmc-guide details {
+    border: 1px solid var(--bp-light-gray);
+    border-radius: 6px;
+    margin-bottom: 8px;
+    overflow: hidden;
+}
+
+.bannercalc-gmc-guide details[open] {
+    border-color: var(--bp-cyan);
+}
+
+.bannercalc-gmc-guide summary {
+    padding: 12px 16px;
+    cursor: pointer;
+    background: var(--bp-off-white);
+    transition: background 0.15s ease;
+}
+
+.bannercalc-gmc-guide summary:hover {
+    background: #eef0f2;
+}
+
+.bannercalc-gmc-guide details[open] summary {
+    border-bottom: 1px solid var(--bp-light-gray);
+}
+
+.bannercalc-gmc-guide details > ol,
+.bannercalc-gmc-guide details > ul {
+    padding: 12px 16px 12px 36px;
+    margin: 0;
+    line-height: 1.7;
+}
+
+.bannercalc-gmc-guide code {
+    background: var(--bp-off-white);
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 12px;
+}

@@ -167,7 +167,83 @@
         }
     };
 
+    /* ===================================================================
+       Google Merchant Center — Feed Regeneration & Copy URL
+    =================================================================== */
+
+    var BannerCalcGMC = {
+        init: function() {
+            this.bindCopyUrl();
+            this.bindRegenerate();
+        },
+
+        bindCopyUrl: function() {
+            $('#bannercalc-copy-feed-url').on('click', function() {
+                var $input = $('#bannercalc-feed-url');
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText($input.val()).then(function() {
+                        var $btn = $('#bannercalc-copy-feed-url');
+                        $btn.text('Copied!');
+                        setTimeout(function() { $btn.html('<span class="dashicons dashicons-clipboard"></span> Copy'); }, 2000);
+                    });
+                } else {
+                    $input[0].select();
+                    document.execCommand('copy');
+                }
+            });
+        },
+
+        bindRegenerate: function() {
+            $('#bannercalc-regenerate-feed').on('click', function() {
+                var $btn     = $(this);
+                var $spinner = $('#bannercalc-regenerate-spinner');
+                var $msg     = $('#bannercalc-regenerate-msg');
+
+                $btn.prop('disabled', true);
+                $spinner.addClass('is-active');
+                $msg.text('').removeClass('bannercalc-gmc-msg-success bannercalc-gmc-msg-error');
+
+                $.post(bannercalcAdmin.ajaxUrl, {
+                    action: 'bannercalc_regenerate_feed',
+                    nonce:  bannercalcAdmin.nonce
+                }, function(response) {
+                    $btn.prop('disabled', false);
+                    $spinner.removeClass('is-active');
+
+                    if (!response.success) {
+                        $msg.text(response.data || 'Regeneration failed.').addClass('bannercalc-gmc-msg-error');
+                        return;
+                    }
+
+                    var d = response.data;
+                    var now = new Date();
+                    var formatted = now.getDate() + ' ' +
+                        now.toLocaleString('en-GB', { month: 'short' }) + ' ' +
+                        now.getFullYear() + ', ' +
+                        now.toLocaleTimeString('en-GB');
+
+                    $('#bannercalc-feed-generated').text(formatted);
+                    $('#bannercalc-feed-products').text(d.products || 0);
+                    $('#bannercalc-feed-variants').text(d.variants || 0);
+
+                    if (d.size) {
+                        var kb = (d.size / 1024).toFixed(1);
+                        $('#bannercalc-feed-size').text(kb + ' KB');
+                    }
+
+                    $msg.text('Feed regenerated — ' + (d.variants || 0) + ' variants across ' + (d.products || 0) + ' products.')
+                        .addClass('bannercalc-gmc-msg-success');
+                }).fail(function() {
+                    $btn.prop('disabled', false);
+                    $spinner.removeClass('is-active');
+                    $msg.text('Request failed.').addClass('bannercalc-gmc-msg-error');
+                });
+            });
+        }
+    };
+
     $(document).ready(function() {
         BannerCalcAdmin.init();
+        BannerCalcGMC.init();
     });
 })(jQuery);

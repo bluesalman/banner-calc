@@ -1,16 +1,16 @@
 <?php
 /**
- * Google Product Feed — generates a supplemental product feed for GMC.
+ * Google Product Feed — cached supplemental feed for Google Merchant Center.
  *
- * Outputs each BannerCalc preset size as a separate product entry in the
- * Google Products XML format, with item_group_id grouping. This enables
- * Google Merchant Center to treat each size as a product variant.
+ * Generates one <item> per BannerCalc preset size and caches the XML.
+ * Feed is regenerated only when product / config data changes or
+ * manually via the GMC settings page.
  *
  * Feed URL: ?feed=bannercalc-google
- * Or with pretty permalink: /feed/bannercalc-google/
  *
- * Also hooks into "Google for WooCommerce" (Google Listings & Ads) plugin
- * to modify per-product data during sync.
+ * Also hooks into "Google for WooCommerce" (Google Listings & Ads) to
+ * exclude range-priced BannerCalc products from GLA sync (the
+ * supplemental feed handles those instead).
  *
  * @package BannerCalc
  */
@@ -23,139 +23,180 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class GoogleProductFeed {
 
+    /** Option key for cached XML. */
+    const CACHE_KEY = 'bannercalc_google_feed_xml';
+
+    /** Option key for feed metadata (timestamp, counts). */
+    const META_KEY = 'bannercalc_google_feed_meta';
+
     public function __construct() {
         // Register the custom feed endpoint.
         add_action( 'init', [ $this, 'register_feed' ] );
 
         // Hook into Google for WooCommerce (Google Listings & Ads) if active.
         add_action( 'plugins_loaded', [ $this, 'hook_google_for_woocommerce' ], 30 );
+
+        // Invalidation hooks — schedule rebuild when data changes.
+        add_action( 'save_post_product', [ $this, 'schedule_rebuild' ] );
+        add_action( 'woocommerce_product_set_stock_status', [ $this, 'schedule_rebuild' ] );
+        add_action( 'updated_post_meta', [ $this, 'on_post_meta_updated' ], 10, 3 );
+        add_action( 'updated_term_meta', [ $this, 'on_term_meta_updated' ], 10, 3 );
+        add_action( 'update_option_bannercalc_settings', [ $this, 'schedule_rebuild' ] );
+
+        // Deferred rebuild action (fired by wp_schedule_single_event).
+        add_action( 'bannercalc_rebuild_google_feed', [ $this, 'regenerate' ] );
+
+        // AJAX handler for manual rebuild from admin.
+        add_action( 'wp_ajax_bannercalc_regenerate_feed', [ $this, 'ajax_regenerate' ] );
     }
 
-    /**
-     * Register the custom feed.
-     */
+    /* =================================================================
+       Feed Endpoint
+    ================================================================= */
+
     public function register_feed(): void {
         add_feed( 'bannercalc-google', [ $this, 'render_feed' ] );
     }
 
     /**
-     * Hook into Google for WooCommerce to modify product data during sync.
+     * Serve the cached feed XML. If no cache exists, build it first.
      */
+    public function render_feed(): void {
+        header( 'Content-Type: application/xml; charset=UTF-8' );
+
+        $xml = get_option( self::CACHE_KEY, '' );
+
+        if ( empty( $xml ) ) {
+            $xml = $this->build_feed_xml();
+            $this->store_cache( $xml );
+        }
+
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- pre-escaped XML
+        echo $xml;
+        exit;
+    }
+
+    /* =================================================================
+       Google for WooCommerce — Exclude range-priced products
+    ================================================================= */
+
     public function hook_google_for_woocommerce(): void {
-        // Only proceed if Google for WooCommerce is active.
         if ( ! defined( 'WC_GLA_VERSION' ) ) {
             return;
         }
 
-        // Modify product attribute values before sync.
-        add_filter( 'woocommerce_gla_product_attribute_values', [ $this, 'modify_gla_product_attributes' ], 10, 3 );
-
-        // Mark BannerCalc products as needing special handling.
+        // Exclude BannerCalc range-priced products from GLA sync.
         add_filter( 'woocommerce_gla_product_is_ready_to_sync', [ $this, 'gla_product_is_ready' ], 10, 2 );
     }
 
     /**
-     * Modify Google Listings & Ads product attributes.
-     *
-     * Sets the item_group_id and adjusts the price to reflect the lowest preset size price.
-     * Google for WooCommerce creates one MC product per WC product — for full variant support
-     * the supplemental feed should be used.
-     *
-     * @param array       $attributes Attribute values keyed by attribute ID.
-     * @param \WC_Product $product    WooCommerce product.
-     * @param string      $adapter_class The adapter class name.
-     * @return array
+     * Exclude BannerCalc products that use preset sizes from GLA sync.
+     * These are handled by the supplemental feed instead.
+     * Fixed-price products (no presets) are left untouched for GLA.
      */
-    public function modify_gla_product_attributes( array $attributes, $product, $adapter_class = '' ): array {
+    public function gla_product_is_ready( bool $ready, $product ): bool {
         if ( ! $product instanceof \WC_Product ) {
-            return $attributes;
+            return $ready;
         }
 
         $plugin = Plugin::instance();
 
         if ( ! $plugin->is_enabled_for_product( $product->get_id() ) ) {
-            return $attributes;
+            return $ready;
         }
 
         $config  = $plugin->get_product_config( $product->get_id() );
         $presets = $config['preset_sizes'] ?? [];
 
-        if ( empty( $presets ) ) {
-            return $attributes;
-        }
-
-        $rate      = (float) ( $config['area_rate_sqft'] ?? 0 );
-        $min_charge = (float) ( $config['minimum_charge'] ?? 0 );
-
-        // Calculate prices for all presets.
-        $prices = [];
-        foreach ( $presets as $preset ) {
-            $prices[] = $this->calculate_preset_price( $preset, $rate, $min_charge );
-        }
-
-        $min_price = min( $prices );
-        $max_price = max( $prices );
-
-        // Set item_group_id so GMC knows variants belong together.
-        $attributes['itemGroupId'] = 'bannercalc-' . $product->get_id();
-
-        // Set price range (lowest preset price as the base).
-        $attributes['price'] = [
-            'value'    => number_format( $min_price, 2, '.', '' ),
-            'currency' => get_woocommerce_currency(),
-        ];
-
-        // Build a size string from all presets for the product listing.
-        $size_labels = array_column( $presets, 'label' );
-        if ( ! empty( $size_labels ) ) {
-            $attributes['sizes'] = $size_labels;
-        }
-
-        return $attributes;
-    }
-
-    /**
-     * Ensure BannerCalc products are marked ready to sync.
-     *
-     * @param bool        $ready   Whether the product is ready.
-     * @param \WC_Product $product WooCommerce product.
-     * @return bool
-     */
-    public function gla_product_is_ready( bool $ready, $product ): bool {
-        if ( $ready ) {
-            return $ready;
-        }
-
-        if ( ! $product instanceof \WC_Product ) {
-            return $ready;
-        }
-
-        $plugin = Plugin::instance();
-        if ( $plugin->is_enabled_for_product( $product->get_id() ) ) {
-            return true;
+        // If product has preset sizes → exclude from GLA (our feed handles it).
+        if ( ! empty( $presets ) ) {
+            return false;
         }
 
         return $ready;
     }
 
+    /* =================================================================
+       Cache Invalidation
+    ================================================================= */
+
     /**
-     * Render the supplemental Google Products XML feed.
-     *
-     * This feed outputs one <item> per preset size per BannerCalc-enabled product.
-     * Google Merchant Center can consume this as a supplemental feed alongside
-     * (or instead of) the main Google for WooCommerce sync.
-     *
-     * Feed URL: /feed/bannercalc-google/ or ?feed=bannercalc-google
+     * Schedule a deferred feed rebuild (coalesces multiple saves).
      */
-    public function render_feed(): void {
-        // Set proper XML content type.
-        header( 'Content-Type: application/xml; charset=UTF-8' );
+    public function schedule_rebuild(): void {
+        if ( get_transient( 'bannercalc_feed_rebuild_scheduled' ) ) {
+            return;
+        }
 
-        $settings  = Plugin::get_settings();
-        $site_name = get_bloginfo( 'name' );
-        $site_url  = home_url( '/' );
-        $currency  = get_woocommerce_currency();
+        set_transient( 'bannercalc_feed_rebuild_scheduled', 1, 120 );
+        wp_schedule_single_event( time() + 30, 'bannercalc_rebuild_google_feed' );
+    }
 
+    /**
+     * Rebuild when BannerCalc product config meta is updated.
+     */
+    public function on_post_meta_updated( $meta_id, $object_id, $meta_key ): void {
+        if ( '_bannercalc_product_config' === $meta_key ) {
+            $this->schedule_rebuild();
+        }
+    }
+
+    /**
+     * Rebuild when BannerCalc category config meta is updated.
+     */
+    public function on_term_meta_updated( $meta_id, $object_id, $meta_key ): void {
+        if ( '_bannercalc_config' === $meta_key ) {
+            $this->schedule_rebuild();
+        }
+    }
+
+    /* =================================================================
+       Feed Generation
+    ================================================================= */
+
+    /**
+     * Regenerate the feed XML and store it. Returns metadata.
+     *
+     * @return array{products: int, variants: int, generated: int}
+     */
+    public function regenerate(): array {
+        delete_transient( 'bannercalc_feed_rebuild_scheduled' );
+        $xml = $this->build_feed_xml();
+        return $this->store_cache( $xml );
+    }
+
+    /**
+     * AJAX handler — manual regenerate from GMC settings page.
+     */
+    public function ajax_regenerate(): void {
+        check_ajax_referer( 'bannercalc_admin', 'nonce' );
+
+        if ( ! current_user_can( 'manage_woocommerce' ) ) {
+            wp_send_json_error( 'Unauthorized', 403 );
+        }
+
+        $meta = $this->regenerate();
+        wp_send_json_success( $meta );
+    }
+
+    /**
+     * Build the complete feed XML string.
+     */
+    private function build_feed_xml(): string {
+        $settings   = Plugin::get_settings();
+        $site_name  = get_bloginfo( 'name' );
+        $site_url   = home_url( '/' );
+        $currency   = get_woocommerce_currency();
+        $gmc_brand  = ! empty( $settings['gmc_default_brand'] )
+            ? $settings['gmc_default_brand']
+            : '';
+        $gmc_cat    = ! empty( $settings['gmc_default_category'] )
+            ? $settings['gmc_default_category']
+            : '';
+
+        $products = $this->get_bannercalc_products();
+
+        ob_start();
         echo '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
         ?>
 <rss version="2.0" xmlns:g="http://base.google.com/ns/1.0">
@@ -164,9 +205,6 @@ class GoogleProductFeed {
 <link><?php echo esc_url( $site_url ); ?></link>
 <description>Product size variants generated by BannerCalc</description>
 <?php
-        // Query all BannerCalc-enabled products.
-        $products = $this->get_bannercalc_products();
-
         foreach ( $products as $product ) {
             $config  = Plugin::instance()->get_product_config( $product->get_id() );
             $presets = $config['preset_sizes'] ?? [];
@@ -181,9 +219,11 @@ class GoogleProductFeed {
             $image_id   = $product->get_image_id();
             $image_url  = $image_id ? wp_get_attachment_url( $image_id ) : '';
             $categories = $this->get_product_google_category( $product );
-            $brand      = $this->get_product_brand( $product );
+            if ( empty( $categories ) && $gmc_cat ) {
+                $categories = $gmc_cat;
+            }
+            $brand = $this->get_product_brand( $product, $gmc_brand );
             $description = wp_strip_all_tags( $product->get_short_description() ?: $product->get_description() );
-            // Limit description length for feed.
             if ( mb_strlen( $description ) > 5000 ) {
                 $description = mb_substr( $description, 0, 4997 ) . '...';
             }
@@ -195,17 +235,13 @@ class GoogleProductFeed {
             $stock_status  = $product->is_in_stock() ? 'in_stock' : 'out_of_stock';
 
             foreach ( $presets as $preset ) {
-                $price      = $this->calculate_preset_price( $preset, $rate, $min_charge );
-                $size_param = \BannerCalc\Frontend\ProductDisplay::get_size_url_param( $preset );
-                $size_url   = add_query_arg( 'attribute_size', $size_param, $permalink );
-                $size_label = $preset['label'] ?? $size_param;
+                $price       = $this->calculate_preset_price( $preset, $rate, $min_charge );
+                $size_param  = \BannerCalc\Frontend\ProductDisplay::get_size_url_param( $preset );
+                $size_url    = add_query_arg( 'attribute_size', $size_param, $permalink );
+                $size_label  = $preset['label'] ?? $size_param;
                 $preset_slug = $preset['slug'] ?? sanitize_title( $size_label );
-
-                // Build unique ID per variant: SKU-sizeslug or productid-sizeslug.
-                $variant_id = ( $product_sku ?: $product_id ) . '-' . $preset_slug;
-
-                // MPN per variant.
-                $mpn = $this->get_product_mpn( $product, $preset );
+                $variant_id  = ( $product_sku ?: $product_id ) . '-' . $preset_slug;
+                $mpn         = $this->get_product_mpn( $product, $preset );
                 ?>
 <item>
 <g:id><?php echo esc_html( $variant_id ); ?></g:id>
@@ -238,34 +274,63 @@ class GoogleProductFeed {
 </channel>
 </rss>
 <?php
-        exit;
+        return ob_get_clean();
     }
 
     /**
-     * Get all WooCommerce products with BannerCalc enabled.
+     * Store cached XML and metadata.
      *
-     * @return \WC_Product[]
+     * @return array{products: int, variants: int, generated: int, size: int}
      */
+    private function store_cache( string $xml ): array {
+        update_option( self::CACHE_KEY, $xml, false );
+
+        // Count products and variants from the XML.
+        $variant_count = substr_count( $xml, '<g:id>' );
+        $group_ids     = [];
+        if ( preg_match_all( '/<g:item_group_id>([^<]+)</', $xml, $matches ) ) {
+            $group_ids = array_unique( $matches[1] );
+        }
+
+        $meta = [
+            'products'  => count( $group_ids ),
+            'variants'  => $variant_count,
+            'generated' => time(),
+            'size'      => strlen( $xml ),
+        ];
+
+        update_option( self::META_KEY, $meta, false );
+        return $meta;
+    }
+
+    /**
+     * Get feed metadata (for admin display).
+     *
+     * @return array{products: int, variants: int, generated: int, size: int}
+     */
+    public static function get_feed_meta(): array {
+        return (array) get_option( self::META_KEY, [
+            'products'  => 0,
+            'variants'  => 0,
+            'generated' => 0,
+            'size'      => 0,
+        ] );
+    }
+
+    /* =================================================================
+       Product Queries
+    ================================================================= */
+
     private function get_bannercalc_products(): array {
-        $plugin = Plugin::instance();
+        $plugin   = Plugin::instance();
         $products = [];
 
-        // Get all product categories with BannerCalc enabled.
         $enabled_cats = $this->get_enabled_category_ids();
 
         if ( empty( $enabled_cats ) ) {
             return $products;
         }
 
-        // Query products in those categories.
-        $args = [
-            'status'   => 'publish',
-            'limit'    => -1,
-            'category' => [],
-            'return'   => 'objects',
-        ];
-
-        // Use tax_query for category filtering.
         $query_args = [
             'post_type'      => 'product',
             'post_status'    => 'publish',
@@ -273,9 +338,9 @@ class GoogleProductFeed {
             'fields'         => 'ids',
             'tax_query'      => [
                 [
-                    'taxonomy' => 'product_cat',
-                    'field'    => 'term_id',
-                    'terms'    => $enabled_cats,
+                    'taxonomy'         => 'product_cat',
+                    'field'            => 'term_id',
+                    'terms'            => $enabled_cats,
                     'include_children' => true,
                 ],
             ],
@@ -286,18 +351,18 @@ class GoogleProductFeed {
         foreach ( $post_ids as $post_id ) {
             $product = wc_get_product( $post_id );
             if ( $product && $plugin->is_enabled_for_product( $product->get_id() ) ) {
-                $products[] = $product;
+                $config  = $plugin->get_product_config( $product->get_id() );
+                $presets = $config['preset_sizes'] ?? [];
+                // Only include products with preset sizes (range-priced).
+                if ( ! empty( $presets ) ) {
+                    $products[] = $product;
+                }
             }
         }
 
         return $products;
     }
 
-    /**
-     * Get all category IDs that have BannerCalc enabled.
-     *
-     * @return int[]
-     */
     private function get_enabled_category_ids(): array {
         $categories = get_terms( [
             'taxonomy'   => 'product_cat',
@@ -320,14 +385,10 @@ class GoogleProductFeed {
         return $enabled;
     }
 
-    /**
-     * Calculate the price for a single preset size.
-     *
-     * @param array $preset    Preset data.
-     * @param float $rate      Area rate per sqft.
-     * @param float $min_charge Minimum charge.
-     * @return float
-     */
+    /* =================================================================
+       Price & Attribute Helpers
+    ================================================================= */
+
     private function calculate_preset_price( array $preset, float $rate, float $min_charge ): float {
         if ( isset( $preset['price'] ) && $preset['price'] !== null && $preset['price'] !== '' ) {
             return (float) $preset['price'];
@@ -345,22 +406,12 @@ class GoogleProductFeed {
         return $p;
     }
 
-    /**
-     * Get the Google product category for a product.
-     *
-     * Tries: custom meta → Yoast GMC category → empty.
-     *
-     * @param \WC_Product $product
-     * @return string
-     */
     private function get_product_google_category( \WC_Product $product ): string {
-        // Check for a custom Google product category in meta.
         $gpc = get_post_meta( $product->get_id(), '_wpseo_global_identifier_values', true );
         if ( ! empty( $gpc ) && is_array( $gpc ) && ! empty( $gpc['google_product_category'] ) ) {
             return $gpc['google_product_category'];
         }
 
-        // Check Google for WooCommerce category mapping.
         $gla_cat = get_post_meta( $product->get_id(), '_wc_gla_google_category', true );
         if ( ! empty( $gla_cat ) ) {
             return $gla_cat;
@@ -370,13 +421,9 @@ class GoogleProductFeed {
     }
 
     /**
-     * Get the brand for a product.
-     *
-     * @param \WC_Product $product
-     * @return string
+     * @param string $default_brand Fallback brand from settings.
      */
-    private function get_product_brand( \WC_Product $product ): string {
-        // Check brand taxonomy (common plugins: WooCommerce Brands, YITH Brands).
+    private function get_product_brand( \WC_Product $product, string $default_brand = '' ): string {
         $brand_taxonomies = [ 'product_brand', 'pwb-brand', 'yith_product_brand' ];
         foreach ( $brand_taxonomies as $tax ) {
             if ( taxonomy_exists( $tax ) ) {
@@ -387,55 +434,37 @@ class GoogleProductFeed {
             }
         }
 
-        // Check custom meta.
         $brand = get_post_meta( $product->get_id(), '_brand', true );
         if ( $brand ) {
             return $brand;
         }
 
-        // Check Google for WooCommerce brand attribute.
         $gla_brand = get_post_meta( $product->get_id(), '_wc_gla_brand', true );
         if ( $gla_brand ) {
             return $gla_brand;
         }
 
-        // Fallback to site name.
+        if ( $default_brand ) {
+            return $default_brand;
+        }
+
         return get_bloginfo( 'name' );
     }
 
-    /**
-     * Generate an MPN for a size variant.
-     *
-     * Format: {SKU or product ID}-{widthMM}x{heightMM}
-     * This matches the pattern shown in the GMC screenshot (e.g. PP-015-1200mmx2000mm).
-     *
-     * @param \WC_Product $product
-     * @param array       $preset
-     * @return string
-     */
     private function get_product_mpn( \WC_Product $product, array $preset ): string {
         $base = $product->get_sku() ?: ( 'BC-' . $product->get_id() );
-
-        // Build size suffix in mm (matching GMC pattern).
         $w_mm = round( (float) ( $preset['width_m'] ?? 0 ) * 1000 );
         $h_mm = round( (float) ( $preset['height_m'] ?? 0 ) * 1000 );
 
         return $base . '-' . $w_mm . 'mmx' . $h_mm . 'mm';
     }
 
-    /**
-     * Get the product category path (breadcrumb style) for product_type field.
-     *
-     * @param \WC_Product $product
-     * @return string
-     */
     private function get_product_type_path( \WC_Product $product ): string {
         $category_ids = $product->get_category_ids();
         if ( empty( $category_ids ) ) {
             return '';
         }
 
-        // Use the first category and build the full path.
         $cat_id    = $category_ids[0];
         $ancestors = get_ancestors( $cat_id, 'product_cat', 'taxonomy' );
         $ancestors = array_reverse( $ancestors );
