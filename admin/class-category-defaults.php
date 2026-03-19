@@ -103,6 +103,9 @@ class CategoryDefaults {
         $config['attribute_pricing']   = $raw['attribute_pricing'] ?? [];  // TODO: deep sanitize in Phase C.
         $config['preset_sizes']        = $raw['preset_sizes'] ?? [];      // TODO: deep sanitize in Phase C.
 
+        // Google Product Category for supplemental feed.
+        $config['google_product_category'] = sanitize_text_field( $raw['google_product_category'] ?? '' );
+
         // Quantity mode: 'standard' (default WC qty) or 'bundles' (predefined tiers).
         $config['quantity_mode'] = sanitize_text_field( $raw['quantity_mode'] ?? 'standard' );
 

@@ -242,6 +242,26 @@ $attributes = $attr_mgr->get_all_attributes();
     </td>
 </tr>
 
+<!-- Google Product Category -->
+<tr class="form-field">
+    <th scope="row">
+        <label><?php esc_html_e( 'Google Product Category', 'bannercalc' ); ?></label>
+    </th>
+    <td>
+        <input type="text"
+               name="bannercalc_category[google_product_category]"
+               value="<?php echo esc_attr( $config['google_product_category'] ?? '' ); ?>"
+               class="regular-text"
+               placeholder="e.g. Signage > Banners" />
+        <p class="description">
+            <?php esc_html_e( 'Google Merchant Center product taxonomy. Used in the supplemental feed.', 'bannercalc' ); ?>
+            <a href="https://www.google.com/basepages/producttype/taxonomy-with-ids.en-GB.txt" target="_blank" rel="noopener">
+                <?php esc_html_e( 'View full taxonomy list', 'bannercalc' ); ?>
+            </a>
+        </p>
+    </td>
+</tr>
+
 <!-- Enabled attributes -->
 <tr class="form-field">
     <th scope="row">

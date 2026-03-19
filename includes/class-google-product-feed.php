@@ -218,10 +218,7 @@ class GoogleProductFeed {
             $permalink  = get_permalink( $product->get_id() );
             $image_id   = $product->get_image_id();
             $image_url  = $image_id ? wp_get_attachment_url( $image_id ) : '';
-            $categories = $this->get_product_google_category( $product );
-            if ( empty( $categories ) && $gmc_cat ) {
-                $categories = $gmc_cat;
-            }
+            $categories = $this->get_product_google_category( $product, $gmc_cat );
             $brand = $this->get_product_brand( $product, $gmc_brand );
             $description = wp_strip_all_tags( $product->get_short_description() ?: $product->get_description() );
             if ( mb_strlen( $description ) > 5000 ) {
@@ -406,18 +403,35 @@ class GoogleProductFeed {
         return $p;
     }
 
-    private function get_product_google_category( \WC_Product $product ): string {
+    /**
+     * Resolve the Google product category for a product.
+     *
+     * Priority: per-product meta → BannerCalc category config → GMC default setting.
+     */
+    private function get_product_google_category( \WC_Product $product, string $default = '' ): string {
+        // 1. Per-product: Yoast SEO meta.
         $gpc = get_post_meta( $product->get_id(), '_wpseo_global_identifier_values', true );
         if ( ! empty( $gpc ) && is_array( $gpc ) && ! empty( $gpc['google_product_category'] ) ) {
             return $gpc['google_product_category'];
         }
 
+        // 2. Per-product: Google for WooCommerce meta.
         $gla_cat = get_post_meta( $product->get_id(), '_wc_gla_google_category', true );
         if ( ! empty( $gla_cat ) ) {
             return $gla_cat;
         }
 
-        return '';
+        // 3. Per-category: BannerCalc category config.
+        $cat_ids = $product->get_category_ids();
+        foreach ( $cat_ids as $cat_id ) {
+            $cat_config = get_term_meta( $cat_id, '_bannercalc_config', true );
+            if ( ! empty( $cat_config['google_product_category'] ) ) {
+                return $cat_config['google_product_category'];
+            }
+        }
+
+        // 4. Global default from GMC settings page.
+        return $default;
     }
 
     /**
