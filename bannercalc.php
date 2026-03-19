@@ -98,6 +98,7 @@ function bannercalc_init() {
     require_once BANNERCALC_PLUGIN_DIR . 'includes/class-pricing-engine.php';
     require_once BANNERCALC_PLUGIN_DIR . 'includes/class-cart-handler.php';
     require_once BANNERCALC_PLUGIN_DIR . 'includes/class-preset-seeder.php';
+    require_once BANNERCALC_PLUGIN_DIR . 'includes/class-google-product-feed.php';
 
     // Load admin classes.
     if ( is_admin() ) {

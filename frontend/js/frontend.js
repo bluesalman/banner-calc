@@ -115,6 +115,9 @@
             // Show price range on product page.
             this.renderPriceRange();
             this.updateHiddenFields();
+
+            // Auto-select preset from URL parameter (?attribute_size=...).
+            this.initFromUrlParam();
         },
 
         /**
@@ -331,6 +334,216 @@
         },
 
         /**
+         * Auto-select a preset from the URL ?attribute_size= parameter.
+         * Also handles the config.selectedSizeParam passed from PHP.
+         */
+        initFromUrlParam: function() {
+            var sizeParam = this.config.selectedSizeParam || '';
+
+            // Also check URL directly (for client-side navigation / history).
+            if (!sizeParam) {
+                var urlParams = new URLSearchParams(window.location.search);
+                sizeParam = urlParams.get('attribute_size') || '';
+            }
+
+            if (!sizeParam) return;
+
+            // Normalise the param for comparison.
+            var normalised = sizeParam.toLowerCase().replace(/\s+/g, ' ').trim();
+
+            // Try to find a matching preset.
+            var presets = this.config.presetSizes || [];
+            var matchedPreset = null;
+            var self = this;
+
+            for (var i = 0; i < presets.length; i++) {
+                var p = presets[i];
+                var presetParam = this.buildSizeParam(p).toLowerCase();
+                if (normalised === presetParam) {
+                    matchedPreset = p;
+                    break;
+                }
+            }
+
+            // Fallback: parse dimensions and compare in metres.
+            if (!matchedPreset) {
+                var parsed = this.parseSizeParam(normalised);
+                if (parsed) {
+                    var tolerance = 0.005;
+                    for (var j = 0; j < presets.length; j++) {
+                        var pw = parseFloat(presets[j].width_m || 0);
+                        var ph = parseFloat(presets[j].height_m || 0);
+                        if (Math.abs(pw - parsed.widthM) < tolerance && Math.abs(ph - parsed.heightM) < tolerance) {
+                            matchedPreset = presets[j];
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (!matchedPreset) return;
+
+            // Find and click the matching preset card.
+            var slug = matchedPreset.slug;
+            var $card = this.el.find('.bannercalc-preset-card[data-slug="' + slug + '"]');
+
+            // Also try matching by data-size-param attribute on DOM cards.
+            if (!$card.length) {
+                var self2 = this;
+                this.el.find('.bannercalc-preset-card').each(function() {
+                    var cardParam = $(this).data('size-param') || '';
+                    if (cardParam && cardParam.toLowerCase().replace(/\s+/g, ' ').trim() === normalised) {
+                        $card = $(this);
+                        return false;
+                    }
+                });
+            }
+
+            if ($card.length) {
+                $card.trigger('click');
+            }
+        },
+
+        /**
+         * Build the URL size parameter string from a preset object.
+         * Format: "{width}{unit} x {height}{unit}" e.g. "1000mm x 2000mm"
+         */
+        buildSizeParam: function(preset) {
+            var w = preset.display_w;
+            var h = preset.display_h;
+            var unit = preset.display_unit || 'mm';
+
+            if (w !== undefined && w !== null && h !== undefined && h !== null) {
+                return this.formatDimension(parseFloat(w)) + unit + ' x ' + this.formatDimension(parseFloat(h)) + unit;
+            }
+
+            // Fallback: convert from metres to mm.
+            var wMm = Math.round(parseFloat(preset.width_m || 0) * 1000);
+            var hMm = Math.round(parseFloat(preset.height_m || 0) * 1000);
+            return wMm + 'mm x ' + hMm + 'mm';
+        },
+
+        /**
+         * Format a dimension number — strip trailing zeros.
+         */
+        formatDimension: function(val) {
+            if (Math.floor(val) === val) return String(Math.floor(val));
+            return parseFloat(val.toFixed(4)).toString();
+        },
+
+        /**
+         * Parse a size param string like "1000mm x 2000mm" into metres.
+         * Returns { widthM, heightM } or null.
+         */
+        parseSizeParam: function(str) {
+            var unitMap = {
+                mm: 0.001, cm: 0.01, inch: 0.0254, 'in': 0.0254, ft: 0.3048, m: 1.0
+            };
+            var match = str.match(/^([\d.]+)\s*(mm|cm|inch|in|ft|m)?\s*[x×]\s*([\d.]+)\s*(mm|cm|inch|in|ft|m)?$/);
+            if (!match) return null;
+
+            var wVal = parseFloat(match[1]);
+            var wUnit = match[2] || 'mm';
+            var hVal = parseFloat(match[3]);
+            var hUnit = match[4] || wUnit;
+
+            return {
+                widthM: wVal * (unitMap[wUnit] || 0.001),
+                heightM: hVal * (unitMap[hUnit] || 0.001)
+            };
+        },
+
+        /**
+         * Update the browser URL with the current size selection.
+         * Uses history.replaceState to avoid creating extra history entries.
+         */
+        updateSizeUrl: function() {
+            if (typeof history.replaceState !== 'function') return;
+
+            var url = new URL(window.location.href);
+
+            if (this.state.sizingMode === 'preset' && this.state.selectedPreset) {
+                // Use the data-size-param from the active card if available.
+                var $activeCard = this.el.find('.bannercalc-preset-card.active');
+                var sizeParam = $activeCard.length ? $activeCard.data('size-param') : '';
+
+                if (!sizeParam) {
+                    // Fallback to building from preset config.
+                    var presets = this.config.presetSizes || [];
+                    for (var i = 0; i < presets.length; i++) {
+                        if (presets[i].slug === this.state.selectedPreset) {
+                            sizeParam = this.buildSizeParam(presets[i]);
+                            break;
+                        }
+                    }
+                }
+
+                if (sizeParam) {
+                    url.searchParams.set('attribute_size', sizeParam);
+                } else {
+                    url.searchParams.delete('attribute_size');
+                }
+            } else {
+                url.searchParams.delete('attribute_size');
+            }
+
+            history.replaceState(null, '', url.toString());
+
+            // Update page structured data to reflect the selected size.
+            this.updateStructuredData();
+        },
+
+        /**
+         * Update the in-page JSON-LD structured data when a size is selected.
+         * This updates the script tag that WooCommerce renders.
+         */
+        updateStructuredData: function() {
+            var $scripts = $('script[type="application/ld+json"]');
+            if (!$scripts.length) return;
+
+            var self = this;
+            $scripts.each(function() {
+                var $script = $(this);
+                var json;
+                try {
+                    json = JSON.parse($script.text());
+                } catch(e) {
+                    return;
+                }
+
+                // Find and update the Product schema.
+                var product = null;
+                if (json['@type'] === 'Product') {
+                    product = json;
+                } else if (json['@graph']) {
+                    for (var g = 0; g < json['@graph'].length; g++) {
+                        if (json['@graph'][g]['@type'] === 'Product') {
+                            product = json['@graph'][g];
+                            break;
+                        }
+                    }
+                }
+
+                if (!product) return;
+
+                if (self.state.sizingMode === 'preset' && self.state.selectedPreset && self.state.basePrice > 0) {
+                    // Specific size selected — single Offer.
+                    product['offers'] = {
+                        '@type': 'Offer',
+                        'priceCurrency': self.config.currency === '£' ? 'GBP' : 'GBP',
+                        'price': self.state.basePrice.toFixed(2),
+                        'availability': 'https://schema.org/InStock',
+                        'url': window.location.href
+                    };
+                }
+
+                try {
+                    $script.text(JSON.stringify(json));
+                } catch(e) {}
+            });
+        },
+
+        /**
          * Bind all UI event listeners.
          */
         bindEvents: function() {
@@ -379,6 +592,7 @@
                 self.calculatePrice();
                 self.updateHiddenFields();
                 self.updatePriceDisplay();
+                self.updateSizeUrl();
             });
 
             // Preset size selection.
@@ -409,6 +623,7 @@
                 self.calculatePrice();
                 self.updateHiddenFields();
                 self.updatePriceDisplay();
+                self.updateSizeUrl();
             });
 
             // Unit selector.

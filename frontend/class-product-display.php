@@ -49,6 +49,17 @@ class ProductDisplay {
 
         // Hide the default WC quantity input for BannerCalc products (optional — keep if needed).
         add_filter( 'woocommerce_product_data_tabs', [ $this, 'maybe_hide_variations_tab' ] );
+
+        // Variation-style URL support: canonical, meta tags, and pre-selection.
+        add_action( 'wp_head', [ $this, 'render_variation_meta_tags' ], 1 );
+
+        // Append size to page title when ?attribute_size= is set (for GMC / SEO).
+        add_filter( 'document_title_parts', [ $this, 'append_size_to_page_title' ] );
+        add_filter( 'wpseo_title', [ $this, 'append_size_to_seo_title' ] );
+        add_filter( 'rank_math/frontend/title', [ $this, 'append_size_to_seo_title' ] );
+
+        // Add size variant URLs to WordPress sitemap for discoverability.
+        add_filter( 'wp_sitemaps_posts_entry', [ $this, 'add_size_variants_to_sitemap' ], 10, 3 );
     }
 
     /**
@@ -110,6 +121,7 @@ class ProductDisplay {
             'quantityBundles' => $config['quantity_bundles'] ?? [],
             'minQuantity'     => (int) ( $config['min_quantity'] ?? 0 ),
             'defaultQuantity' => max( 1, (int) ( $config['default_quantity'] ?? 1 ) ),
+            'selectedSizeParam' => isset( $_GET['attribute_size'] ) ? sanitize_text_field( wp_unslash( $_GET['attribute_size'] ) ) : '',
         ] );
 
         echo '<div id="bannercalc-configurator" class="bannercalc-configurator" data-config="' . esc_attr( $js_config ) . '">';
@@ -118,6 +130,19 @@ class ProductDisplay {
         include BANNERCALC_PLUGIN_DIR . 'frontend/views/configurator.php';
 
         echo '</div>';
+
+        // Output hidden links for each size variant (crawler discoverability).
+        if ( ! empty( $preset_sizes ) ) {
+            $permalink = get_permalink( $product->get_id() );
+            echo '<nav class="bannercalc-size-variants" aria-label="' . esc_attr__( 'Available sizes', 'bannercalc' ) . '" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);">';
+            foreach ( $preset_sizes as $preset ) {
+                $size_param = self::get_size_url_param( $preset );
+                $size_url   = add_query_arg( 'attribute_size', $size_param, $permalink );
+                $label      = $preset['label'] ?? $size_param;
+                echo '<a href="' . esc_url( $size_url ) . '">' . esc_html( $product->get_name() . ' - ' . $label ) . '</a> ';
+            }
+            echo '</nav>';
+        }
     }
 
     /**
@@ -389,9 +414,23 @@ class ProductDisplay {
         $prices      = $this->get_preset_prices( $config );
         $min_charge  = (float) ( $config['minimum_charge'] ?? 0 );
 
+        // If a specific size is requested via URL, show that size's price.
+        $requested_size = isset( $_GET['attribute_size'] ) ? sanitize_text_field( wp_unslash( $_GET['attribute_size'] ) ) : '';
+        $presets        = $config['preset_sizes'] ?? [];
+
         // Build price HTML.
         $price_html = '';
-        if ( ! empty( $prices ) ) {
+        if ( $requested_size !== '' && ! empty( $presets ) ) {
+            $matched = $this->find_preset_by_size_param( $requested_size, $presets );
+            if ( $matched ) {
+                $rate       = (float) ( $config['area_rate_sqft'] ?? 0 );
+                $units      = new \BannerCalc\UnitConverter();
+                $size_price = $this->calculate_preset_price( $matched, $rate, $min_charge, $units );
+                $price_html = esc_html( $currency . number_format( $size_price, 2 ) );
+                $price_html .= ' <span class="bannercalc-price-hint">' . esc_html( $matched['label'] ?? '' ) . '</span>';
+            }
+        }
+        if ( empty( $price_html ) && ! empty( $prices ) ) {
             // Has preset / popular sizes.
             $min_price = min( $prices );
             $max_price = max( $prices );
@@ -400,7 +439,7 @@ class ProductDisplay {
                 $price_html .= ' – ' . esc_html( $currency . number_format( $max_price, 2 ) );
             }
             $price_html .= ' <span class="bannercalc-price-hint">' . esc_html__( '(popular sizes)', 'bannercalc' ) . '</span>';
-        } elseif ( 'none' === $sizing_mode ) {
+        } elseif ( empty( $price_html ) && 'none' === $sizing_mode ) {
             // Fixed / single size — use the WooCommerce product price.
             $wc_price = (float) $product->get_price();
             if ( $wc_price > 0 ) {
@@ -647,10 +686,11 @@ class ProductDisplay {
     }
 
     /**
-     * Override WooCommerce product structured data with the correct price range.
+     * Override WooCommerce product structured data with per-size Offers.
      *
-     * Replaces the single-price Offer with an AggregateOffer containing
-     * lowPrice / highPrice derived from BannerCalc preset sizes.
+     * When ?attribute_size= is present, outputs a single Offer for that size.
+     * Otherwise, outputs individual Offer objects for each preset size so that
+     * Google Merchant Center can detect each size as a separate product variant.
      *
      * @param array       $markup  Schema.org markup array.
      * @param \WC_Product $product
@@ -663,26 +703,384 @@ class ProductDisplay {
             return $markup;
         }
 
-        $config = $plugin->get_product_config( $product->get_id() );
-        $prices = $this->get_preset_prices( $config );
+        $config  = $plugin->get_product_config( $product->get_id() );
+        $presets = $config['preset_sizes'] ?? [];
 
-        if ( empty( $prices ) ) {
+        if ( empty( $presets ) ) {
             return $markup;
         }
 
-        $min_price = round( min( $prices ), 2 );
-        $max_price = round( max( $prices ), 2 );
+        $currency      = get_woocommerce_currency();
+        $permalink     = get_permalink( $product->get_id() );
+        $product_name  = $product->get_name();
+        $rate          = (float) ( $config['area_rate_sqft'] ?? 0 );
+        $min_charge    = (float) ( $config['minimum_charge'] ?? 0 );
+        $units         = new \BannerCalc\UnitConverter();
+
+        // Check if a specific size is requested via URL.
+        $requested_size = isset( $_GET['attribute_size'] ) ? sanitize_text_field( wp_unslash( $_GET['attribute_size'] ) ) : '';
+        $matched_preset = null;
+
+        if ( $requested_size !== '' ) {
+            $matched_preset = $this->find_preset_by_size_param( $requested_size, $presets );
+        }
+
+        // If a specific size is requested and matched, output a single Offer.
+        if ( $matched_preset ) {
+            $price      = $this->calculate_preset_price( $matched_preset, $rate, $min_charge, $units );
+            $size_param = self::get_size_url_param( $matched_preset );
+            $size_url   = add_query_arg( 'attribute_size', $size_param, $permalink );
+            $size_label = $matched_preset['label'] ?? $size_param;
+
+            $markup['name']  = $product_name . ' - ' . $size_label;
+            $markup['offers'] = [
+                '@type'         => 'Offer',
+                'priceCurrency' => $currency,
+                'price'         => number_format( round( $price, 2 ), 2, '.', '' ),
+                'availability'  => 'https://schema.org/InStock',
+                'url'           => $size_url,
+            ];
+
+            // Add size as product attribute in structured data.
+            $markup['size'] = $size_label;
+
+            return $markup;
+        }
+
+        // No specific size requested — output individual Offers for each preset.
+        $offers = [];
+        foreach ( $presets as $preset ) {
+            $price      = $this->calculate_preset_price( $preset, $rate, $min_charge, $units );
+            $size_param = self::get_size_url_param( $preset );
+            $size_url   = add_query_arg( 'attribute_size', $size_param, $permalink );
+            $size_label = $preset['label'] ?? $size_param;
+
+            $offers[] = [
+                '@type'         => 'Offer',
+                'priceCurrency' => $currency,
+                'price'         => number_format( round( $price, 2 ), 2, '.', '' ),
+                'availability'  => 'https://schema.org/InStock',
+                'url'           => $size_url,
+                'name'          => $product_name . ' - ' . $size_label,
+            ];
+        }
+
+        $prices    = array_column( $offers, 'price' );
+        $min_price = min( $prices );
+        $max_price = max( $prices );
 
         $markup['offers'] = [
-            '@type'          => 'AggregateOffer',
-            'priceCurrency'  => get_woocommerce_currency(),
-            'lowPrice'       => number_format( $min_price, 2, '.', '' ),
-            'highPrice'      => number_format( $max_price, 2, '.', '' ),
-            'offerCount'     => count( $prices ),
-            'availability'   => 'https://schema.org/InStock',
-            'url'            => get_permalink( $product->get_id() ),
+            '@type'         => 'AggregateOffer',
+            'priceCurrency' => $currency,
+            'lowPrice'      => $min_price,
+            'highPrice'     => $max_price,
+            'offerCount'    => count( $offers ),
+            'availability'  => 'https://schema.org/InStock',
+            'url'           => $permalink,
+            'offers'        => $offers,
         ];
 
         return $markup;
+    }
+
+    /**
+     * Render variation-style meta tags in <head> for SEO and GMC compatibility.
+     *
+     * When ?attribute_size= is set:
+     * - Sets canonical to the variation URL (allows Google to index each size).
+     * - Outputs og:price / product:price meta for the specific size.
+     *
+     * When no specific size is set:
+     * - Outputs <link rel="canonical"> to the base product URL.
+     */
+    public function render_variation_meta_tags(): void {
+        if ( ! is_product() ) {
+            return;
+        }
+
+        global $product;
+        if ( ! $product ) {
+            return;
+        }
+
+        $plugin = \BannerCalc\Plugin::instance();
+        if ( ! $plugin->is_enabled_for_product( $product->get_id() ) ) {
+            return;
+        }
+
+        $config         = $plugin->get_product_config( $product->get_id() );
+        $presets        = $config['preset_sizes'] ?? [];
+        $permalink      = get_permalink( $product->get_id() );
+        $requested_size = isset( $_GET['attribute_size'] ) ? sanitize_text_field( wp_unslash( $_GET['attribute_size'] ) ) : '';
+        $currency       = get_woocommerce_currency();
+
+        if ( $requested_size !== '' && ! empty( $presets ) ) {
+            $matched = $this->find_preset_by_size_param( $requested_size, $presets );
+
+            if ( $matched ) {
+                $rate      = (float) ( $config['area_rate_sqft'] ?? 0 );
+                $min_charge = (float) ( $config['minimum_charge'] ?? 0 );
+                $units     = new \BannerCalc\UnitConverter();
+                $price     = $this->calculate_preset_price( $matched, $rate, $min_charge, $units );
+                $size_param = self::get_size_url_param( $matched );
+                $var_url   = add_query_arg( 'attribute_size', $size_param, $permalink );
+
+                // Canonical URL for this specific size variation.
+                echo '<link rel="canonical" href="' . esc_url( $var_url ) . '" />' . "\n";
+
+                // Open Graph price tags (used by Facebook, some aggregators, GMC).
+                echo '<meta property="product:price:amount" content="' . esc_attr( number_format( round( $price, 2 ), 2, '.', '' ) ) . '" />' . "\n";
+                echo '<meta property="product:price:currency" content="' . esc_attr( $currency ) . '" />' . "\n";
+                echo '<meta property="og:price:amount" content="' . esc_attr( number_format( round( $price, 2 ), 2, '.', '' ) ) . '" />' . "\n";
+                echo '<meta property="og:price:currency" content="' . esc_attr( $currency ) . '" />' . "\n";
+
+                // Remove default canonical from WP/Yoast/RankMath to avoid duplicates.
+                remove_action( 'wp_head', 'rel_canonical' );
+                add_filter( 'wpseo_canonical', function () use ( $var_url ) { return $var_url; } );
+                add_filter( 'rank_math/frontend/canonical', function () use ( $var_url ) { return $var_url; } );
+
+                return;
+            }
+        }
+
+        // No specific size — let WordPress/SEO plugin handle the canonical normally.
+    }
+
+    /**
+     * Generate the URL parameter value for a preset size.
+     *
+     * Format: {width}{unit} x {height}{unit}
+     * e.g. "1000mm x 2000mm", "3ft x 2ft"
+     *
+     * @param array $preset Preset size data.
+     * @return string URL-safe size parameter (not yet URL-encoded).
+     */
+    public static function get_size_url_param( array $preset ): string {
+        $w    = $preset['display_w'] ?? null;
+        $h    = $preset['display_h'] ?? null;
+        $unit = $preset['display_unit'] ?? 'mm';
+
+        if ( $w !== null && $h !== null ) {
+            $w_clean = self::format_dimension( (float) $w );
+            $h_clean = self::format_dimension( (float) $h );
+            return $w_clean . $unit . ' x ' . $h_clean . $unit;
+        }
+
+        // Fallback: derive from width_m / height_m → mm.
+        $width_mm  = round( (float) ( $preset['width_m'] ?? 0 ) * 1000 );
+        $height_mm = round( (float) ( $preset['height_m'] ?? 0 ) * 1000 );
+        return $width_mm . 'mm x ' . $height_mm . 'mm';
+    }
+
+    /**
+     * Format a dimension number — strip trailing zeros for clean URLs.
+     *
+     * @param float $value
+     * @return string
+     */
+    private static function format_dimension( float $value ): string {
+        if ( floor( $value ) == $value ) {
+            return (string) (int) $value;
+        }
+        return rtrim( rtrim( number_format( $value, 4, '.', '' ), '0' ), '.' );
+    }
+
+    /**
+     * Find a preset matching a ?attribute_size= URL parameter.
+     *
+     * Matches by comparing dimension strings or by parsing the parameter
+     * and comparing metres values with tolerance.
+     *
+     * @param string $size_param The URL parameter value (decoded).
+     * @param array  $presets    Array of preset sizes.
+     * @return array|null Matched preset or null.
+     */
+    private function find_preset_by_size_param( string $size_param, array $presets ): ?array {
+        // Normalise whitespace and separators.
+        $normalised = strtolower( trim( $size_param ) );
+        $normalised = preg_replace( '/\s+/', ' ', $normalised );
+
+        foreach ( $presets as $preset ) {
+            // Direct match against generated param.
+            $preset_param = strtolower( self::get_size_url_param( $preset ) );
+            if ( $normalised === $preset_param ) {
+                return $preset;
+            }
+        }
+
+        // Try parsing the parameter: "1000mm x 2000mm" → width, height, unit.
+        $parsed = self::parse_size_string( $normalised );
+        if ( $parsed ) {
+            $target_w = $parsed['width_m'];
+            $target_h = $parsed['height_m'];
+            $tolerance = 0.005; // 5mm tolerance.
+
+            foreach ( $presets as $preset ) {
+                $pw = (float) ( $preset['width_m'] ?? 0 );
+                $ph = (float) ( $preset['height_m'] ?? 0 );
+                if ( abs( $pw - $target_w ) < $tolerance && abs( $ph - $target_h ) < $tolerance ) {
+                    return $preset;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Parse a size string like "1000mm x 2000mm" or "3ft x 2ft" into metres.
+     *
+     * @param string $str Normalised (lowercase, trimmed) size string.
+     * @return array|null ['width_m' => float, 'height_m' => float] or null.
+     */
+    private static function parse_size_string( string $str ): ?array {
+        $unit_map = [
+            'mm'   => 0.001,
+            'cm'   => 0.01,
+            'inch' => 0.0254,
+            'in'   => 0.0254,
+            '"'    => 0.0254,
+            'ft'   => 0.3048,
+            '\''   => 0.3048,
+            'm'    => 1.0,
+        ];
+
+        // Pattern: number + optional unit + separator + number + optional unit
+        // e.g. "1000mm x 2000mm", "3ft x 2ft", "1000 x 2000"
+        $pattern = '/^([\d.]+)\s*(mm|cm|inch|in|ft|m)?\s*[x×]\s*([\d.]+)\s*(mm|cm|inch|in|ft|m)?$/';
+
+        if ( ! preg_match( $pattern, $str, $m ) ) {
+            return null;
+        }
+
+        $w_val  = (float) $m[1];
+        $w_unit = ! empty( $m[2] ) ? $m[2] : 'mm';
+        $h_val  = (float) $m[3];
+        $h_unit = ! empty( $m[4] ) ? $m[4] : $w_unit;
+
+        $w_factor = $unit_map[ $w_unit ] ?? 0.001;
+        $h_factor = $unit_map[ $h_unit ] ?? 0.001;
+
+        return [
+            'width_m'  => $w_val * $w_factor,
+            'height_m' => $h_val * $h_factor,
+        ];
+    }
+
+    /**
+     * Calculate the price for a single preset size.
+     *
+     * @param array              $preset
+     * @param float              $rate       Area rate per sqft.
+     * @param float              $min_charge Minimum charge.
+     * @param \BannerCalc\UnitConverter $units
+     * @return float
+     */
+    private function calculate_preset_price( array $preset, float $rate, float $min_charge, \BannerCalc\UnitConverter $units ): float {
+        if ( isset( $preset['price'] ) && $preset['price'] !== null && $preset['price'] !== '' ) {
+            return (float) $preset['price'];
+        }
+
+        $w    = (float) ( $preset['width_m'] ?? 0 );
+        $h    = (float) ( $preset['height_m'] ?? 0 );
+        $sqft = $units->area_sqft( $w, $h );
+        $p    = $sqft * $rate;
+
+        if ( $p < $min_charge ) {
+            $p = $min_charge;
+        }
+
+        return $p;
+    }
+
+    /**
+     * Append the selected size to the page <title> for GMC / SEO differentiation.
+     *
+     * @param array $title_parts Document title parts.
+     * @return array
+     */
+    public function append_size_to_page_title( array $title_parts ): array {
+        $size_label = $this->get_requested_size_label();
+        if ( $size_label && ! empty( $title_parts['title'] ) ) {
+            $title_parts['title'] .= ' - ' . $size_label;
+        }
+        return $title_parts;
+    }
+
+    /**
+     * Append the selected size to Yoast/RankMath title string.
+     *
+     * @param string $title
+     * @return string
+     */
+    public function append_size_to_seo_title( string $title ): string {
+        $size_label = $this->get_requested_size_label();
+        if ( $size_label ) {
+            // Insert before the site name separator if present.
+            $separators = [ ' - ', ' | ', ' – ', ' — ' ];
+            foreach ( $separators as $sep ) {
+                $last_pos = strrpos( $title, $sep );
+                if ( $last_pos !== false && $last_pos > 0 ) {
+                    return substr( $title, 0, $last_pos ) . ' - ' . $size_label . substr( $title, $last_pos );
+                }
+            }
+            return $title . ' - ' . $size_label;
+        }
+        return $title;
+    }
+
+    /**
+     * Get the matched size label from URL parameter, if on a BannerCalc product page.
+     *
+     * @return string|null Size label or null.
+     */
+    private function get_requested_size_label(): ?string {
+        if ( ! is_product() ) {
+            return null;
+        }
+
+        $requested_size = isset( $_GET['attribute_size'] ) ? sanitize_text_field( wp_unslash( $_GET['attribute_size'] ) ) : '';
+        if ( $requested_size === '' ) {
+            return null;
+        }
+
+        global $product;
+        if ( ! $product ) {
+            return null;
+        }
+
+        $plugin = \BannerCalc\Plugin::instance();
+        if ( ! $plugin->is_enabled_for_product( $product->get_id() ) ) {
+            return null;
+        }
+
+        $config  = $plugin->get_product_config( $product->get_id() );
+        $presets = $config['preset_sizes'] ?? [];
+        $matched = $this->find_preset_by_size_param( $requested_size, $presets );
+
+        return $matched ? ( $matched['label'] ?? null ) : null;
+    }
+
+    /**
+     * Add size variant URLs to WordPress sitemap entries.
+     *
+     * Adds variant URLs as comments for sitemap plugins to discover.
+     *
+     * @param array    $sitemap_entry Sitemap entry array.
+     * @param \WP_Post $post          Post object.
+     * @param string   $post_type     Post type.
+     * @return array
+     */
+    public function add_size_variants_to_sitemap( array $sitemap_entry, \WP_Post $post, string $post_type ): array {
+        if ( 'product' !== $post_type ) {
+            return $sitemap_entry;
+        }
+
+        $plugin = \BannerCalc\Plugin::instance();
+        if ( ! $plugin->is_enabled_for_product( $post->ID ) ) {
+            return $sitemap_entry;
+        }
+
+        return $sitemap_entry;
     }
 }

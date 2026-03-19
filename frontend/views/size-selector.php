@@ -61,7 +61,8 @@ if ( ! empty( $preset_sizes ) ) {
                         data-height-m="<?php echo esc_attr( $preset['height_m'] ); ?>"
                         data-price="<?php echo esc_attr( $preset['price'] ?? '' ); ?>"
                         data-description="<?php echo esc_attr( $description ); ?>"
-                        data-popularity="<?php echo esc_attr( $popularity ); ?>">
+                        data-popularity="<?php echo esc_attr( $popularity ); ?>"
+                        data-size-param="<?php echo esc_attr( \BannerCalc\Frontend\ProductDisplay::get_size_url_param( $preset ) ); ?>">
                     <?php if ( $is_popular ) : ?>
                         <span class="bannercalc-preset-badge"><?php esc_html_e( 'Popular', 'bannercalc' ); ?></span>
                     <?php endif; ?>
