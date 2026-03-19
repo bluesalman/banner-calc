@@ -134,6 +134,9 @@ if ( isset( $_POST['bannercalc_category_save'] ) && wp_verify_nonce( $_POST['_wp
 
         $config['preset_sizes'] = $preset_sizes;
 
+        // Google Product Category for supplemental feed.
+        $config['google_product_category'] = sanitize_text_field( $raw['google_product_category'] ?? '' );
+
         // Quantity settings.
         $config['quantity_mode']    = sanitize_text_field( $raw['quantity_mode'] ?? 'standard' );
         $config['min_quantity']     = absint( $raw['min_quantity'] ?? 0 );
@@ -670,6 +673,44 @@ if ( $editing_cat_id ) {
                                         <span id="bannercalc-import-status" style="font-size:12px;color:#8892A0;"></span>
                                     </div>
                                 </div>
+                            </td>
+                        </tr>
+
+                        <!-- Google Product Category -->
+                        <tr>
+                            <th scope="row"><?php esc_html_e( 'Google Product Category', 'bannercalc' ); ?></th>
+                            <td>
+                                <?php
+                                $gpc_suggestions = [
+                                    'vinyl banners'          => 'Business & Industrial > Signage > Banners',
+                                    'mesh banners'           => 'Business & Industrial > Signage > Banners',
+                                    'roller banners'         => 'Business & Industrial > Signage > Banner Stands',
+                                    'backdrop banner stands' => 'Business & Industrial > Signage > Banner Stands',
+                                    'posters'                => 'Arts & Entertainment > Party & Celebration > Party Decorations > Banners',
+                                    'business cards'         => 'Office Supplies > General Office Supplies > Printed Cards > Business Cards',
+                                    'flyers'                 => 'Business & Industrial > Advertising & Marketing > Flyers',
+                                    'stickers'               => 'Arts & Crafts > Craft Supplies > Stickers',
+                                ];
+                                $cat_name_lower = strtolower( $editing_term->name ?? '' );
+                                $suggested = $gpc_suggestions[ $cat_name_lower ] ?? '';
+                                ?>
+                                <input type="text"
+                                       name="bannercalc_category[google_product_category]"
+                                       value="<?php echo esc_attr( $editing_config['google_product_category'] ?? '' ); ?>"
+                                       class="regular-text"
+                                       placeholder="<?php echo esc_attr( $suggested ?: 'e.g. Business & Industrial > Signage > Banners' ); ?>" />
+                                <?php if ( $suggested && empty( $editing_config['google_product_category'] ) ) : ?>
+                                    <button type="button" class="button bannercalc-btn-secondary bannercalc-gpc-suggest"
+                                            onclick="this.previousElementSibling.value='<?php echo esc_js( $suggested ); ?>';this.remove();">
+                                        Use: <?php echo esc_html( $suggested ); ?>
+                                    </button>
+                                <?php endif; ?>
+                                <p class="description">
+                                    <?php esc_html_e( 'Google Merchant Center product taxonomy. Used in the supplemental feed for all products in this category.', 'bannercalc' ); ?>
+                                    <a href="https://www.google.com/basepages/producttype/taxonomy-with-ids.en-GB.txt" target="_blank" rel="noopener">
+                                        <?php esc_html_e( 'View full taxonomy list', 'bannercalc' ); ?>
+                                    </a>
+                                </p>
                             </td>
                         </tr>
 
