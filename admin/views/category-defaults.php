@@ -254,7 +254,7 @@ $attributes = $attr_mgr->get_all_attributes();
                class="regular-text"
                placeholder="e.g. Business & Industrial > Signage" />
         <p class="description">
-            <?php esc_html_e( 'Google Merchant Center product taxonomy. Used in the supplemental feed.', 'bannercalc' ); ?>
+            <?php esc_html_e( 'Google Merchant Center product taxonomy. Used in the product feed.', 'bannercalc' ); ?>
             <a href="https://www.google.com/basepages/producttype/taxonomy-with-ids.en-GB.txt" target="_blank" rel="noopener">
                 <?php esc_html_e( 'View full taxonomy list', 'bannercalc' ); ?>
             </a>

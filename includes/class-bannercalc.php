@@ -89,7 +89,7 @@ class Plugin {
             $this->frontend = new Frontend();
         }
 
-        // Google product feed (supplemental feed for GMC + Google for WooCommerce hooks).
+        // Google product feed (primary feed for GMC + Google for WooCommerce hooks).
         new GoogleProductFeed();
 
         $this->register_hooks();

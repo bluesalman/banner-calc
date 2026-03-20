@@ -1,6 +1,6 @@
 <?php
 /**
- * Google Product Feed — cached supplemental feed for Google Merchant Center.
+ * Google Product Feed — cached primary feed for Google Merchant Center.
  *
  * Generates one <item> per BannerCalc preset size and caches the XML.
  * Feed is regenerated only when product / config data changes or
@@ -8,9 +8,13 @@
  *
  * Feed URL: ?feed=bannercalc-google
  *
- * Also hooks into "Google for WooCommerce" (Google Listings & Ads) to
- * exclude range-priced BannerCalc products from GLA sync (the
- * supplemental feed handles those instead).
+ * Works alongside Google for WooCommerce (GLA): fixed-price products
+ * sync through GLA, while range-priced products with preset sizes are
+ * excluded from GLA and handled by this feed instead.
+ *
+ * Made-to-order products are excluded from local inventory destinations
+ * (Local_inventory_ads, Free_local_listings) since they have no
+ * physical store stock.
  *
  * @package BannerCalc
  */
@@ -91,7 +95,7 @@ class GoogleProductFeed {
 
     /**
      * Exclude BannerCalc products that use preset sizes from GLA sync.
-     * These are handled by the supplemental feed instead.
+     * These are handled by the primary BannerCalc feed instead.
      * Fixed-price products (no presets) are left untouched for GLA.
      */
     public function gla_product_is_ready( bool $ready, $product ): bool {
@@ -258,11 +262,25 @@ class GoogleProductFeed {
 <?php if ( $mpn ) : ?>
 <g:mpn><?php echo esc_html( $mpn ); ?></g:mpn>
 <?php endif; ?>
+<?php
+// GTIN check: per-product meta → fallback to identifier_exists = false.
+$gtin = get_post_meta( $product->get_id(), '_gtin', true );
+if ( ! $gtin ) {
+    $gtin = get_post_meta( $product->get_id(), '_global_unique_id', true );
+}
+?>
+<?php if ( $gtin ) : ?>
+<g:gtin><?php echo esc_html( $gtin ); ?></g:gtin>
+<?php else : ?>
+<g:identifier_exists>false</g:identifier_exists>
+<?php endif; ?>
 <g:size><?php echo esc_html( $size_label ); ?></g:size>
 <?php if ( $categories ) : ?>
 <g:google_product_category><?php echo esc_html( $categories ); ?></g:google_product_category>
 <?php endif; ?>
 <g:product_type><?php echo esc_html( $this->get_product_type_path( $product ) ); ?></g:product_type>
+<g:excluded_destination>Local_inventory_ads</g:excluded_destination>
+<g:excluded_destination>Free_local_listings</g:excluded_destination>
 </item>
 <?php
             }

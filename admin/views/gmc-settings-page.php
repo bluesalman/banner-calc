@@ -22,13 +22,13 @@ $feed_size     = (int) ( $feed_meta['size'] ?? 0 );
 
     <div class="bannercalc-page-header">
         <h1><?php esc_html_e( 'Google Merchant Center', 'bannercalc' ); ?></h1>
-        <p class="bannercalc-page-subtitle">Supplemental product feed for Google Merchant Center — one listing per preset size with correct pricing and deep links.</p>
+        <p class="bannercalc-page-subtitle">Primary product feed for Google Merchant Center — one listing per preset size with correct pricing and deep links.</p>
     </div>
 
     <!-- Feed URL -->
     <div class="bannercalc-content-card">
         <h2>Feed URL</h2>
-        <p>Add this URL as a <strong>supplemental feed</strong> in Google Merchant Center. Format: Google RSS (XML).</p>
+        <p>Add this URL as a <strong>primary feed</strong> in Google Merchant Center. Format: Google RSS (XML).</p>
         <div class="bannercalc-gmc-feed-url-row">
             <input type="text" id="bannercalc-feed-url" class="bannercalc-gmc-feed-url" value="<?php echo esc_url( $feed_url ); ?>" readonly />
             <button type="button" class="bannercalc-btn bannercalc-btn-secondary" id="bannercalc-copy-feed-url">
@@ -173,13 +173,13 @@ $feed_size     = (int) ( $feed_meta['size'] ?? 0 );
         <h2>Setup Guide</h2>
         <div class="bannercalc-gmc-guide">
             <details>
-                <summary><strong>1. Add the supplemental feed in Google Merchant Center</strong></summary>
+                <summary><strong>1. Add the primary feed in Google Merchant Center</strong></summary>
                 <ol>
                     <li>Go to <strong>Products → Feeds</strong> in your Merchant Center account.</li>
-                    <li>Under <strong>Supplemental feeds</strong>, click <strong>Add supplemental feed</strong>.</li>
-                    <li>Name it (e.g. "BannerCalc Sizes") and choose <strong>Scheduled fetch</strong>.</li>
-                    <li>Paste the feed URL shown above. Set frequency to <strong>Daily</strong>.</li>
-                    <li>Link it to your primary feed so the supplemental data merges in.</li>
+                    <li>Under <strong>Primary feeds</strong>, click <strong>Add primary feed</strong>.</li>
+                    <li>Select your target country and language, then choose <strong>Scheduled fetch</strong>.</li>
+                    <li>Name it (e.g. "BannerCalc Sizes") and paste the feed URL above. Set frequency to <strong>Daily</strong>.</li>
+                    <li>This feed creates unique product entries per size — it must be a <strong>primary feed</strong>, not supplemental.</li>
                 </ol>
             </details>
 
@@ -199,7 +199,8 @@ $feed_size     = (int) ( $feed_meta['size'] ?? 0 );
                     <li>BannerCalc products with preset sizes are <strong>excluded from Google for WooCommerce sync</strong> automatically.</li>
                     <li>This prevents the £0.01 placeholder price issue in GMC.</li>
                     <li>Fixed-price products (without presets) continue to sync through GLA normally.</li>
-                    <li>For best results, use GLA for fixed-price products and this supplemental feed for preset-size products.</li>
+                    <li>For best results, use GLA for fixed-price products and this <strong>primary feed</strong> for preset-size products.</li>
+                    <li><strong>Important:</strong> This feed must be a primary feed — supplemental feeds can only update existing products, not create new size variant entries.</li>
                 </ul>
             </details>
 
