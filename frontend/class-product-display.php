@@ -717,6 +717,18 @@ class ProductDisplay {
         $min_charge    = (float) ( $config['minimum_charge'] ?? 0 );
         $units         = new \BannerCalc\UnitConverter();
 
+        // Brand — same lookup chain as the Google Product Feed.
+        $brand = $this->get_structured_data_brand( $product );
+        if ( $brand ) {
+            $markup['brand'] = [
+                '@type' => 'Brand',
+                'name'  => $brand,
+            ];
+        }
+
+        // priceValidUntil — required for Merchant Listings rich results.
+        $price_valid_until = gmdate( 'Y-m-d', strtotime( '+1 year' ) );
+
         // Check if a specific size is requested via URL.
         $requested_size = isset( $_GET['attribute_size'] ) ? sanitize_text_field( wp_unslash( $_GET['attribute_size'] ) ) : '';
         $matched_preset = null;
@@ -734,11 +746,12 @@ class ProductDisplay {
 
             $markup['name']  = $product_name . ' - ' . $size_label;
             $markup['offers'] = [
-                '@type'         => 'Offer',
-                'priceCurrency' => $currency,
-                'price'         => number_format( round( $price, 2 ), 2, '.', '' ),
-                'availability'  => 'https://schema.org/InStock',
-                'url'           => $size_url,
+                '@type'           => 'Offer',
+                'priceCurrency'   => $currency,
+                'price'           => number_format( round( $price, 2 ), 2, '.', '' ),
+                'priceValidUntil' => $price_valid_until,
+                'availability'    => 'https://schema.org/InStock',
+                'url'             => $size_url,
             ];
 
             // Add size as product attribute in structured data.
@@ -756,12 +769,13 @@ class ProductDisplay {
             $size_label = $preset['label'] ?? $size_param;
 
             $offers[] = [
-                '@type'         => 'Offer',
-                'priceCurrency' => $currency,
-                'price'         => number_format( round( $price, 2 ), 2, '.', '' ),
-                'availability'  => 'https://schema.org/InStock',
-                'url'           => $size_url,
-                'name'          => $product_name . ' - ' . $size_label,
+                '@type'           => 'Offer',
+                'priceCurrency'   => $currency,
+                'price'           => number_format( round( $price, 2 ), 2, '.', '' ),
+                'priceValidUntil' => $price_valid_until,
+                'availability'    => 'https://schema.org/InStock',
+                'url'             => $size_url,
+                'name'            => $product_name . ' - ' . $size_label,
             ];
         }
 
@@ -781,6 +795,41 @@ class ProductDisplay {
         ];
 
         return $markup;
+    }
+
+    /**
+     * Get brand for structured data — mirrors GoogleProductFeed::get_product_brand().
+     *
+     * @param \WC_Product $product
+     * @return string Brand name or empty string.
+     */
+    private function get_structured_data_brand( \WC_Product $product ): string {
+        $brand_taxonomies = [ 'product_brand', 'pwb-brand', 'yith_product_brand' ];
+        foreach ( $brand_taxonomies as $tax ) {
+            if ( taxonomy_exists( $tax ) ) {
+                $terms = get_the_terms( $product->get_id(), $tax );
+                if ( $terms && ! is_wp_error( $terms ) ) {
+                    return $terms[0]->name;
+                }
+            }
+        }
+
+        $brand = get_post_meta( $product->get_id(), '_brand', true );
+        if ( $brand ) {
+            return $brand;
+        }
+
+        $gla_brand = get_post_meta( $product->get_id(), '_wc_gla_brand', true );
+        if ( $gla_brand ) {
+            return $gla_brand;
+        }
+
+        $settings = \BannerCalc\Plugin::get_settings();
+        if ( ! empty( $settings['gmc_default_brand'] ) ) {
+            return $settings['gmc_default_brand'];
+        }
+
+        return get_bloginfo( 'name' );
     }
 
     /**
